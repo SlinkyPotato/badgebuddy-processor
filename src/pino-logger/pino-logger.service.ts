@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import pino, { LoggerOptions } from 'pino';
-import NodeEnvs from '../config/enums/node-envs.enum';
+import NodeEnvs from '../enums/node-envs.enum';
 
 @Injectable()
 export class PinoLoggerService {
   constructor(private configService: ConfigService) {}
 
   createPinoLogger(): pino.Logger {
-    console.log('creating pino logger');
     const targets: any = [
       {
         level: 'info',

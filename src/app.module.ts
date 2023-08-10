@@ -14,6 +14,7 @@ import { GatewayIntentBits, Partials } from 'discord.js';
 import { DiscordModule, DiscordModuleOption } from '@discord-nestjs/core';
 import { PinoLoggerModule } from './pino-logger/pino-logger.module';
 import { PinoLoggerService } from './pino-logger/pino-logger.service';
+import { ProcessorsModule } from './processors/processors.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { PinoLoggerService } from './pino-logger/pino-logger.service';
     }),
     ConfigModule,
     LoggerModule,
+    ProcessorsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
