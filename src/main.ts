@@ -4,7 +4,6 @@ import { AppModule } from './app.module';
 import { Logger } from 'nestjs-pino';
 
 async function bootstrap() {
-  // const pinoLogger = new LogtailPinoLogger();
   const context = await NestFactory.createApplicationContext(AppModule, {
     bufferLogs: true,
   });

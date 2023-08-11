@@ -8,6 +8,7 @@ export class PinoLoggerService {
   constructor(private configService: ConfigService) {}
 
   createPinoLogger(): pino.Logger {
+    console.log('Initializing pino logger...');
     const targets: any = [
       {
         level: 'info',
