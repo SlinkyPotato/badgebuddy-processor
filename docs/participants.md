@@ -51,16 +51,27 @@ A user entry in db MUST exist if they enter the voice channel during an active e
   - store new startDate for user
   - remove endDate for user
 
-### on processor startup
+### on processor startup recovery
 - all present users are checked from channel
 - audio checked
-- retrieve all users from cache
-  - if user exists in cache with endDate and present in channel, execute rejoin flow (3)
-  - if user exists in cache without endDate and present in channel, skip
-  - if user does not exist in cache and present in channel, execute join flow (3)
+- store users from channel and db into cache
+- retrieve all users from db and compare with channel
+  - if user exists in db with endDate and present in channel, execute rejoin flow (3)
+    - reset startDate
+    - remove endDate
+    - insert into cache
+  - if user exists in db without endDate and present in channel, skip
+  - if user does not exist in db and present in channel, execute join flow (3)
+    - capture startDate
+    - duration of zero is captured
+    - insert into cache
+
 
 ### on processor shutdown (graceful)
-... 
+- store all users from cache into db
+
+### on processor failure
+- try to store all users from cache into db
 
 ### end of event
 - all present users are checked from channel
