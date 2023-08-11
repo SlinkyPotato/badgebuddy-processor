@@ -1,7 +1,7 @@
 import { registerAs } from '@nestjs/config';
 import ConfigUtil, { JoiConfig } from './config.util';
 import Joi from 'joi';
-import NodeEnvs from '../enums/node-envs.enum';
+import NodeEnvs from './enums/node-envs.enum';
 
 export type SystemEnv = {
   nodeEnv: NodeEnvs;

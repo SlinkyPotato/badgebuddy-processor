@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import pino, { LoggerOptions } from 'pino';
-import NodeEnvs from '../enums/node-envs.enum';
+import NodeEnvs from '../config/enums/node-envs.enum';
 
 @Injectable()
 export class PinoLoggerService {
