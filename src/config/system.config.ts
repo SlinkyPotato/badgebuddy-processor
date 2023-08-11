@@ -5,8 +5,6 @@ import NodeEnvs from '../enums/node-envs.enum';
 
 export type SystemEnv = {
   nodeEnv: NodeEnvs;
-  nodeVersion: string;
-  pnpmVersion: string;
 };
 export default registerAs('system', (): SystemEnv => {
   const values: JoiConfig<SystemEnv> = {
@@ -15,14 +13,6 @@ export default registerAs('system', (): SystemEnv => {
       joi: Joi.string()
         .required()
         .valid(...Object.values(NodeEnvs)),
-    },
-    nodeVersion: {
-      value: process.env.NODE_VERSION,
-      joi: Joi.string().required(),
-    },
-    pnpmVersion: {
-      value: process.env.PNPM_VERSION,
-      joi: Joi.string().required(),
     },
   };
 

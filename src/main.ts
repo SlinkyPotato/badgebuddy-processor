@@ -8,6 +8,9 @@ async function bootstrap() {
     bufferLogs: true,
   });
   context.useLogger(context.get(Logger));
+
+  // TODO: add shutdown hook
+  context.enableShutdownHooks();
 }
 
 bootstrap();
