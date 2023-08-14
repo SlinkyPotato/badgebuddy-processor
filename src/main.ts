@@ -1,13 +1,15 @@
 import 'dotenv/config'; // must be first import
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger } from 'nestjs-pino';
+import { PinoConfigLogger } from './logger/pino-config.logger';
+import { PinoLoggerService } from './logger/pino-logger.service';
 
 async function bootstrap() {
+  const pinoLogger = new PinoConfigLogger();
+  const pinoLoggerService = new PinoLoggerService(pinoLogger);
   const context = await NestFactory.createApplicationContext(AppModule, {
-    bufferLogs: true,
+    logger: pinoLoggerService,
   });
-  context.useLogger(context.get(Logger));
 
   // TODO: add shutdown hook
   context.enableShutdownHooks();

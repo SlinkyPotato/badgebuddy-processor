@@ -1,17 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import pino, { LoggerOptions } from 'pino';
+import { PinoLogger } from 'nestjs-pino';
 import NodeEnvs from '../config/enums/node-envs.enum';
 
-@Injectable()
-export class PinoLoggerService {
-  constructor(private configService: ConfigService) {}
-
-  createPinoLogger(): pino.Logger {
-    console.log('Initializing pino logger...');
+export class PinoConfigLogger extends PinoLogger {
+  constructor() {
+    console.log('creating logger...');
+    // const { formatters, messageKey, timestamp } = ecsFormat();
     const targets: any = [
       {
-        level: 'info',
+        level: 'info', // all logs printed since info does not map
         target: 'pino/file',
         options: {
           destination: './logs/app.log',
@@ -31,22 +27,25 @@ export class PinoLoggerService {
       {
         target: '@logtail/pino',
         options: {
-          sourceToken: this.configService.get('logtail.token'),
+          sourceToken: process.env.LOGTAIL_TOKEN,
         },
       },
     ];
-    if (this.configService.get('system.nodeEnv') !== NodeEnvs.PRODUCTION) {
+    if (process.env.NODE_ENV !== NodeEnvs.PRODUCTION) {
       // https://github.com/pinojs/pino-pretty
       targets.push({
         target: 'pino/file',
+        options: {},
       });
     }
-    return pino({
-      name: 'badge-buddy-api',
-      level: 'info',
-      transport: {
-        targets: targets,
+    super({
+      pinoHttp: {
+        name: 'badge-buddy-api',
+        level: 'info',
+        transport: {
+          targets: targets,
+        },
       },
-    } as LoggerOptions);
+    });
   }
 }

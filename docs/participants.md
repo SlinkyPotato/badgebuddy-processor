@@ -5,7 +5,8 @@ stored in cache. The cache is cleared when the event is stopped. Later the badge
 participants.
 
 ## Redis Indexes
-- active events cache - GET /events/active?guildId=&voiceChannelId= (endpoint)
+- active events - GET /events/active?guildId= (endpoint)
+- active events in cache - /events/active?guildId=&voiceChannelId= (cache)
 - participant in event - processor_/events/:id/participants/:id (processor only)
 
 ### Notes

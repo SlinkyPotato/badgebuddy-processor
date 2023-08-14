@@ -12,8 +12,6 @@ import DiscordConfig from './config/discord.config';
 import { GatewayIntentBits, Partials } from 'discord.js';
 
 import { DiscordModule, DiscordModuleOption } from '@discord-nestjs/core';
-import { PinoLoggerModule } from './pino-logger/pino-logger.module';
-import { PinoLoggerService } from './pino-logger/pino-logger.service';
 import { ProcessorsModule } from './processors/processors.module';
 
 @Module({
@@ -28,16 +26,6 @@ import { ProcessorsModule } from './processors/processors.module';
         RedisConfig,
         DiscordConfig,
       ],
-    }),
-    LoggerModule.forRootAsync({
-      imports: [PinoLoggerModule],
-      providers: [ConfigService, PinoLoggerService],
-      inject: [PinoLoggerService],
-      useFactory: (pinoLoggerService: PinoLoggerService) => ({
-        pinoHttp: {
-          logger: pinoLoggerService.createPinoLogger(),
-        },
-      }),
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
