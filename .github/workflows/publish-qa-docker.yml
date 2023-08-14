@@ -52,4 +52,4 @@ jobs:
             port: ${{ secrets.SSH_PORT }}
             script: |
               cd ${{ secrets.APP_PATH_STAGING }}
-              ./deploy.sh
+              DOTENV_KEY=${{ secrets.DOTENV_KEY_QA }} ./deploy.sh
