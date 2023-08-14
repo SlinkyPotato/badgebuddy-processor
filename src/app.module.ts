@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { LoggerModule } from 'nestjs-pino';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import LogtailConfig from './config/logtail.config';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -65,7 +64,6 @@ import { ProcessorsModule } from './processors/processors.module';
       }),
     }),
     ConfigModule,
-    LoggerModule,
     ProcessorsModule,
   ],
   controllers: [AppController],
