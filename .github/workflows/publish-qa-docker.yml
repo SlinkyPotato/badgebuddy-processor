@@ -37,9 +37,6 @@ jobs:
           uses: docker/build-push-action@v4
           with:
             push: true
-            build-args: |
-              PNPM_VERSION=${{ steps.pnpm-version.outputs.prop }}
-              NODE_VERSION=${{ steps.node-version.outputs.prop }}
             tags: "${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:latest-beta,${{ secrets.DOCKER_USERNAME 
             }}/badge-buddy-processor:${{ steps.package-version.outputs.prop }}"
         - name: Deploy to staging
