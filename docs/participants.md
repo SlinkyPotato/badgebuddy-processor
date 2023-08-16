@@ -28,6 +28,7 @@ A user entry in db MUST exist if they enter the voice channel during an active e
 ### ongoing event
 
 #### new user joins (or un-deafens)
+- check event is active for voice channel
 - audio is checked
 - cache is checked for user exists
 - capture startDate
@@ -35,6 +36,7 @@ A user entry in db MUST exist if they enter the voice channel during an active e
 - insert into cache
 
 ### user leaves (or is deafened)
+- check event is active for voice channel
 - audio is checked
 - cache is checked for user exists
 - capture endDate
@@ -44,6 +46,7 @@ A user entry in db MUST exist if they enter the voice channel during an active e
   - store duration for user
 
 ### user rejoins (or un-deafens)
+- check event is active for voice channel
 - audio is checked
 - cache is checked for user exists
 - reset startDate

@@ -1,7 +1,7 @@
 import { registerAs } from '@nestjs/config';
 import ConfigUtil, { JoiConfig } from './config.util';
 import Joi from 'joi';
-import NodeEnvs from './enums/node-envs.enum';
+import { NodeEnvs } from '@solidchain/badge-buddy-common';
 
 export type SystemEnv = {
   nodeEnv: NodeEnvs;

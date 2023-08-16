@@ -12,6 +12,7 @@ import { GatewayIntentBits, Partials } from 'discord.js';
 
 import { DiscordModule, DiscordModuleOption } from '@discord-nestjs/core';
 import { ProcessorsModule } from './processors/processors.module';
+import { DiscordEventsModule } from './discord-events/discord-events.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { ProcessorsModule } from './processors/processors.module';
     }),
     ConfigModule,
     ProcessorsModule,
+    DiscordEventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

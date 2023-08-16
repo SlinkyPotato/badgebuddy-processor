@@ -1,12 +1,14 @@
 import 'dotenv/config'; // must be first import
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { PinoConfigLogger } from './logger/pino-config.logger';
-import { PinoLoggerService } from './logger/pino-logger.service';
+import {
+  CommonPinoLogger,
+  CommonPinoLoggerService,
+} from '@solidchain/badge-buddy-common';
 
 async function bootstrap() {
-  const pinoLogger = new PinoConfigLogger();
-  const pinoLoggerService = new PinoLoggerService(pinoLogger);
+  const pinoLogger = new CommonPinoLogger('badge-buddy-processor');
+  const pinoLoggerService = new CommonPinoLoggerService(pinoLogger);
   const context = await NestFactory.createApplicationContext(AppModule, {
     logger: pinoLoggerService,
   });
