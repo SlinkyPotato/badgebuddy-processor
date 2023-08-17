@@ -4,10 +4,8 @@ on:
   push:
     branches:
       - release/dev
-
 env:
   GH_TOKEN: ${{ github.token }}
-
 jobs:
   prepare-versions:
     outputs:
@@ -76,32 +74,45 @@ jobs:
             PNPM_VERSION=${{ needs.prepare-versions.outputs.pnpm }}
       - run: git push --follow-tags
   deploy-qa:
-    needs: build-deploy-docker
+    needs:
+      - prepare-versions
+      - build-deploy-docker
     environment: staging
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to server
-        uses: appleboy/ssh-action@v1.0.0
-        env:
-          DOTENV_KEY: ${{ secrets.DOTENV_KEY_STAGING }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      - uses: actions/checkout@v3
+      - name: Transfer compose.yml
+        uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: ${{ secrets.SSH_PORT }}
-          envs: DOTENV_KEY,GH_TOKEN
+          source: "compose.yml"
+          target: "${{ secrets.APP_PATH_STAGING }}"
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.0
+        env:
+          DOTENV_KEY: "${{ secrets.DOTENV_KEY_STAGING }}"
+          NODE_VERSION: "${{ needs.prepare-versions.outputs.node }}"
+          PNPM_VERSION: "${{ needs.prepare-versions.outputs.pnpm }}"
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: ${{ secrets.SSH_PORT }}
+          envs: DOTENV_KEY,NODE_VERSION,PNPM_VERSION
           script: |
-            curl -H "Authorization: token $GH_TOKEN" \
-                 -H 'Accept: application/vnd.github.v3.raw' \
-                 -o 'compose.yml' \
-                 -L 'https://api.github.com/repos/solidchain-tech/badge-buddy-processor/contents/compose.yml?ref=release/dev'
+            cd ${{ secrets.APP_PATH_STAGING }}
             docker compose --profile staging pull
             docker compose --profile staging stop
             docker compose --profile staging up --build -d
   create-pr:
-    needs: deploy-qa
+    needs:
+      - build-deploy-docker
+      - deploy-qa
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
