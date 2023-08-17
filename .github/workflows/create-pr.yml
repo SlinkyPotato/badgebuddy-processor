@@ -94,6 +94,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           envs: DOTENV_KEY
           script: |
+            cd ${{ secrets.APP_PATH_STAGING }}
             docker compose --profile staging pull
             docker compose --profile staging stop
             docker compose --profile staging up --build -d
