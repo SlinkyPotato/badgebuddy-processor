@@ -62,11 +62,11 @@ jobs:
         with:
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:dev
-            ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:${{ needs.prepare-versions.outputs.package }}
+            "${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:dev"
+            "${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:${{ needs.prepare-versions.outputs.package }}"
           build-args: |
-            NODE_VERSION=${{ needs.prepare-versions.outputs.node }}
-            PNPM_VERSION=${{ needs.prepare-versions.outputs.pnpm }}
+            NODE_VERSION="${{ needs.prepare-versions.outputs.node }}"
+            PNPM_VERSION="${{ needs.prepare-versions.outputs.pnpm }}"
   deploy-qa:
     needs: build-deploy-docker
     environment: staging
