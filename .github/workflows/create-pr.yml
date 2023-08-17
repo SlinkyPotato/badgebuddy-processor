@@ -48,7 +48,9 @@ jobs:
       - run: pnpm build
       - run: pnpm test
   build-deploy-docker:
-    needs: build-and-test
+    needs:
+      - prepare-versions
+      - build-and-test
     environment: staging
     runs-on: ubuntu-latest
     steps:
@@ -61,7 +63,9 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: "${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:dev,${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:${{ needs.prepare-versions.outputs.package }}"
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:dev
+            ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:${{ needs.prepare-versions.outputs.package }}
           build-args: |
             NODE_VERSION="${{ needs.prepare-versions.outputs.node }}"
             PNPM_VERSION="${{ needs.prepare-versions.outputs.pnpm }}"
