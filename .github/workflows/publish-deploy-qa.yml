@@ -36,6 +36,9 @@ jobs:
       package: ${{ steps.package-version.outputs.prop }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ needs.prepare-versions.outputs.node }}
@@ -116,11 +119,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      contents: write
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - run: git fetch origin
       - run: git config user.name "github-action[bot]"
       - run: git config user.email "<>"
-      - run: git fetch origin
       - run: git pull origin release/dev
       - run: gh pr create --base dev --fill --title "v${{ needs.build-deploy-docker.outputs.package }} sync release/dev into dev" | exit 0
       - run: gh pr merge --auto -m | exit 0
