@@ -80,7 +80,7 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: ${{ secrets.SSH_PORT }}
           source: "compose.yml"
-          target: "${{APP_PATH_STAGING}}"
+          target: "${{ secrets.APP_PATH_STAGING }}"
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.0
         env:
