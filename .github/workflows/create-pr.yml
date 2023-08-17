@@ -60,7 +60,7 @@ jobs:
         with:
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:dev
+            ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:next
             ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:${{ needs.prepare-versions.outputs.package }}
           build-args: |
             NODE_VERSION=${{ needs.prepare-versions.outputs.node }}

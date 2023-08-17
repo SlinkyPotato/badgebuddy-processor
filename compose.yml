@@ -18,7 +18,7 @@ services:
 
   badge_buddy_processor_qa:
     container_name: badge_buddy_processor_qa
-    image: amaredeus/badge-buddy-processor:latest-beta
+    image: amaredeus/badge-buddy-processor:next
     restart: always
     networks:
       - qa_server
