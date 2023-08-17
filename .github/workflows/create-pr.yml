@@ -111,6 +111,9 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - run: git fetch origin
       - run: git config user.name "github-action[bot]"
       - run: git config user.email "<>"
       - run: git fetch origin
