@@ -11,9 +11,9 @@ env:
 jobs:
   prepare-versions:
     outputs:
-      pnpm_version: ${{ steps.pnpm-version.outputs.prop }}
-      node_version: ${{ steps.node-version.outputs.prop }}
-      package_version: ${{ steps.package-version.outputs.prop }}
+      pnpm: ${{ steps.pnpm-version.outputs.prop }}
+      node: ${{ steps.node-version.outputs.prop }}
+      package: ${{ steps.package-version.outputs.prop }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -42,8 +42,8 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: ${{ needs.prepare-versions.outputs.node_version }}
-      - run: npm install -g pnpm@${{ needs.prepare-versions.outputs.pnpm_version }}
+          node-version: ${{ needs.prepare-versions.outputs.node }}
+      - run: npm install -g pnpm@${{ needs.prepare-versions.outputs.pnpm }}
       - run: pnpm install
       - run: pnpm build
       - run: pnpm test
@@ -63,10 +63,10 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:dev
-            ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:${{ steps.package-version.outputs.prop }}
+            ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:${{ needs.prepare-versions.outputs.package }}
           build-args: |
-            NODE_VERSION=${{ needs.prepare-versions.outputs.node_version }}
-            PNPM_VERSION=${{ needs.prepare-versions.outputs.pnpm_version }}
+            NODE_VERSION=${{ needs.prepare-versions.outputs.node }}
+            PNPM_VERSION=${{ needs.prepare-versions.outputs.pnpm }}
   deploy-qa:
     needs: build-deploy-docker
     environment: staging
@@ -101,9 +101,6 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ needs.prepare-versions.outputs.node_version }}
       - run: git config user.name "github-action[bot]"
       - run: git config user.email "<>"
       - run: git fetch origin

@@ -11,8 +11,8 @@ env:
 jobs:
   prepare-versions:
     outputs:
-      pnpm_version: ${{ steps.pnpm-version.outputs.prop }}
-      node_version: ${{ steps.node-version.outputs.prop }}
+      pnpm: ${{ steps.pnpm-version.outputs.prop }}
+      node: ${{ steps.node-version.outputs.prop }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -32,16 +32,18 @@ jobs:
     needs: prepare-versions
     environment: staging
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
-      package_version: ${{ steps.package-version.outputs.prop }}
+      package: ${{ steps.package-version.outputs.prop }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: ${{ needs.prepare-versions.outputs.node_version }}
+          node-version: ${{ needs.prepare-versions.outputs.node }}
       - run: git config user.name "github-action[bot]"
       - run: git config user.email "<>"
-      - run: npm install -g pnpm@${{ needs.prepare-versions.outputs.pnpm_version }}
+      - run: npm install -g pnpm@${{ needs.prepare-versions.outputs.pnpm }}
       - run: pnpm install
       - run: npx standard-version --prerelease
       - run: pnpm build
@@ -70,8 +72,8 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:next
             ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:${{ steps.package-version.outputs.prop }}
           build-args: |
-            NODE_VERSION=${{ needs.prepare-versions.outputs.node_version }}
-            PNPM_VERSION=${{ needs.prepare-versions.outputs.pnpm_version }}
+            NODE_VERSION=${{ needs.prepare-versions.outputs.node }}
+            PNPM_VERSION=${{ needs.prepare-versions.outputs.pnpm }}
       - run: git push --follow-tags
   deploy-qa:
     needs: build-deploy-docker
@@ -98,3 +100,18 @@ jobs:
             docker compose --profile staging pull
             docker compose --profile staging stop
             docker compose --profile staging up --build -d
+  create-pr:
+    needs: deploy-qa
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+      - run: git config user.name "github-action[bot]"
+      - run: git config user.email "<>"
+      - run: git fetch origin
+      - run: git pull origin release/dev
+      - run: gh pr create --base dev --fill --title "v${{ needs.build-deploy-docker.outputs.package }} sync release/dev into dev" | exit 0
+      - run: gh pr merge --auto -m | exit 0
+      - run: gh pr close release/dev | exit 0
+      - run: gh pr create --base release/main --fill --title "v${{ needs.build-deploy-docker.outputs.package }} release to production"
