@@ -85,7 +85,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           envs: DOTENV_KEY,GH_TOKEN
           script: |
-            curl -H "Authorization: token ${{ GH_TOKEN }}" \
+            curl -H "Authorization: token $GH_TOKEN" \
                  -H 'Accept: application/vnd.github.v3.raw' \
                  -o 'compose.yml' \
                  -L 'https://api.github.com/repos/solidchain-tech/badge-buddy-processor/contents/compose.yml?ref=dev'
