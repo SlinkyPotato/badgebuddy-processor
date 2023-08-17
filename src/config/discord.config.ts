@@ -2,12 +2,12 @@ import { registerAs } from '@nestjs/config';
 import ConfigUtil, { JoiConfig } from './config.util';
 import Joi from 'joi';
 
-export type DiscordEnv = {
+export interface DiscordEnv {
   token: string;
   appId: string;
   publicKey: string;
   ownerId: string;
-};
+}
 
 export default registerAs('discord', (): DiscordEnv => {
   const discordEnvs: JoiConfig<DiscordEnv> = {
@@ -28,5 +28,7 @@ export default registerAs('discord', (): DiscordEnv => {
       joi: Joi.string().required(),
     },
   };
+  // discordEnvs.token.value = null;
+  console.log(JSON.stringify(discordEnvs.constructor.name));
   return ConfigUtil.validate(discordEnvs);
 });

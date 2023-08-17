@@ -4,6 +4,9 @@ services:
     container_name: badge_buddy_processor_local
     build:
       context: .
+      args:
+        NODE_VERSION: ${NODE_VERSION}
+        PNPM_VERSION: ${PNPM_VERSION}
     environment:
       DOTENV_KEY: ${DOTENV_KEY}
     networks:
@@ -15,7 +18,7 @@ services:
 
   badge_buddy_processor_qa:
     container_name: badge_buddy_processor_qa
-    image: amaredeus/badge-buddy-processor:latest-beta
+    image: solidchain/badge-buddy-processor:next
     restart: always
     networks:
       - qa_server
@@ -23,7 +26,6 @@ services:
       - staging
     environment:
       DOTENV_KEY: ${DOTENV_KEY}
-      NODE_ENV: 'staging'
     volumes:
       - ./logs:/app/logs
       - type: bind
@@ -32,7 +34,7 @@ services:
 
   badge_buddy_processor_prod:
     container_name: badge_buddy_processor_prod
-    image: amaredeus/badge-buddy-processor:latest
+    image: solidchain/badge-buddy-processor:latest
     restart: always
     ports:
       - 3002:3000
@@ -42,7 +44,6 @@ services:
       - production
     environment:
       DOTENV_KEY: ${DOTENV_KEY}
-      NODE_ENV: 'production'
     volumes:
       - ./logs:/app/logs
       - type: bind

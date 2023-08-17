@@ -1,11 +1,15 @@
-FROM node:20.3.1-alpine
+ARG NODE_VERSION
+
+FROM node:${NODE_VERSION}-alpine
+
+ARG PNPM_VERSION
 
 LABEL description="Node processor for Badge Buddy"
 
 WORKDIR /app
 
 # Install pnpm
-RUN npm install -g pnpm@8.6.10
+RUN npm install -g pnpm@${PNPM_VERSION}
 
 # Bundle app source
 COPY . .
