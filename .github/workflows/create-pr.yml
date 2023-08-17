@@ -47,7 +47,7 @@ jobs:
     needs:
       - prepare-versions
       - build-and-test
-    environment: staging
+    environment: development
     runs-on: ubuntu-latest
     steps:
       - name: Login to Docker Hub
@@ -103,7 +103,6 @@ jobs:
             docker compose --profile staging up --build -d
   create-pr:
     needs: deploy-qa
-    environment: development
     env:
       GH_TOKEN: ${{ github.token }}
     runs-on: ubuntu-latest
