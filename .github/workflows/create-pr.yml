@@ -78,16 +78,15 @@ jobs:
         uses: appleboy/ssh-action@v1.0.0
         env:
           DOTENV_KEY: ${{ secrets.DOTENV_KEY_STAGING }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: ${{ secrets.SSH_PORT }}
-          envs: DOTENV_KEY,GH_TOKEN
+          envs: DOTENV_KEY
           script: |
-            curl -H "Authorization: token $GH_TOKEN" \
+            curl -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
                  -H 'Accept: application/vnd.github.v3.raw' \
                  -o 'compose.yml' \
                  -L 'https://api.github.com/repos/solidchain-tech/badge-buddy-processor/contents/compose.yml?ref=dev'
