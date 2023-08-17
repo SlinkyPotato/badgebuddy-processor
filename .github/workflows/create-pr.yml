@@ -116,6 +116,5 @@ jobs:
       - run: git fetch origin
       - run: git config user.name "github-action[bot]"
       - run: git config user.email "<>"
-      - run: git fetch origin
       - run: gh pr close dev | exit 0
       - run: gh pr create --base release/dev --fill --title "dev -> release/dev" | exit 0
