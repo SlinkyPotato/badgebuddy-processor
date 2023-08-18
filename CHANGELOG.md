@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.1-3](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.1-2...v0.0.1-3) (2023-08-18)
+
+
+### Bug Fixes
+
+* rename publish-deploy workflow titles ([a94cacf](https://github.com/solidchain-tech/badge-buddy-processor/commit/a94cacff4dc5d6f9fc8ff36c85f0b16fe036f0ff))
+
 ### [0.0.1-2](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.1-1...v0.0.1-2) (2023-08-18)
 
 
