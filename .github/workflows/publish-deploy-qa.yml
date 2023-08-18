@@ -54,10 +54,6 @@ jobs:
         with:
           path: 'package.json'
           prop_path: 'version'
-      - uses: vimtor/action-zip@v1
-        with:
-          files: dist/ CHANGELOG.md LICENSE.md README.md package.json
-          dest: dist.zip
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -75,7 +71,6 @@ jobs:
             NODE_VERSION=${{ needs.prepare-versions.outputs.node }}
             PNPM_VERSION=${{ needs.prepare-versions.outputs.pnpm }}
       - run: git push --follow-tags
-      - run: gh release create -p --verify-tag -F CHANGELOG.md v${{ steps.package-version.outputs.prop }} dist.zip
   deploy-qa:
     needs:
       - prepare-versions
