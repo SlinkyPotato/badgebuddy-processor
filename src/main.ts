@@ -1,13 +1,20 @@
 import 'dotenv/config'; // must be first import
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { LogtailPinoLogger } from './config/logtail-pino.logger';
+import {
+  CommonPinoLogger,
+  CommonPinoLoggerService,
+} from '@solidchain/badge-buddy-common';
 
 async function bootstrap() {
-  const pinoLogger = new LogtailPinoLogger();
+  const pinoLogger = new CommonPinoLogger('badge-buddy-processor');
+  const pinoLoggerService = new CommonPinoLoggerService(pinoLogger);
   const context = await NestFactory.createApplicationContext(AppModule, {
-    logger: pinoLogger,
+    logger: pinoLoggerService,
   });
+
+  // TODO: add shutdown hook
+  context.enableShutdownHooks();
 }
 
 bootstrap();
