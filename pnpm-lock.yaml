@@ -37,7 +37,7 @@ dependencies:
     version: 10.1.3(@nestjs/common@10.1.3)(@nestjs/core@10.1.3)
   '@solidchain/badge-buddy-common':
     specifier: ^0.0.5
-    version: 0.0.5(@nestjs/common@10.1.3)(@nestjs/core@10.1.3)(pino-http@8.4.0)(pino@8.15.0)(reflect-metadata@0.1.13)(rxjs@7.8.1)
+    version: link:../badge-buddy-common
   axios:
     specifier: ^1.4.0
     version: 1.4.0
@@ -1038,32 +1038,11 @@ packages:
       '@logtail/types': 0.4.5
     dev: false
 
-  /@logtail/core@0.4.6:
-    resolution: {integrity: sha512-lUGLtxZoZGgA8WoEOkH3XhldeM7J4+Ou3eIUaxUY0BHMgQSumWIsXlqEaPn6zxLM+b0cyam8z9HH9kUBBnr6Sw==}
-    dependencies:
-      '@logtail/tools': 0.4.6
-      '@logtail/types': 0.4.6
-    dev: false
-
   /@logtail/node@0.4.5:
     resolution: {integrity: sha512-HHBKNtbnkKeMwlPafqeYG1jikQAMJlaqXbu34LjxgG+uQrnXrfCutz2d7gwIoBjF29nFBKVM1u0NnIK6TJpIJA==}
     dependencies:
       '@logtail/core': 0.4.5
       '@logtail/types': 0.4.5
-      '@msgpack/msgpack': 2.8.0
-      '@types/stack-trace': 0.0.29
-      cross-fetch: 3.1.8
-      minimatch: 3.1.2
-      stack-trace: 0.0.10
-    transitivePeerDependencies:
-      - encoding
-    dev: false
-
-  /@logtail/node@0.4.6:
-    resolution: {integrity: sha512-Md2rnsHwn11ISFnxl0ibBJObB6u0DJF7zvQlzAO+zHLb92keSWBs5xq1PowqTkANfZ9VuPIqR4tZ4Tbt0ZPPOw==}
-    dependencies:
-      '@logtail/core': 0.4.6
-      '@logtail/types': 0.4.6
       '@msgpack/msgpack': 2.8.0
       '@types/stack-trace': 0.0.29
       cross-fetch: 3.1.8
@@ -1086,39 +1065,14 @@ packages:
       - encoding
     dev: false
 
-  /@logtail/pino@0.4.6(pino@8.15.0):
-    resolution: {integrity: sha512-Bx9sUk9Ao4sKTM0t3NnY1x2HdePiBd+A3gtv1GtdBQCUwv/TfYfGh1/KnQBNZ9cjkFH7ptJJqND2Oqq20ZPwiA==}
-    peerDependencies:
-      pino: ^7.0.0 || ^8.0.0
-    dependencies:
-      '@logtail/node': 0.4.6
-      '@logtail/types': 0.4.6
-      pino: 8.15.0
-      pino-abstract-transport: 1.0.0
-    transitivePeerDependencies:
-      - encoding
-    dev: false
-
   /@logtail/tools@0.4.5:
     resolution: {integrity: sha512-EJOTpJngnui4QMN/7CiuQNytkj7G54sepn8C8pyFOTlLoI5vn46uJ/Zw+rXozBkWHtXt6ckqm4ATMnX8OE+uEw==}
     dependencies:
       '@logtail/types': 0.4.5
     dev: false
 
-  /@logtail/tools@0.4.6:
-    resolution: {integrity: sha512-fcUg/OUTgdaEYUI0SQXQXOeX51+0Xh5r+3ypfbIrovMpeEkyAT12ivs+0vXX1y3uF+XoAYWWXNULGMtUl5KLZg==}
-    dependencies:
-      '@logtail/types': 0.4.6
-    dev: false
-
   /@logtail/types@0.4.5:
     resolution: {integrity: sha512-XKvbPwt5/lIW2+6SQjLKqhTxu6lkNu+Pq0S5Hf+lCfpJzgutt6u7dCrlpnnHu3/ffPI6aukVyixklBLWeCxKTw==}
-    dependencies:
-      js: 0.1.0
-    dev: false
-
-  /@logtail/types@0.4.6:
-    resolution: {integrity: sha512-+dlM4hk9MfA9Wes3lk8vBk1P0X+eXHxKkQg8kn6U+A1n8DlL3d4ptFkt19R6axVIvDQRNZ8mAZ0CcYsCxCnPrg==}
     dependencies:
       js: 0.1.0
     dev: false
@@ -1643,29 +1597,6 @@ packages:
     dependencies:
       '@sinonjs/commons': 3.0.0
     dev: true
-
-  /@solidchain/badge-buddy-common@0.0.5(@nestjs/common@10.1.3)(@nestjs/core@10.1.3)(pino-http@8.4.0)(pino@8.15.0)(reflect-metadata@0.1.13)(rxjs@7.8.1):
-    resolution: {integrity: sha512-+kwIUhiLnStqkANQKGtZWEX7ZthL40JAR8AIOny1sfvm5EabjdHogPvWBucl/Wde2M/hKS2cEkupzbjdhPMvYQ==}
-    engines: {node: 20.3.1, pnpm: 8.6.10}
-    peerDependencies:
-      '@nestjs/common': 10.*
-      '@nestjs/core': 10.*
-      reflect-metadata: ^0.1.13
-      rxjs: ^7.*
-    dependencies:
-      '@logtail/pino': 0.4.6(pino@8.15.0)
-      '@nestjs/common': 10.1.3(class-transformer@0.5.1)(class-validator@0.14.0)(reflect-metadata@0.1.13)(rxjs@7.8.1)
-      '@nestjs/core': 10.1.3(@nestjs/common@10.1.3)(@nestjs/platform-express@10.1.3)(reflect-metadata@0.1.13)(rxjs@7.8.1)
-      class-transformer: 0.5.1
-      class-validator: 0.14.0
-      nestjs-pino: 3.3.0(@nestjs/common@10.1.3)(pino-http@8.4.0)
-      reflect-metadata: 0.1.13
-      rxjs: 7.8.1
-    transitivePeerDependencies:
-      - encoding
-      - pino
-      - pino-http
-    dev: false
 
   /@tsconfig/node10@1.0.9:
     resolution: {integrity: sha512-jNsYVVxU8v5g43Erja32laIDHXeoNvFEpX33OK4d6hljo3jDhCBDhx5dhCCTMWUojscpAagGiRkBKxpdl9fxqA==}
