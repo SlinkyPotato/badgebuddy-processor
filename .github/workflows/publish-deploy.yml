@@ -28,7 +28,7 @@ jobs:
           prop_path: 'engines.pnpm'
   build-deploy-docker:
     needs: prepare-versions
-    environment: staging
+    environment: production
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -38,7 +38,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          fetch-tags: true
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ needs.prepare-versions.outputs.node }}
@@ -81,7 +80,7 @@ jobs:
     needs:
       - prepare-versions
       - build-deploy-docker
-    environment: staging
+    environment: production
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -110,9 +109,9 @@ jobs:
           envs: DOTENV_KEY,NODE_VERSION,PNPM_VERSION
           script: |
             cd ${{ secrets.APP_PATH_PRODUCTION }}
-            docker compose --profile staging pull
-            docker compose --profile staging stop
-            docker compose --profile staging up --build -d
+            docker compose --profile production pull
+            docker compose --profile production stop
+            docker compose --profile production up --build -d
   create-pr:
     needs:
       - build-deploy-docker
