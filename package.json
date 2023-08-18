@@ -1,6 +1,6 @@
 {
   "name": "@solidchain/badge-buddy-processor",
-  "version": "0.0.3-0",
+  "version": "0.0.3",
   "description": "Processing app for badge buddy operations.",
   "author": "SlinkyPotato <patinobrian@gmail.com>",
   "private": true,
