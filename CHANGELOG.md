@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.4-2](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.4-1...v0.0.4-2) (2023-08-18)
+
+
+### Bug Fixes
+
+* set redis envs as optional ([1cfa95a](https://github.com/solidchain-tech/badge-buddy-processor/commit/1cfa95a81e26f176a3012f08cec9a1d03824b0bc))
+
 ### [0.0.4-1](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.4-0...v0.0.4-1) (2023-08-18)
 
 
