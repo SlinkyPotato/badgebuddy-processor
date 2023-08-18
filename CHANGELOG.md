@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.1-2](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.1-1...v0.0.1-2) (2023-08-18)
+
+
+### Bug Fixes
+
+* remove release/main ([5d75bce](https://github.com/solidchain-tech/badge-buddy-processor/commit/5d75bce8ba678a47d229cf39a801f9b7d15e95b0))
+* review workflows create-pr, publish-deploy-qa, publish-deploy ([2685016](https://github.com/solidchain-tech/badge-buddy-processor/commit/26850162cdf4f20a6a2c3070e3638eebe4718378))
+* small rename of pr title ([02e22e7](https://github.com/solidchain-tech/badge-buddy-processor/commit/02e22e7e3e480180f99499705d64f0f3d16e9958))
+
 ### 0.0.1-1 (2023-08-17)
 
 
