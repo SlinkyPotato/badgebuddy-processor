@@ -2,45 +2,37 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import LogtailConfig from './config/logtail.config';
 import { MongooseModule } from '@nestjs/mongoose';
-import MongoConfig from './config/mongo.config';
-import SystemConfig from './config/system.config';
-import RedisConfig from './config/redis.config';
-import DiscordConfig from './config/discord.config';
 import { GatewayIntentBits, Partials } from 'discord.js';
 
 import { DiscordModule, DiscordModuleOption } from '@discord-nestjs/core';
 import { ProcessorsModule } from './processors/processors.module';
 import { DiscordEventsModule } from './discord-events/discord-events.module';
+import EnvConfig, { validationSchema } from './config/env.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       ignoreEnvFile: true,
       cache: true,
-      load: [
-        LogtailConfig,
-        MongoConfig,
-        SystemConfig,
-        RedisConfig,
-        DiscordConfig,
-      ],
+      load: [EnvConfig],
+      validationSchema: validationSchema(),
+      validationOptions: {},
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService<any, true>) => ({
-        uri: configService.get('mongo.uri'),
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI'),
       }),
     }),
     DiscordModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (
-        configService: ConfigService<any, true>,
+        configService: ConfigService<{ DISCORD_BOT_TOKEN: string }, true>,
       ): Promise<DiscordModuleOption> | DiscordModuleOption => ({
-        token: configService.get('discord.token'),
+        token: configService.get('DISCORD_BOT_TOKEN', { infer: true }),
         discordClientOptions: {
           // TODO: Reduce and compact the intents
           intents: [

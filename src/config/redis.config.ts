@@ -1,36 +1,14 @@
 import { redisStore } from 'cache-manager-redis-yet';
 import { RedisClientOptions } from 'redis';
 import { CacheManagerOptions } from '@nestjs/cache-manager';
-import { ConfigService, registerAs } from '@nestjs/config';
-import ConfigUtil, { JoiConfig } from './config.util';
-import Joi from 'joi';
+import { ConfigService } from '@nestjs/config';
 import { NodeEnvs } from '@solidchain/badge-buddy-common';
 
-type RedisEnv = {
-  host: string;
-  port: number;
-};
-
-export default registerAs('redis', (): RedisEnv => {
-  const redisEnvs: JoiConfig<RedisEnv> = {
-    host: {
-      value: process.env.REDIS_HOST,
-      joi: Joi.string().default('localhost'),
-    },
-    port: {
-      value: process.env.REDIS_PORT,
-      joi: Joi.number().default(6379),
-    },
-  };
-
-  return ConfigUtil.validate(redisEnvs);
-});
-
-export const configureCache = (configService: ConfigService<any, true>) => {
+export const configureCache = (configService: ConfigService) => {
   const config: CacheManagerOptions & RedisClientOptions = {
     store: redisStore,
   };
-  switch (configService.get('system.nodeEnv')) {
+  switch (configService.get<string>('NODE_ENV')) {
     case NodeEnvs.PRODUCTION.toString():
       config.socket = {
         path: '/app/redis/redis.sock',
@@ -47,8 +25,8 @@ export const configureCache = (configService: ConfigService<any, true>) => {
       break;
     default:
       config.socket = {
-        host: configService.get<string>('redis.host'),
-        port: configService.get<number>('redis.port'),
+        host: configService.get<string>('REDIS_HOST'),
+        port: configService.get<number>('REDIS_PORT'),
       };
       config.ttl = 1000 * 60; // 1 minute
   }

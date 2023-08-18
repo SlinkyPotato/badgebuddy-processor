@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.4-2](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.4-1...v0.0.4-2) (2023-08-18)
+
+
+### Bug Fixes
+
+* set redis envs as optional ([1cfa95a](https://github.com/solidchain-tech/badge-buddy-processor/commit/1cfa95a81e26f176a3012f08cec9a1d03824b0bc))
+
+### [0.0.4-1](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.4-0...v0.0.4-1) (2023-08-18)
+
+
+### Bug Fixes
+
+* github release only production ([39041d0](https://github.com/solidchain-tech/badge-buddy-processor/commit/39041d04653d47cf943acf169b8a291eabf48031))
+
+### [0.0.4-0](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.3...v0.0.4-0) (2023-08-18)
+
+
+### Bug Fixes
+
+* optimize config files ([86cacf4](https://github.com/solidchain-tech/badge-buddy-processor/commit/86cacf4db7d240b79bcd76bb5277e338b37f786a))
+* pass release to release generation ([97274c1](https://github.com/solidchain-tech/badge-buddy-processor/commit/97274c19e9e10911c9c3004a6a5d8b452e005e8f))
+
 ### [0.0.3](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.3-0...v0.0.3) (2023-08-18)
 
 ### [0.0.3-0](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.2...v0.0.3-0) (2023-08-18)
