@@ -75,7 +75,7 @@ jobs:
             NODE_VERSION=${{ needs.prepare-versions.outputs.node }}
             PNPM_VERSION=${{ needs.prepare-versions.outputs.pnpm }}
       - run: git push --follow-tags
-      - run: gh release create --generate-notes -p --verify-tag v${{ steps.package-version.outputs.prop }} dist.zip
+      - run: gh release create -p --verify-tag -F CHANGELOG.md v${{ steps.package-version.outputs.prop }} dist.zip
   deploy-qa:
     needs:
       - prepare-versions
