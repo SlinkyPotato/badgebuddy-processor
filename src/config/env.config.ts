@@ -15,8 +15,8 @@ export default () => ({
 export const validationSchema = () => {
   return Joi.object({
     NODE_ENV: Joi.string().required(),
-    REDIS_HOST: Joi.string().required(),
-    REDIS_PORT: Joi.number().required(),
+    REDIS_HOST: Joi.string().optional(),
+    REDIS_PORT: Joi.number().optional(),
     MONGODB_URI: Joi.string().required(),
     LOGTAIL_TOKEN: Joi.string().optional(),
     DISCORD_BOT_TOKEN: Joi.string().required(),
