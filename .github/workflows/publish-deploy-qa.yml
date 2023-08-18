@@ -125,12 +125,13 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          fetch-tags: true
-      - run: git fetch origin
+      - run: git fetch
+      - run: git pull --tags
       - run: git config user.name "github-action[bot]"
       - run: git config user.email "<>"
-      - run: git pull origin release/dev
-      - run: gh pr create --base dev --fill --title "v${{ needs.build-deploy-docker.outputs.package }} sync release/dev into dev" | exit 0
-      - run: gh pr merge --auto -m | exit 0
       - run: gh pr close release/dev | exit 0
-      - run: gh pr create --base main --fill --title "v${{ needs.build-deploy-docker.outputs.package }} release to production"
+      - run: gh pr create --base main --fill --title "deploy v${{ needs.build-deploy-docker.outputs.package }} to production"
+      - run: git checkout dev
+      - run: git merge --no-ff release/dev -m "sync branch release/dev v${{ needs.build-deploy-docker.outputs.package }} into dev" | exit 0
+      - run: git push
+
