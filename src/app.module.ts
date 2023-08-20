@@ -8,7 +8,7 @@ import { GatewayIntentBits, Partials } from 'discord.js';
 import { DiscordModule, DiscordModuleOption } from '@discord-nestjs/core';
 import { ProcessorsModule } from './processors/processors.module';
 import { DiscordEventsModule } from './discord-events/discord-events.module';
-import EnvConfig, { validationSchema } from './config/env.config';
+import { EnvConfig, validationSchema } from '@solidchain/badge-buddy-common';
 
 @Module({
   imports: [
