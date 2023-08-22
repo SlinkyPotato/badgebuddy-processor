@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.5-2](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.5-1...v0.0.5-2) (2023-08-22)
+
+
+### Bug Fixes
+
+* add missing pnpm step ([c0507c4](https://github.com/solidchain-tech/badge-buddy-processor/commit/c0507c46cc4172af341f9ae56bda9d4f8c5cfba8))
+* include zip step ([09af09b](https://github.com/solidchain-tech/badge-buddy-processor/commit/09af09b31ca40316dfe3864276861782c10e25d7))
+
 ### [0.0.5-1](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.5-0...v0.0.5-1) (2023-08-22)
 
 
