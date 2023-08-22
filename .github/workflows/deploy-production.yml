@@ -23,7 +23,7 @@ jobs:
           node-version-file: 'package.json'
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
-      - run: pnpm install --prod --frozen-lockfile
+      - run: pnpm install @solidchain/badge-buddy-common@latest --frozen-lockfile
       - run: git config user.name "github-action[bot]"
       - run: git config user.email "<>"
       - name: Retrieve Package Version
