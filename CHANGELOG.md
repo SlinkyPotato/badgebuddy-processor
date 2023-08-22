@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.5-3](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.5-2...v0.0.5-3) (2023-08-22)
+
+
+### Bug Fixes
+
+* reverse frozen lock args ([2d01761](https://github.com/solidchain-tech/badge-buddy-processor/commit/2d01761fbb8b01a7ab6b522eb2be9c529b5cede8))
+
 ### [0.0.5-2](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.5-1...v0.0.5-2) (2023-08-22)
 
 
