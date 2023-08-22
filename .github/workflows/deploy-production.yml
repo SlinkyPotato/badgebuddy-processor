@@ -103,7 +103,7 @@ jobs:
             DOTENV_KEY=$DOTENV_KEY docker compose --profile production up -d
       - run: git pull --tags
       - run: git push --follow-tags
-      - run: gh release create -F parsed.md -t "v${{ steps.package-version.outputs.prop }} Release" --verify-tag v${{ steps.package-version.outputs.prop }} dist.zip
+      - run: gh release create -F release.md -t "v${{ steps.package-version.outputs.prop }} Release" --verify-tag v${{ steps.package-version.outputs.prop }} dist.zip
       - run: git checkout dev
       - run: git merge --no-ff main -m "sync branch main v${{ steps.package-version.outputs.prop }} into dev" | exit 0
       - run: git push
