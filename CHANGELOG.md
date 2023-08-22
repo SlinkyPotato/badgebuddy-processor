@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.5](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.4...v0.0.5) (2023-08-22)
+
+
+### Bug Fixes
+
+* add missing pnpm step ([c0507c4](https://github.com/solidchain-tech/badge-buddy-processor/commit/c0507c46cc4172af341f9ae56bda9d4f8c5cfba8))
+* include zip step ([09af09b](https://github.com/solidchain-tech/badge-buddy-processor/commit/09af09b31ca40316dfe3864276861782c10e25d7))
+* move some deps to peerDeps ([acf6276](https://github.com/solidchain-tech/badge-buddy-processor/commit/acf6276c7ecf5d049e7d3ab1a6f491a1781eb0ad))
+* remove port ([7bbd6f6](https://github.com/solidchain-tech/badge-buddy-processor/commit/7bbd6f60165944346fabe658d854dd01808d1a17))
+* reverse frozen lock args ([2d01761](https://github.com/solidchain-tech/badge-buddy-processor/commit/2d01761fbb8b01a7ab6b522eb2be9c529b5cede8))
+* sync deps in package.json ([b83a4db](https://github.com/solidchain-tech/badge-buddy-processor/commit/b83a4db9fe871c83c15d0c18e7777ae45d36cc36))
+* type in release.md ([9054b25](https://github.com/solidchain-tech/badge-buddy-processor/commit/9054b253b7b607c1cd943a074ae8349d6d33f1ab))
+* use correct @solidchain/badge-buddy-common ([ad33334](https://github.com/solidchain-tech/badge-buddy-processor/commit/ad333348e665518810e6a33953cad054db811173))
+
 ### [0.0.5-6](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.5-5...v0.0.5-6) (2023-08-22)
 
 
