@@ -39,5 +39,7 @@ lerna-debug.log*
 !.env.vault
 
 # Certs
-/certs/*
-!/certs/.gitkeep
+/certs
+
+# Github
+.github

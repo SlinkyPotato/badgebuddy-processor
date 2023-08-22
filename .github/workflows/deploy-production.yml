@@ -1,0 +1,104 @@
+#file: noinspection YAMLSchemaValidation
+name: Deploy Production
+on:
+  push:
+    branches:
+      - main
+env:
+  GH_TOKEN: ${{ github.token }}
+jobs:
+  deploy-production:
+    environment: production
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: 'package.json'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+      - run: pnpm install --prod --frozen-lockfile
+      - run: git config user.name "github-action[bot]"
+      - run: git config user.email "<>"
+      - name: Retrieve Package Version
+        id: prerelease-version
+        uses: notiz-dev/github-action-json-property@v0.2.0
+        with:
+          path: 'package.json'
+          prop_path: 'version'
+      - name: Remove prerelease tags
+        run: git tag -d $(git tag -l "v$(node -e "console.log('${{steps.prerelease-version.outputs.prop}}'.split('-')[0]);")-*")
+      - name: Tag release
+        run: npx standard-version > changes.md
+      - name: Retrieve package version
+        id: package-version
+        uses: notiz-dev/github-action-json-property@v0.2.0
+        with:
+          path: 'package.json'
+          prop_path: 'version'
+      - run: node -e "require('@solidchain/badge-buddy-common')['parseChangesFile']();"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Build Docker
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: false
+          load: true
+          tags: |
+            solidchain/badge-buddy-processor:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - run: docker cp $(docker run -d --rm solidchain/badge-buddy-processor:latest):/app/dist ./dist
+      - name: Push Docker Hub
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            solidchain/badge-buddy-processor:latest
+            solidchain/badge-buddy-processor:${{ steps.package-version.outputs.prop }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Transfer compose.yml
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "compose.yml"
+          target: "${{ secrets.APP_PATH_PRODUCTION }}"
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.0
+        env:
+          DOTENV_KEY: ${{ secrets.DOTENV_KEY_PRODUCTION }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: ${{ secrets.SSH_PORT }}
+          envs: DOTENV_KEY
+          script: |
+            cd ${{ secrets.APP_PATH_PRODUCTION }}
+            docker compose --profile production pull
+            docker compose --profile production stop
+            DOTENV_KEY=$DOTENV_KEY docker compose --profile production up -d
+      - run: git pull --tags
+      - run: git push --follow-tags
+      - run: gh release create -F parsed.md -t "v${{ steps.package-version.outputs.prop }} Release" --verify-tag v${{ steps.package-version.outputs.prop }} dist.zip
+      - run: git checkout dev
+      - run: git merge --no-ff main -m "sync branch main v${{ steps.package-version.outputs.prop }} into dev" | exit 0
+      - run: git push
