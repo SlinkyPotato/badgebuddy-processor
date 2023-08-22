@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.5-1](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.5-0...v0.0.5-1) (2023-08-22)
+
+
+### Bug Fixes
+
+* use correct @solidchain/badge-buddy-common ([ad33334](https://github.com/solidchain-tech/badge-buddy-processor/commit/ad333348e665518810e6a33953cad054db811173))
+
+### [0.0.5-0](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.4...v0.0.5-0) (2023-08-20)
+
+
+### Bug Fixes
+
+* move some deps to peerDeps ([acf6276](https://github.com/solidchain-tech/badge-buddy-processor/commit/acf6276c7ecf5d049e7d3ab1a6f491a1781eb0ad))
+* remove port ([7bbd6f6](https://github.com/solidchain-tech/badge-buddy-processor/commit/7bbd6f60165944346fabe658d854dd01808d1a17))
+* sync deps in package.json ([b83a4db](https://github.com/solidchain-tech/badge-buddy-processor/commit/b83a4db9fe871c83c15d0c18e7777ae45d36cc36))
+
 ### [0.0.4](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.4-2...v0.0.4) (2023-08-18)
 
 ### [0.0.4-2](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.4-1...v0.0.4-2) (2023-08-18)

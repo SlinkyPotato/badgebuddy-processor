@@ -7,7 +7,7 @@ participants.
 ## Redis Indexes
 - active events - GET /events/active?guildId= (endpoint)
 - active events in cache - /events/active?guildId=&voiceChannelId= (cache)
-- participant in event - processor_/events/:id/participants/:id (processor only)
+- participants in event - processor_/events/:id/participants (processor only)
 
 ### Notes
 - post start marks event as active
@@ -23,7 +23,7 @@ A user entry in db MUST exist if they enter the voice channel during an active e
 - startDate captured
 - duration of 0 is captured
 - all participants inserted into db (should be single db call)
-- all participants inserted into cache
+- all participants inserted into cache (message queue)
 
 ### ongoing event
 

@@ -4,9 +4,6 @@ services:
     container_name: badge_buddy_processor_local
     build:
       context: .
-      args:
-        NODE_VERSION: ${NODE_VERSION}
-        PNPM_VERSION: ${PNPM_VERSION}
     environment:
       DOTENV_KEY: ${DOTENV_KEY}
     networks:
@@ -36,8 +33,6 @@ services:
     container_name: badge_buddy_processor_prod
     image: solidchain/badge-buddy-processor:latest
     restart: always
-    ports:
-      - 3002:3000
     networks:
       - prod_server
     profiles:
