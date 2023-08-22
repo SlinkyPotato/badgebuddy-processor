@@ -1,34 +1,22 @@
-ARG NODE_VERSION
-
-FROM node:${NODE_VERSION}-alpine
-
-ARG PNPM_VERSION
-
+FROM node:20.3.1-alpine
 LABEL description="Node processor for Badge Buddy"
 
+RUN corepack enable
+
 WORKDIR /app
+COPY pnpm-lock.yaml /app/
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch --frozen-lockfile
+COPY . /app/
 
-# Install pnpm
-RUN npm install -g pnpm@${PNPM_VERSION}
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --offline --frozen-lockfile
 
-# Bundle app source
-COPY . .
-
-# Fetch dep from virtual store
-RUN pnpm fetch
-
-# Install app dependencies
-RUN pnpm install --frozen-lockfile
-
-# Build the app
 RUN pnpm build
+RUN pnpm test
 
-# Move docs to dist
-RUN mv CHANGELOG.md ./dist/
-RUN mv LICENSE.md ./dist/
-RUN mv README.md ./dist/
+COPY CHANGELOG.md /app/dist/
+COPY LICENSE.md /app/dist/
+COPY README.md /app/dist/
 
-# Remove dev dependencies
-RUN pnpm install --prod
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --offline --prod --frozen-lockfile
 
 CMD ["pnpm", "start:prod"]
