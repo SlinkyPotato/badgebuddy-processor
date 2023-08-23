@@ -13,6 +13,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      repository-projects: read
     steps:
       - uses: actions/checkout@v3
         with:
@@ -34,8 +35,8 @@ jobs:
           prop_path: 'version'
       - name: Remove prerelease tags
         run: git tag -d $(git tag -l "v$(node -e "console.log('${{steps.prerelease-version.outputs.prop}}'.split('-')[0]);")-*")
-      - name: Tag release
-        run: npx standard-version > changes.md
+      - run: pnpm standard-version --dry-run > changes.md | exit 0
+      - run: pnpm standard-version
       - name: Retrieve package version
         id: package-version
         uses: notiz-dev/github-action-json-property@v0.2.0
@@ -101,9 +102,9 @@ jobs:
             docker compose --profile production pull
             docker compose --profile production stop
             DOTENV_KEY=$DOTENV_KEY docker compose --profile production up -d
-      - run: git pull --tags
       - run: git push --follow-tags
-      - run: gh release create -F release.md -t "v${{ steps.package-version.outputs.prop }} Release" --verify-tag v${{ steps.package-version.outputs.prop }} dist.zip
+      - run: gh pr edit -F release.md | exit 0
+      - run: gh release create -F release.md --verify-tag v${{ steps.package-version.outputs.prop }} dist.zip | exit 0
       - run: git checkout dev
       - run: git merge --no-ff main -m "sync branch main v${{ steps.package-version.outputs.prop }} into dev" | exit 0
       - run: git push
