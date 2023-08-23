@@ -13,6 +13,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      repository-projects: read
     steps:
       - uses: actions/checkout@v3
         with:
@@ -23,9 +24,12 @@ jobs:
           node-version-file: 'package.json'
           cache: 'pnpm'
           cache-dependency-path: './pnpm-lock.yaml'
+      - run: pnpm install --frozen-lockfile --prod
       - run: git config user.name "github-action[bot]"
       - run: git config user.email "<>"
-      - run: pnpm dlx standard-version --prerelease
+      - run: pnpm standard-version --prerelease --dry-run > changes.md | exit 0
+      - run: node -e "require('@solidchain/badge-buddy-common')['parseChangesFile']();"
+      - run: pnpm standard-version --prerelease
       - name: Retrieve package version
         id: package-version
         uses: notiz-dev/github-action-json-property@v0.2.0
@@ -86,9 +90,9 @@ jobs:
             docker compose --profile staging stop
             DOTENV_KEY=$DOTENV_KEY docker compose --profile staging up -d
       - run: git push --follow-tags
-      - run: gh pr close release/dev | exit 0
-      - run: gh pr create --base main --fill --title "deploy v${{ steps.package-version.outputs.prop }} to production"
+      - run: gh pr edit -F release.md | exit 0
+      - run: gh pr create --base main -F release.md --title "deploy release/dev to production" | exit 0
       - run: git checkout dev
-      - run: git merge --no-ff release/dev -m "sync branch release/dev v${{ steps.package-version.outputs.prop }} into dev" | exit 0
+      - run: git merge --no-ff release/dev -m "sync branch release/dev into dev" | exit 0
       - run: git push
 

@@ -12,11 +12,19 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      repository-projects: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: 'package.json'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+      - run: pnpm install --frozen-lockfile --prod
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub
@@ -33,5 +41,8 @@ jobs:
           cache-to: type=gha,mode=max
       - run: git config user.name "github-action[bot]"
       - run: git config user.email "<>"
-      - run: gh pr close dev | exit 0
-      - run: gh pr create --base release/dev --fill --title "deploy dev -> release/dev" | exit 0
+      - run: pnpm standard-version --prerelease --dry-run > changes.md | exit 0
+      - run: node -e "require('@solidchain/badge-buddy-common')['parseChangesFile']();"
+      - run: gh pr edit -F release.md | exit 0
+      - run: gh pr create --base release/dev --title "deploy dev -> release/dev" -F release.md | exit 0
+
