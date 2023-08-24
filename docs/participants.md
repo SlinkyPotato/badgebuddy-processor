@@ -10,7 +10,7 @@ participants.
     - this is used during ongoing event to check if event is active for voice channel
     - if found, then event is active
     - if not found, then do nothing (caching should only be used during discord events)
-3. participants in event - processor_/events/:id/participants (processor only)
+3. participants in event - tracking:events:{id}:participants:{id} (processor only)
 
 ### Notes
 - post start marks event as active
