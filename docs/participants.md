@@ -81,8 +81,6 @@ A user entry in db MUST exist if they enter the voice channel during an active e
 - try to store all users from cache into db
 
 ### end of event
-- all present users are checked from channel
-- audio checked
 - endDate captured
 - retrieve all users from cache (check size of object and revisit this)
   - store new endDate for all users missing endDate

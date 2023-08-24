@@ -26,7 +26,7 @@ export class EventsProcessor {
   @Process('start')
   async start(job: Job<{ eventId: string }>) {
     const eventId = job.data.eventId;
-    this.logger.log(`Processing start event ${eventId}...`);
+    this.logger.log(`Processing start eventId: ${eventId}`);
     const communityEvent = await this.communityEventModel.findOne({
       _id: eventId,
     });
@@ -55,7 +55,7 @@ export class EventsProcessor {
     for (const member of voiceChannel.members.values()) {
       if (member.voice.deaf) {
         this.logger.warn(
-          `Skipping deaf member tag: ${member.user.tag}, userId: ${member.id}`,
+          `Skipping deaf member tag: ${member.user.tag}, userId: ${member.id}, eventId: ${eventId}, guildId: ${communityEvent.guildId}`,
         );
         continue;
       }
@@ -95,7 +95,8 @@ export class EventsProcessor {
 
   @Process('end')
   async end(job: Job<{ eventId: string }>) {
-    this.logger.log('Processing end event...');
+    const eventId = job.data.eventId;
+    this.logger.log(`Processing end eventId: ${eventId}`);
     return {};
   }
 }
