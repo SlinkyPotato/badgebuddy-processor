@@ -97,6 +97,39 @@ export class EventsProcessor {
   async end(job: Job<{ eventId: string }>) {
     const eventId = job.data.eventId;
     this.logger.log(`Processing end eventId: ${eventId}`);
+
+    const communityEvent = await this.communityEventModel.findOne({
+      _id: eventId,
+    });
+    if (!communityEvent) {
+      this.logger.error(`Event ${eventId} not found`);
+      return;
+    }
+    this.logger.log(`Event ${eventId} found`);
+
+    const participants: DiscordParticipant[] | undefined =
+      await this.cacheManager.get<DiscordParticipant[]>(
+        `tracking:events:${eventId}:participants:*`,
+      );
+
+    if (!participants) {
+      this.logger.error(`Participants not found for eventId: ${eventId}`);
+      return;
+    }
+
+    this.logger.log(`Participants found for eventId: ${eventId}`);
+
+    participants.forEach((_, i) => {
+      const endDate = new Date();
+      participants[i].endDate = endDate;
+      participants[i].durationInMinutes =
+        Math.floor(endDate.getTime() - participants[i].startDate.getTime()) /
+        1000 /
+        60;
+    });
+
+    // TODO: combine cache participants with db participants
+
     return {};
   }
 }

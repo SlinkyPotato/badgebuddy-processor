@@ -84,7 +84,6 @@ A user entry in db MUST exist if they enter the voice channel during an active e
 - endDate captured
 - retrieve all users from cache (check size of object and revisit this)
   - store new endDate for all users missing endDate
-  - store new endDate for all users that exist in channel (they should not have an endDate)
 - duration is calculated
 - all participants updated in db (should be single db call, replace if exists)
 - clear cache
