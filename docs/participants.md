@@ -5,9 +5,12 @@ stored in cache. The cache is cleared when the event is stopped. Later the badge
 participants.
 
 ## Redis Indexes
-- active events - GET /events/active?guildId= (endpoint)
-- active events in cache - /events/active?guildId=&voiceChannelId= (cache)
-- participants in event - processor_/events/:id/participants (processor only)
+1. active events - GET /events/active?guildId= (endpoint)
+2. active events in cache - /events/active?guildId=&voiceChannelId= (manual cache)
+    - this is used during ongoing event to check if event is active for voice channel
+    - if found, then event is active
+    - if not found, then do nothing (caching should only be used during discord events)
+3. participants in event - processor_/events/:id/participants (processor only)
 
 ### Notes
 - post start marks event as active
