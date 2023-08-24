@@ -1,5 +1,5 @@
 {
-  "name": "@solidchain/badge-buddy-processor",
+  "name": "badge-buddy-processor",
   "version": "0.0.6",
   "description": "Processing app for badge buddy operations.",
   "author": "SlinkyPotato <patinobrian@gmail.com>",
@@ -96,5 +96,41 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "standard-version": {
+    "types": [
+      {
+        "type": "feat",
+        "section": "Features"
+      },
+      {
+        "type": "fix",
+        "section": "Bug Fixes"
+      },
+      {
+        "type": "chore",
+        "hidden": true
+      },
+      {
+        "type": "docs",
+        "section": "Docs"
+      },
+      {
+        "type": "style",
+        "hidden": true
+      },
+      {
+        "type": "refactor",
+        "section": "Refactor"
+      },
+      {
+        "type": "perf",
+        "section": "Performance"
+      },
+      {
+        "type": "test",
+        "section": "Tests"
+      }
+    ]
   }
 }
