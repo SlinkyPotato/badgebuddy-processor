@@ -11,6 +11,8 @@ participants.
     - if found, then event is active
     - if not found, then do nothing (caching should only be used during discord events)
 3. participants in event - tracking:events:{id}:participants:{id} (processor only)
+4. tracking:events:{id}:participants:keys (processor only)
+    - this is used to retrieve all participants userIds for an event
 
 ### Notes
 - post start marks event as active
