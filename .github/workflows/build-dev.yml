@@ -48,12 +48,7 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             NODE_VERSION=${{ steps.node-version.outputs.prop }}
-      - name: Push to docker hub
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: solidchain/badge-buddy-processor:dev
+      - run: docker push solidchain/badge-buddy-processor:dev
       - run: git config user.name "github-action[bot]"
       - run: git config user.email "<>"
       - run: pnpm standard-version --prerelease --dry-run > changes.md | exit 0
