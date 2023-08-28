@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.7-2](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.7-1...v0.0.7-2) (2023-08-28)
+
+
+### Bug Fixes
+
+* github var ([fc93fc8](https://github.com/solidchain-tech/badge-buddy-processor/commit/fc93fc83c60d3b73760b382ad32f75e7fbe64aa4))
+
 ### [0.0.7-1](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.7-0...v0.0.7-1) (2023-08-28)
 
 
