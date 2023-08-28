@@ -1,6 +1,6 @@
 {
   "name": "badge-buddy-processor",
-  "version": "0.0.7-2",
+  "version": "0.0.7",
   "description": "Processing app for badge buddy operations.",
   "author": "SlinkyPotato <patinobrian@gmail.com>",
   "private": true,
