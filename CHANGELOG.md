@@ -2,6 +2,51 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.7-2](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.7-1...v0.0.7-2) (2023-08-28)
+
+
+### Bug Fixes
+
+* github var ([fc93fc8](https://github.com/solidchain-tech/badge-buddy-processor/commit/fc93fc83c60d3b73760b382ad32f75e7fbe64aa4))
+
+### [0.0.7-1](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.7-0...v0.0.7-1) (2023-08-28)
+
+
+### Bug Fixes
+
+* try push directly instead of load in workflow prod ([d7a46c1](https://github.com/solidchain-tech/badge-buddy-processor/commit/d7a46c18e92ae24ac37e6451c34353c432a1f1f8))
+
+### [0.0.7-0](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.6...v0.0.7-0) (2023-08-28)
+
+
+### Features
+
+* partial processing for end event ([c120ff5](https://github.com/solidchain-tech/badge-buddy-processor/commit/c120ff5eb07013081d59c0a6bd9a3b724e77d41a))
+* processing for start event ([0e50a25](https://github.com/solidchain-tech/badge-buddy-processor/commit/0e50a25e6f2e0a8a1def932b73d58e08fc0d00cf))
+
+
+### Bug Fixes
+
+* add missing standard-version package.json field ([1f0b326](https://github.com/solidchain-tech/badge-buddy-processor/commit/1f0b3261962ea751ea02401934ab16635369e2b5))
+* add release.md and changes.md .gitignore ([e9710bd](https://github.com/solidchain-tech/badge-buddy-processor/commit/e9710bdcc6408043faa572aa96dbc4dbdc2e87c5))
+* reog staging and prod workflow ([4c730e2](https://github.com/solidchain-tech/badge-buddy-processor/commit/4c730e289a187ec4b1838b1d354351c0adcb8346))
+
+
+### Docs
+
+* **participants:** add not entry ([ac45f2c](https://github.com/solidchain-tech/badge-buddy-processor/commit/ac45f2c18c730985fa8e30588cdafd19dbf55763))
+
+
+### Refactor
+
+* add logging to start processing ([5007923](https://github.com/solidchain-tech/badge-buddy-processor/commit/500792337372a3eef81644abe0f5d5ffd41e0339))
+
+
+### Performance
+
+* update to node 20.5.1 and pnpm 8.7.0 ([a5b3411](https://github.com/solidchain-tech/badge-buddy-processor/commit/a5b341103a0ad501e641f9d90f1b42274275756e))
+* upgrade node + pnpm version, enhance workflow staging notes ([5df5006](https://github.com/solidchain-tech/badge-buddy-processor/commit/5df500680cd0bd17368fdaec843a106eaad41b1e))
+
 ### [0.0.6](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.5...v0.0.6) (2023-08-23)
 
 

@@ -5,9 +5,12 @@ stored in cache. The cache is cleared when the event is stopped. Later the badge
 participants.
 
 ## Redis Indexes
-- active events - GET /events/active?guildId= (endpoint)
-- active events in cache - /events/active?guildId=&voiceChannelId= (cache)
-- participants in event - processor_/events/:id/participants (processor only)
+1. active events - GET /events/active?guildId= (endpoint)
+2. active events in cache - /events/active?guildId=&voiceChannelId= (manual cache)
+    - this is used during ongoing event to check if event is active for voice channel
+    - if found, then event is active
+    - if not found, then do nothing (caching should only be used during discord events)
+3. participants in event - tracking:events:{id}:participants:{id} (processor only)
 
 ### Notes
 - post start marks event as active
@@ -78,12 +81,9 @@ A user entry in db MUST exist if they enter the voice channel during an active e
 - try to store all users from cache into db
 
 ### end of event
-- all present users are checked from channel
-- audio checked
 - endDate captured
 - retrieve all users from cache (check size of object and revisit this)
   - store new endDate for all users missing endDate
-  - store new endDate for all users that exist in channel (they should not have an endDate)
 - duration is calculated
 - all participants updated in db (should be single db call, replace if exists)
 - clear cache
