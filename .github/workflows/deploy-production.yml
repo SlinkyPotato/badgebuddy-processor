@@ -24,9 +24,9 @@ jobs:
           node-version-file: 'package.json'
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
-      - run: pnpm install --frozen-lockfile --prod
       - run: git config user.name "github-action[bot]"
       - run: git config user.email "<>"
+      - run: pnpm install --frozen-lockfile --prod
       - name: Retrieve prerelease version
         id: prerelease-version
         uses: notiz-dev/github-action-json-property@v0.2.0
@@ -49,6 +49,7 @@ jobs:
         with:
           path: 'package.json'
           prop_path: 'engines.node'
+      - run: git push --follow-tags
       - run: node -e "require('@solidchain/badge-buddy-common')['parseChangesFile']();"
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -65,6 +66,7 @@ jobs:
           load: true
           tags: |
             solidchain/badge-buddy-processor:latest
+            solidchain/badge-buddy-processor:${{ steps.package-version.outputs.prop }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
@@ -79,11 +81,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: |
-            solidchain/badge-buddy-processor:latest
-            solidchain/badge-buddy-processor:${{ steps.package-version.outputs.prop }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
       - name: Transfer compose.yml
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -110,8 +107,6 @@ jobs:
             docker compose --profile production pull
             docker compose --profile production stop
             DOTENV_KEY=$DOTENV_KEY docker compose --profile production up -d
-      - run: git push --follow-tags
-      - run: gh pr edit -F release.md | exit 0
       - run: gh release create -F release.md --verify-tag v${{ steps.package-version.outputs.prop }} dist.zip | exit 0
       - run: git checkout dev
       - run: git merge --no-ff main -m "sync branch main v${{ steps.package-version.outputs.prop }} into dev" | exit 0

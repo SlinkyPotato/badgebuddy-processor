@@ -54,6 +54,7 @@ jobs:
           load: true
           tags: |
             solidchain/badge-buddy-processor:next
+            solidchain/badge-buddy-processor:${{ steps.package-version.outputs.prop }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
@@ -63,11 +64,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: |
-            solidchain/badge-buddy-processor:next
-            solidchain/badge-buddy-processor:${{ steps.package-version.outputs.prop }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
       - name: Transfer compose.yml
         uses: appleboy/scp-action@v0.1.4
         with:
