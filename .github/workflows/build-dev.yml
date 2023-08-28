@@ -46,7 +46,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            NODE_VERSION=${{ steps.node-version.outputs.value }}
+            NODE_VERSION=${{ steps.node-version.outputs.prop }}
       - run: git config user.name "github-action[bot]"
       - run: git config user.email "<>"
       - run: pnpm standard-version --prerelease --dry-run > changes.md | exit 0
