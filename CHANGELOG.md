@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.7-1](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.7-0...v0.0.7-1) (2023-08-28)
+
+
+### Bug Fixes
+
+* try push directly instead of load in workflow prod ([d7a46c1](https://github.com/solidchain-tech/badge-buddy-processor/commit/d7a46c18e92ae24ac37e6451c34353c432a1f1f8))
+
 ### [0.0.7-0](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.6...v0.0.7-0) (2023-08-28)
 
 
