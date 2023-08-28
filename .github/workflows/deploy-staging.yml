@@ -8,8 +8,8 @@ env:
   GH_TOKEN: ${{ github.token }}
 jobs:
   deploy-staging:
-    environment: staging
     runs-on: ubuntu-latest
+    environment: staging
     permissions:
       contents: write
       pull-requests: write
@@ -95,4 +95,3 @@ jobs:
       - run: git checkout dev
       - run: git merge --no-ff release/dev -m "sync branch release/dev into dev" | exit 0
       - run: git push
-
