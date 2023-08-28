@@ -67,6 +67,7 @@ export class EventsProcessor {
       );
 
       const discordParticipants: DiscordParticipant[] = [];
+      const participants = new Set<string>();
       for (const member of voiceChannel.members.values()) {
         if (member.voice.deaf) {
           this.logger.warn(
@@ -82,6 +83,8 @@ export class EventsProcessor {
         discordParticipant.userTag = member.user.tag;
         discordParticipant.startDate = new Date();
         discordParticipant.durationInMinutes = 0;
+
+        participants.add(member.id.toString());
 
         await this.cacheManager
           .set(
@@ -99,6 +102,20 @@ export class EventsProcessor {
 
         discordParticipants.push(discordParticipant);
       }
+
+      await this.cacheManager
+        .set(
+          `tracking:events:${eventId}:participants:keys`,
+          Array.from(participants),
+          EventsProcessor.CACHE_TTL,
+        )
+        .catch((err) => {
+          this.logger.error(err);
+          throw new ProcessorException(
+            'Failed to cache participants keys',
+            'EventsProcessor.start',
+          );
+        });
 
       await this.discordParticipantModel
         .insertMany(discordParticipants, { ordered: false })
