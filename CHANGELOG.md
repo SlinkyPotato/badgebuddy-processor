@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.8](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.7...v0.0.8) (2023-08-28)
+
+
+### Bug Fixes
+
+* manually docker push all tags ([add3302](https://github.com/solidchain-tech/badge-buddy-processor/commit/add3302283a28f866da74e6b5e472738c27566a1))
+
 ### [0.0.8-0](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.7...v0.0.8-0) (2023-08-28)
 
 
