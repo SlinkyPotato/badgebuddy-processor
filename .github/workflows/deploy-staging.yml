@@ -34,6 +34,12 @@ jobs:
         with:
           path: 'package.json'
           prop_path: 'version'
+      - name: Retrieve node version
+        id: node-version
+        uses: notiz-dev/github-action-json-property@v0.2.0
+        with:
+          path: 'package.json'
+          prop_path: 'engines.node'
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub
@@ -51,10 +57,11 @@ jobs:
             solidchain/badge-buddy-processor:next
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            NODE_VERSION=${{ steps.node-version.outputs.value }}
       - name: Push Docker Hub
         uses: docker/build-push-action@v4
         with:
-          context: .
           push: true
           tags: |
             solidchain/badge-buddy-processor:next
