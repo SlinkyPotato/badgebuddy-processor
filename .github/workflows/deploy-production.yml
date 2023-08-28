@@ -62,8 +62,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          push: false
-          load: true
+          push: true
           tags: |
             solidchain/badge-buddy-processor:latest
             solidchain/badge-buddy-processor:${{ steps.package-version.outputs.prop }}
@@ -76,11 +75,6 @@ jobs:
         with:
           files: dist/ CHANGELOG.md LICENSE.md README.md package.json
           dest: dist.zip
-      - name: Push Docker Hub
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
       - name: Transfer compose.yml
         uses: appleboy/scp-action@v0.1.4
         with:
