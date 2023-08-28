@@ -87,7 +87,7 @@ jobs:
             DOTENV_KEY=$DOTENV_KEY docker compose --profile staging up -d
       - run: git push --follow-tags
       - name: Remove prerelease tags
-        run: git tag -d $(git tag -l "v$(node -e "console.log('${{steps.prerelease-version.outputs.prop}}'.split('-')[0]);")-*")
+        run: git tag -d $(git tag -l "v$(node -e "console.log('${{steps.package-version.outputs.prop}}'.split('-')[0]);")-*")
       - run: pnpm standard-version --dry-run > changes.md | exit 0
       - run: node -e "require('@solidchain/badge-buddy-common')['parseChangesFile']();"
       - run: gh pr edit -F release.md | exit 0
