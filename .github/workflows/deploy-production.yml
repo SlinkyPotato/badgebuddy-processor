@@ -8,8 +8,8 @@ env:
   GH_TOKEN: ${{ github.token }}
 jobs:
   deploy-production:
-    environment: production
     runs-on: ubuntu-latest
+    environment: production
     permissions:
       contents: write
       pull-requests: write
@@ -70,7 +70,7 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             NODE_VERSION=${{ steps.node-version.outputs.prop }}
-      - run: docker push solidchain/badge-buddy-processor:latest -a
+      - run: docker push solidchain/badge-buddy-processor -a
       - run: docker cp $(docker run -d --rm solidchain/badge-buddy-processor:latest):/app/dist ./dist
       - uses: vimtor/action-zip@v1
         with:

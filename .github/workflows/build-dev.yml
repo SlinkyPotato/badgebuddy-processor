@@ -8,12 +8,12 @@ env:
   GH_TOKEN: ${{ github.token }}
 jobs:
   build-dev:
+    runs-on: ubuntu-latest
     environment: development
     permissions:
       contents: read
       pull-requests: write
       repository-projects: read
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
@@ -53,4 +53,3 @@ jobs:
       - run: node -e "require('@solidchain/badge-buddy-common')['parseChangesFile']();"
       - run: gh pr edit -F release.md | exit 0
       - run: gh pr create --base release/dev --title "deploy dev -> release/dev" -F release.md | exit 0
-
