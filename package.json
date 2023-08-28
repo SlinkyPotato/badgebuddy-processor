@@ -1,16 +1,16 @@
 {
-  "name": "@solidchain/badge-buddy-processor",
-  "version": "0.0.6-0",
+  "name": "badge-buddy-processor",
+  "version": "0.0.6",
   "description": "Processing app for badge buddy operations.",
   "author": "SlinkyPotato <patinobrian@gmail.com>",
   "private": true,
   "license": "MIT",
   "engines": {
-    "node": "20.3.1",
-    "pnpm": "8.6.10"
+    "node": "20.5.1",
+    "pnpm": "8.7.0"
   },
   "engineStrict": true,
-  "packageManager": "pnpm@8.6.10",
+  "packageManager": "pnpm@8.7.0",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -35,14 +35,16 @@
     "@discord-nestjs/common": "^5.2.6",
     "@discord-nestjs/core": "^5.3.8",
     "@nestjs/axios": "^3.0.0",
+    "@nestjs/bull": "^10.0.1",
     "@nestjs/cache-manager": "^2.1.0",
     "@nestjs/common": "^10.1.3",
     "@nestjs/config": "^3.0.0",
     "@nestjs/core": "^10.1.3",
     "@nestjs/mongoose": "^10.0.1",
     "@nestjs/platform-express": "^10.1.3",
-    "@solidchain/badge-buddy-common": "^0.1.0",
+    "@solidchain/badge-buddy-common": "^0.1.2",
     "axios": "^1.4.0",
+    "bull": "^4.11.3",
     "cache-manager": "^5.2.3",
     "cache-manager-redis-yet": "^4.1.2",
     "class-transformer": "^0.5.1",
@@ -96,5 +98,41 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "standard-version": {
+    "types": [
+      {
+        "type": "feat",
+        "section": "Features"
+      },
+      {
+        "type": "fix",
+        "section": "Bug Fixes"
+      },
+      {
+        "type": "chore",
+        "hidden": true
+      },
+      {
+        "type": "docs",
+        "section": "Docs"
+      },
+      {
+        "type": "style",
+        "hidden": true
+      },
+      {
+        "type": "refactor",
+        "section": "Refactor"
+      },
+      {
+        "type": "perf",
+        "section": "Performance"
+      },
+      {
+        "type": "test",
+        "section": "Tests"
+      }
+    ]
   }
 }

@@ -38,6 +38,7 @@ lerna-debug.log*
 .flaskenv*
 !.env.project
 !.env.vault
+badge-buddy-processor.iml
 
 # Certs
 /certs/*
