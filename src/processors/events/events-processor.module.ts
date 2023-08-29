@@ -1,5 +1,5 @@
 import { Logger, Module } from '@nestjs/common';
-import { EventsProcessor } from './events-processor.service';
+import { EventsProcessorService } from './events-processor.service';
 import { DiscordModule } from '@discord-nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
@@ -21,6 +21,6 @@ import { BullModule } from '@nestjs/bull';
       name: 'events',
     }),
   ],
-  providers: [Logger, EventsProcessor],
+  providers: [Logger, EventsProcessorService],
 })
 export class EventsProcessorModule {}
