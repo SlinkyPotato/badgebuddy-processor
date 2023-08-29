@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-2](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-1...v0.0.11-2) (2023-08-29)
+
+
+### Performance
+
+* enhance dockerfile steps ([367511e](https://github.com/solidchain-tech/badge-buddy-processor/commit/367511e51c033bf7872e62d869c107f5d1d1a7be))
+* upgrade deps ([5a732b5](https://github.com/solidchain-tech/badge-buddy-processor/commit/5a732b5ec63b48f3d9aa4f03f13cee7b332e6b8d))
+
 ### [0.0.11-1](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-0...v0.0.11-1) (2023-08-29)
 
 
