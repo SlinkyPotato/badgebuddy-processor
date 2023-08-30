@@ -9,6 +9,7 @@ import { Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Job } from 'bull';
 import { describe, expect, jest, it, beforeEach } from '@jest/globals';
+import { Collection } from 'discord.js';
 
 describe('EventsProcessorService', () => {
   let service: EventsProcessorService;
@@ -23,17 +24,18 @@ describe('EventsProcessorService', () => {
     participants: [],
   };
 
+  const mockVoiceChannel = {
+    name: 'test name',
+    members: new Collection([
+      ['1', { id: '1', voice: { deaf: false }, user: { tag: 'userTag' } }],
+    ]),
+  };
+
   const mockCommunityModel = {
     exists: jest.fn().mockReturnThis(),
     create: jest.fn().mockReturnThis(),
     find: jest.fn().mockReturnThis(),
-    findOne: () => {
-      return {
-        exec: () => {
-          return Promise.resolve(mockCommunityEvent);
-        },
-      };
-    },
+    findOne: jest.fn().mockReturnThis(),
   };
 
   const mockDiscordParticipantModel = {
@@ -52,8 +54,10 @@ describe('EventsProcessorService', () => {
   };
 
   const mockClient = {
-    guilds: {
-      fetch: jest.fn().mockReturnThis(),
+    channels: {
+      fetch: () => {
+        return jest.fn().mockReturnValue(Promise.resolve(mockVoiceChannel));
+      },
     },
   };
 
@@ -95,16 +99,44 @@ describe('EventsProcessorService', () => {
     });
 
     it('should pull Community Event from db', async () => {
-      const spy = jest.spyOn(mockCommunityModel, 'findOne');
+      const execMock = jest.fn();
+      const spy = jest
+        .spyOn(mockCommunityModel, 'findOne')
+        .mockReturnValue({ exec: execMock });
+      execMock.mockResolvedValue(mockCommunityEvent as never);
       try {
         await service.start(mockJob);
       } catch (e) {}
       expect(spy).toHaveBeenCalled();
-
-      // expect mockCommunityModel.findOne to return mockCommunityEvent
+      const result = spy.mock.results[0].value;
       await expect(
-        (spy.mock.results[0].value as jest.MockedFunction<any>).exec(),
+        (result as jest.MockedFunction<any>).exec(),
       ).resolves.toEqual(mockCommunityEvent);
+    });
+
+    it('should fetch voice channel from discord', async () => {
+      const spy = jest.spyOn(mockClient.channels, 'fetch');
+      try {
+        await service.start(mockJob);
+      } catch (e) {}
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('should not find voice channel', async () => {
+      mockClient.channels.fetch = () => {
+        return jest.fn().mockReturnValue(null);
+      };
+      const spy = jest.spyOn(mockClient.channels, 'fetch');
+      try {
+        await service.start(mockJob);
+      } catch (e) {
+        console.log(e);
+        // expect(e).toEqual(typeof ProcessorException);
+      }
+      expect(spy).toHaveBeenCalled();
+
+      const result = await spy.mock.results[0].value;
+      expect(result).toEqual(null);
     });
   });
 });
