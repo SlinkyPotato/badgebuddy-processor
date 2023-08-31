@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-3](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-2...v0.0.11-3) (2023-08-31)
+
+
+### Refactor
+
+* remove express dep ([63b4b6d](https://github.com/solidchain-tech/badge-buddy-processor/commit/63b4b6d066f8cc4136014edb8d099e943838ec9f))
+
+
+### Performance
+
+* import @jest/globals ([9ad2d64](https://github.com/solidchain-tech/badge-buddy-processor/commit/9ad2d6462d6beea2aea6a163b5027d6ef6ac3c07))
+
+
+### Tests
+
+* add basic jest cases for EventsProcessor.start ([5e7d45d](https://github.com/solidchain-tech/badge-buddy-processor/commit/5e7d45d8b74f83f987d89dc7deeba1570c0f0788))
+
 ### [0.0.11-2](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-1...v0.0.11-2) (2023-08-29)
 
 
