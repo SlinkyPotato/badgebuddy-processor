@@ -16,7 +16,7 @@ import { ProcessorException } from '../_exceptions/processor.exception';
 
 @Injectable()
 @Processor('events')
-export class EventsProcessor {
+export class EventsProcessorService {
   private static CACHE_TTL = 1000 * 60 * 60 * 24 * 2;
 
   constructor(
@@ -89,7 +89,7 @@ export class EventsProcessor {
         .set(
           `tracking:events:${eventId}:participants:${member.id}`,
           discordParticipant,
-          EventsProcessor.CACHE_TTL,
+          EventsProcessorService.CACHE_TTL,
         )
         .catch((err) => {
           this.logger.error(err);
@@ -103,7 +103,7 @@ export class EventsProcessor {
       .set(
         `tracking:events:${eventId}:participants:keys`,
         Array.from(participantsSet),
-        EventsProcessor.CACHE_TTL,
+        EventsProcessorService.CACHE_TTL,
       )
       .catch((err) => {
         this.logger.error(err);

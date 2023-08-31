@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { VoiceStateUpdateService } from './voice-state-update.service';
+import { describe, expect, it, beforeEach } from '@jest/globals';
 
 describe('VoiceStateUpdateService', () => {
   let service: VoiceStateUpdateService;

@@ -59,11 +59,10 @@
     "standard-version": "^9.5.0"
   },
   "devDependencies": {
+    "@jest/globals": "^29.6.4",
     "@nestjs/cli": "^10.1.16",
     "@nestjs/schematics": "^10.0.2",
     "@nestjs/testing": "^10.2.2",
-    "@types/express": "^4.17.17",
-    "@types/jest": "^29.5.4",
     "@types/node": "^20.5.7",
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
