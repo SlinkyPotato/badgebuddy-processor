@@ -35,7 +35,11 @@ describe('EventsProcessorService', () => {
     exists: jest.fn().mockReturnThis(),
     create: jest.fn().mockReturnThis(),
     find: jest.fn().mockReturnThis(),
-    findOne: jest.fn().mockReturnThis(),
+    findOne: () => {
+      return {
+        exec: jest.fn().mockReturnValue(Promise.resolve(mockCommunityEvent)),
+      };
+    },
   };
 
   const mockDiscordParticipantModel = {
@@ -56,7 +60,9 @@ describe('EventsProcessorService', () => {
   const mockClient = {
     channels: {
       fetch: () => {
-        return jest.fn().mockReturnValue(Promise.resolve(mockVoiceChannel));
+        return {
+          catch: jest.fn().mockReturnValue(Promise.resolve(mockVoiceChannel)),
+        };
       },
     },
   };
@@ -99,19 +105,13 @@ describe('EventsProcessorService', () => {
     });
 
     it('should pull Community Event from db', async () => {
-      const execMock = jest.fn();
-      const spy = jest
-        .spyOn(mockCommunityModel, 'findOne')
-        .mockReturnValue({ exec: execMock });
-      execMock.mockResolvedValue(mockCommunityEvent as never);
+      const spy = jest.spyOn(mockCommunityModel, 'findOne');
       try {
         await service.start(mockJob);
       } catch (e) {}
       expect(spy).toHaveBeenCalled();
-      const result = spy.mock.results[0].value;
-      await expect(
-        (result as jest.MockedFunction<any>).exec(),
-      ).resolves.toEqual(mockCommunityEvent);
+      const result = (spy.mock.results[0].value as any).exec();
+      await expect(result).resolves.toEqual(mockCommunityEvent);
     });
 
     it('should fetch voice channel from discord', async () => {
@@ -120,23 +120,25 @@ describe('EventsProcessorService', () => {
         await service.start(mockJob);
       } catch (e) {}
       expect(spy).toHaveBeenCalled();
+
+      const result = (spy.mock.results[0].value as any).catch();
+      await expect(result).resolves.toEqual(mockVoiceChannel);
     });
 
     it('should not find voice channel', async () => {
       mockClient.channels.fetch = () => {
-        return jest.fn().mockReturnValue(null);
+        return {
+          catch: jest.fn().mockReturnValue(Promise.resolve(null)),
+        };
       };
       const spy = jest.spyOn(mockClient.channels, 'fetch');
       try {
         await service.start(mockJob);
-      } catch (e) {
-        console.log(e);
-        // expect(e).toEqual(typeof ProcessorException);
-      }
+      } catch (e) {}
       expect(spy).toHaveBeenCalled();
 
-      const result = await spy.mock.results[0].value;
-      expect(result).toEqual(null);
+      const result = (spy.mock.results[0].value as any).catch();
+      await expect(result).resolves.toEqual(null);
     });
   });
 });
