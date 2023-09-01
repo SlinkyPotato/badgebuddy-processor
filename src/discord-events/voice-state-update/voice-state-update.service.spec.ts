@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { VoiceStateUpdateService } from './voice-state-update.service';
+import { EventTrackingService } from './event-tracking.service';
 import { describe, expect, it, beforeEach } from '@jest/globals';
 
 describe('VoiceStateUpdateService', () => {
-  let service: VoiceStateUpdateService;
+  let service: EventTrackingService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [VoiceStateUpdateService],
+      providers: [EventTrackingService],
     }).compile();
 
-    service = module.get<VoiceStateUpdateService>(VoiceStateUpdateService);
+    service = module.get<EventTrackingService>(EventTrackingService);
   });
 
   it('should be defined', () => {
