@@ -33,8 +33,8 @@ dependencies:
     specifier: ^10.0.1
     version: 10.0.1(@nestjs/common@10.2.4)(@nestjs/core@10.2.4)(mongoose@7.5.0)(reflect-metadata@0.1.13)(rxjs@7.8.1)
   '@solidchain/badge-buddy-common':
-    specifier: 0.1.3-3
-    version: 0.1.3-3(@nestjs/bull@10.0.1)(@nestjs/cache-manager@2.1.0)(@nestjs/common@10.2.4)(@nestjs/config@3.0.1)(@nestjs/core@10.2.4)(@nestjs/mongoose@10.0.1)(bull@4.11.3)(cache-manager-redis-yet@4.1.2)(cache-manager@5.2.3)(class-transformer@0.5.1)(class-validator@0.14.0)(joi@17.10.1)(mongoose@7.5.0)(redis@4.6.8)(reflect-metadata@0.1.13)(rxjs@7.8.1)(standard-version@9.5.0)
+    specifier: 0.1.3-4
+    version: 0.1.3-4(@nestjs/bull@10.0.1)(@nestjs/cache-manager@2.1.0)(@nestjs/common@10.2.4)(@nestjs/config@3.0.1)(@nestjs/core@10.2.4)(@nestjs/mongoose@10.0.1)(bull@4.11.3)(cache-manager-redis-yet@4.1.2)(cache-manager@5.2.3)(class-transformer@0.5.1)(class-validator@0.14.0)(joi@17.10.1)(mongoose@7.5.0)(redis@4.6.8)(reflect-metadata@0.1.13)(rxjs@7.8.1)(standard-version@9.5.0)
   axios:
     specifier: ^1.5.0
     version: 1.5.0
@@ -1652,8 +1652,8 @@ packages:
       '@sinonjs/commons': 3.0.0
     dev: true
 
-  /@solidchain/badge-buddy-common@0.1.3-3(@nestjs/bull@10.0.1)(@nestjs/cache-manager@2.1.0)(@nestjs/common@10.2.4)(@nestjs/config@3.0.1)(@nestjs/core@10.2.4)(@nestjs/mongoose@10.0.1)(bull@4.11.3)(cache-manager-redis-yet@4.1.2)(cache-manager@5.2.3)(class-transformer@0.5.1)(class-validator@0.14.0)(joi@17.10.1)(mongoose@7.5.0)(redis@4.6.8)(reflect-metadata@0.1.13)(rxjs@7.8.1)(standard-version@9.5.0):
-    resolution: {integrity: sha512-arbXW3/OBymCIs8r4QJjmGC+ogFe8UgF1CEp4iHbI2+BkFqY+SNfYBXa5qw0NW13B5ZnHZFhsYkZNlRVRpzxVA==}
+  /@solidchain/badge-buddy-common@0.1.3-4(@nestjs/bull@10.0.1)(@nestjs/cache-manager@2.1.0)(@nestjs/common@10.2.4)(@nestjs/config@3.0.1)(@nestjs/core@10.2.4)(@nestjs/mongoose@10.0.1)(bull@4.11.3)(cache-manager-redis-yet@4.1.2)(cache-manager@5.2.3)(class-transformer@0.5.1)(class-validator@0.14.0)(joi@17.10.1)(mongoose@7.5.0)(redis@4.6.8)(reflect-metadata@0.1.13)(rxjs@7.8.1)(standard-version@9.5.0):
+    resolution: {integrity: sha512-H3nelrEeQuakXLlDXpd35vv/fxi3Z3N8CVcFqHSw7oLjDol8+8vG2LsHrQfvVmICsdWkOcLOC6FHagK90pFxAg==}
     engines: {node: 20.5.1, pnpm: 8.7.0}
     peerDependencies:
       '@nestjs/bull': ^10.0.1
