@@ -16,6 +16,10 @@ export class EventTrackingService {
   ) {}
 
   async handleParticipantTracking(oldState: VoiceState, newState: VoiceState) {
+    if (this.conditionsForTrackingNotBeenMet(oldState, newState)) {
+      return;
+    }
+
     const communityEvent: CommunityEventDto | null =
       (await this.getActiveEventForVoiceChannel(newState.channelId)) ??
       (await this.getActiveEventForVoiceChannel(oldState.channelId));
@@ -60,6 +64,27 @@ export class EventTrackingService {
       const guildMember = newState.member as GuildMember;
       return this.handleUserLeftVoiceChannel(communityEvent, guildMember);
     }
+  }
+
+  /**
+   * Conditions for tracking not been met
+   *
+   * If the user has not changed voice channels or deafened
+   * @param oldState
+   * @param newState
+   * @private
+   */
+  private conditionsForTrackingNotBeenMet(
+    oldState: VoiceState,
+    newState: VoiceState,
+  ): boolean {
+    if (oldState.deaf === true && newState.deaf === true) {
+      return true;
+    }
+    if (oldState.channelId === newState.channelId) {
+      return true;
+    }
+    return false;
   }
 
   private async handleUserLeftVoiceChannel(
