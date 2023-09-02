@@ -78,10 +78,12 @@ export class EventTrackingService {
     oldState: VoiceState,
     newState: VoiceState,
   ): boolean {
-    if (oldState.deaf === true && newState.deaf === true) {
+    if (
+      oldState.channelId === newState.channelId &&
+      newState.deaf === oldState.deaf
+    ) {
       return true;
-    }
-    if (oldState.channelId === newState.channelId) {
+    } else if (newState.deaf == true && oldState.deaf == true) {
       return true;
     }
     return false;

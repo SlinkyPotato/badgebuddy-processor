@@ -128,6 +128,17 @@ describe('VoiceStateUpdateService', () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
+  it('do nothing for user that has not met conditions for tracking', async () => {
+    mockNewVoiceState.channelId = '111';
+    mockNewVoiceState.deaf = true;
+    const spy = jest.spyOn(mockCacheManager, 'get');
+    await service.handleParticipantTracking(
+      mockOldVoiceState as VoiceState,
+      mockNewVoiceState as VoiceState,
+    );
+    expect(spy).not.toHaveBeenCalled();
+  });
+
   // it('placeholder', () => {
   //   const spy = jest.spyOn(mockCacheManager, 'get');
   //   spy.mockImplementation((key) => {
