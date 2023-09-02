@@ -48,7 +48,7 @@ export class EventTrackingService {
     ) {
       const guildMember = newState.member as GuildMember;
       this.logger.log(
-        `User ${guildMember.user.username} has left a voice channel or deafened, guildId: ${guildMember.guild.id}, eventId: ${communityEvent._id}`,
+        `User ${guildMember.user.username} has left a voice channel or deafened, guildId: ${guildMember.guild.id}, eventId: ${communityEvent.voiceChannelId}`,
       );
       //TODO: stop tracking user
       return;
