@@ -5,6 +5,7 @@ import {
   CommunityEvent,
   CommunityEventDocument,
   DiscordParticipant,
+  DiscordParticipantDto,
 } from '@solidchain/badge-buddy-common';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -83,12 +84,19 @@ export class EventsProcessorService {
       discordParticipant.startDate = new Date();
       discordParticipant.durationInMinutes = 0.0;
 
+      const cacheUser = new DiscordParticipantDto();
+      cacheUser.eventId = discordParticipant.communityEvent._id;
+      cacheUser.userId = discordParticipant.userId;
+      cacheUser.userTag = discordParticipant.userTag;
+      cacheUser.startDate = discordParticipant.startDate;
+      cacheUser.durationInMinutes = discordParticipant.durationInMinutes;
+
       participantsSet.add(member.id.toString());
 
       await this.cacheManager
         .set(
           `tracking:events:${eventId}:participants:${member.id}`,
-          discordParticipant,
+          cacheUser,
           EventsProcessorService.CACHE_TTL,
         )
         .catch((err) => {
