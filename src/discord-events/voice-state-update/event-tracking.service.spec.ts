@@ -4,6 +4,8 @@ import { describe, expect, it, beforeEach, jest } from '@jest/globals';
 import { Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { VoiceState } from 'discord.js';
+import { CommunityEventDto } from '@solidchain/badge-buddy-common';
+import * as mongoose from 'mongoose';
 
 describe('VoiceStateUpdateService', () => {
   let service: EventTrackingService;
@@ -11,11 +13,39 @@ describe('VoiceStateUpdateService', () => {
   const mockOldVoiceState = {
     channelId: '123',
     deaf: false,
+    member: {
+      id: '123',
+      user: {
+        tag: 'test',
+      },
+      guild: {
+        id: '123',
+      },
+    },
   };
 
   const mockNewVoiceState = {
     channelId: '123',
     deaf: false,
+    member: {
+      id: '123',
+      user: {
+        tag: 'test',
+      },
+      guild: {
+        id: '123',
+      },
+    },
+  };
+
+  const mockCommunityEvent: CommunityEventDto = {
+    eventId: new mongoose.Types.ObjectId('64e90a7a0eed9208a77e9b15'),
+    eventName: 'Test event',
+    organizerId: '159014522542096384',
+    voiceChannelId: '850840267082563600',
+    guildId: '850840267082563596',
+    startDate: new Date(),
+    endDate: new Date(new Date().getTime() + 1000 * 60 * 60),
   };
 
   const mockCacheManager = {
@@ -42,15 +72,24 @@ describe('VoiceStateUpdateService', () => {
   it('should ignore non-active event', async () => {
     const spy = jest.spyOn(mockCacheManager, 'get');
     spy.mockReturnValue(null);
-    try {
-      await service.handleParticipantTracking(
-        mockOldVoiceState as VoiceState,
-        mockNewVoiceState as VoiceState,
-      );
-    } catch (e) {}
+    await service.handleParticipantTracking(
+      mockOldVoiceState as VoiceState,
+      mockNewVoiceState as VoiceState,
+    );
     expect(spy).toHaveBeenCalled();
     expect(spy.mock.results[0].value).toBe(null);
   });
 
   // TODO: Add more tests
+  it('should ignore new user that is deafend', async () => {
+    mockNewVoiceState.channelId = '111';
+    mockNewVoiceState.deaf = true;
+    const spy = jest.spyOn(mockCacheManager, 'get');
+    await service.handleParticipantTracking(
+      mockOldVoiceState as VoiceState,
+      mockNewVoiceState as VoiceState,
+    );
+    expect(spy).toHaveBeenCalled();
+    expect(spy.mock.results[0].value).toBe(mockCommunityEvent);
+  });
 });

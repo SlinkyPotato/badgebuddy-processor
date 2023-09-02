@@ -177,7 +177,11 @@ export class EventTrackingService {
     oldState: VoiceState,
     newState: VoiceState,
   ): boolean {
-    return newState.channelId !== oldState.channelId && !oldState.channelId;
+    return (
+      newState.channelId !== oldState.channelId &&
+      !oldState.channelId &&
+      !!newState.deaf
+    );
   }
 
   private hasUserHoppedIntoVoiceChannel(
