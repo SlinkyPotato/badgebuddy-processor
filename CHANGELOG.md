@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-5](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-4...v0.0.11-5) (2023-09-02)
+
+
+### Features
+
+* handle event tracking impl ([cbbc8ce](https://github.com/solidchain-tech/badge-buddy-processor/commit/cbbc8ce06722442af1a1a5b7de199f4509d8cad2))
+
 ### [0.0.11-4](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-3...v0.0.11-4) (2023-09-02)
 
 
