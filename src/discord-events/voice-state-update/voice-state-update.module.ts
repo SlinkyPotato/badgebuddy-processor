@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
-import { VoiceStateUpdateService } from './voice-state-update.service';
+import { EventTrackingService } from './event-tracking.service';
+import { VoiceStateUpdateEvent } from './voice-state-update.event';
 
 @Module({
-  providers: [VoiceStateUpdateService],
+  imports: [],
+  providers: [VoiceStateUpdateEvent, EventTrackingService],
 })
 export class VoiceStateUpdateModule {}

@@ -5,11 +5,12 @@ stored in cache. The cache is cleared when the event is stopped. Later the badge
 participants.
 
 ## Redis Indexes
-1. active events - GET /events/active?guildId= (endpoint)
-2. active events in cache - /events/active?guildId=&voiceChannelId= (manual cache)
+1. active events - GET /events/active?voiceChannelId= (endpoint)
+2. active event in cache - tracking:events:active:voiceChannelId:{id}
     - this is used during ongoing event to check if event is active for voice channel
     - if found, then event is active
     - if not found, then do nothing (caching should only be used during discord events)
+    - voiceChannelId is unique for each event 
 3. participants in event - tracking:events:{id}:participants:{id} (processor only)
 4. tracking:events:{id}:participants:keys (processor only)
     - this is used to retrieve all participants userIds for an event
