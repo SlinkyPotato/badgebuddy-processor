@@ -40,6 +40,9 @@ A user entry in db MUST exist if they enter the voice channel during an active e
 - capture startDate
 - duration of zero is captured
 - insert into cache
+  - add user key to keys
+  - store startDate for user
+  - store duration for user
 
 ### user leaves (or is deafened)
 - check event is active for voice channel
