@@ -40,7 +40,7 @@ export class EventTrackingService {
       const guildMember = newState.member as GuildMember;
       const userCache: DiscordParticipantDto | undefined =
         await this.cacheManager.get(
-          `tracking:events:${communityEvent.eventId}:participants:${guildMember.id}`,
+          `tracking:events:${communityEvent.eventId.toString()}:participants:${guildMember.id.toString()}`,
         );
       if (!userCache) {
         return this.handleUserJoinedVoiceChannel(communityEvent, guildMember);
@@ -207,7 +207,7 @@ export class EventTrackingService {
     return (
       newState.channelId !== oldState.channelId &&
       !oldState.channelId &&
-      !!newState.deaf
+      !newState.deaf
     );
   }
 
