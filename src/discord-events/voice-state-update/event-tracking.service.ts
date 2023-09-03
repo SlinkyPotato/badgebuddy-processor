@@ -20,13 +20,20 @@ export class EventTrackingService {
       return;
     }
 
-    const communityEvent: CommunityEventDto | null =
+    let communityEvent: CommunityEventDto | null =
       (await this.getActiveEventForVoiceChannel(newState.channelId)) ??
       (await this.getActiveEventForVoiceChannel(oldState.channelId));
 
-    if (!communityEvent) {
+    if (
+      this.conditionsForTrackingNotBeenMetForCommunityEvent(
+        communityEvent,
+        oldState,
+        newState,
+      )
+    ) {
       return;
     }
+    communityEvent = communityEvent as CommunityEventDto;
 
     if (
       this.hasUserJoinedVoiceChannel(oldState, newState) ||
@@ -84,6 +91,22 @@ export class EventTrackingService {
     ) {
       return true;
     } else if (newState.deaf == true && oldState.deaf == true) {
+      return true;
+    }
+    return false;
+  }
+
+  private conditionsForTrackingNotBeenMetForCommunityEvent(
+    communityEvent: CommunityEventDto | null,
+    oldState: VoiceState,
+    newState: VoiceState,
+  ): boolean {
+    if (!communityEvent) {
+      return true;
+    } else if (
+      communityEvent.voiceChannelId !== oldState.channelId &&
+      communityEvent.voiceChannelId !== newState.channelId
+    ) {
       return true;
     }
     return false;
