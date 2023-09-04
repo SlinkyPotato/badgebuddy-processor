@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-7](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-6...v0.0.11-7) (2023-09-04)
+
+
+### Docs
+
+* rename participants.md heading ([65e5c96](https://github.com/solidchain-tech/badge-buddy-processor/commit/65e5c9654fc784d40bb0dc994a65809d7a886c40))
+
+
+### Performance
+
+* pull user from db in case not found in cache ([7ee548d](https://github.com/solidchain-tech/badge-buddy-processor/commit/7ee548d2c03890ebd18462beb443337e549ae909))
+
 ### [0.0.11-6](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-5...v0.0.11-6) (2023-09-04)
 
 
