@@ -64,7 +64,15 @@ A user entry in db MUST exist if they enter the voice channel during an active e
   - store new startDate for user
   - remove endDate for user
 
-### on processor startup recovery
+### end of event
+- endDate captured
+- retrieve all users from cache (check size of object and revisit this)
+    - store new endDate for all users missing endDate
+- duration is calculated
+- all participants updated in db (should be single db call, replace if exists)
+- clear cache
+
+### on redis startup recovery
 - all present users are checked from channel
 - audio checked
 - store users from channel and db into cache
@@ -79,20 +87,14 @@ A user entry in db MUST exist if they enter the voice channel during an active e
     - duration of zero is captured
     - insert into cache
 
-
-### on processor shutdown (graceful)
+### on redis server shutdown (graceful)
 - store all users from cache into db
+  - get all active events from db
+  - pull all users from cache for each active event
+  - store all users from cache into db
 
 ### on processor failure
 - try to store all users from cache into db
-
-### end of event
-- endDate captured
-- retrieve all users from cache (check size of object and revisit this)
-  - store new endDate for all users missing endDate
-- duration is calculated
-- all participants updated in db (should be single db call, replace if exists)
-- clear cache
 
 # Open questions
 1. What happens if processor is down, event is marked as active, and +5 minutes has passed?
