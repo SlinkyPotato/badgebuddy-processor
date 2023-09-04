@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-6](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-5...v0.0.11-6) (2023-09-04)
+
+
+### Tests
+
+* add first test for event-tracking.service.ts ([32ee90f](https://github.com/solidchain-tech/badge-buddy-processor/commit/32ee90fe9cbd875808723c16edc96eef7c97c6e3))
+* add full test coverage for event-tracking.service.ts ([8744e9f](https://github.com/solidchain-tech/badge-buddy-processor/commit/8744e9f18814939bc3c70a20bbac44a7f84b3dbf))
+* add test for hopping active events ([ae582d8](https://github.com/solidchain-tech/badge-buddy-processor/commit/ae582d87ddf85f8dff7c48f2dfb355af8cf1f959))
+* add tests and add conditions check ([9f15108](https://github.com/solidchain-tech/badge-buddy-processor/commit/9f151083b2b2c3d7dfa4f9f1000da6a79af8f5d1))
+
 ### [0.0.11-5](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-4...v0.0.11-5) (2023-09-02)
 
 
