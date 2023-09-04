@@ -22,6 +22,7 @@ describe('VoiceStateUpdateService', () => {
   let mockNewVoiceState: VoiceState | any;
   let mockOldVoiceState: VoiceState | any;
   let mockCommunityEvent: CommunityEventDto;
+  let mockAnotherCommunityEvent: CommunityEventDto;
   let mockUserCache: DiscordParticipantDto;
   let keys: string[];
 
@@ -67,6 +68,16 @@ describe('VoiceStateUpdateService', () => {
     endDate: new Date(new Date().getTime() + 1000 * 60 * 60),
   });
 
+  const getAnotherMockCommunityEvent = (): CommunityEventDto => ({
+    eventId: new mongoose.Types.ObjectId('74e90a7a0eed9208a87e9b15'),
+    eventName: 'Another event',
+    organizerId: '1592343244',
+    voiceChannelId: '23423435235',
+    guildId: '324244353645',
+    startDate: new Date(),
+    endDate: new Date(new Date().getTime() + 1000 * 60 * 60),
+  });
+
   const getMockUserCache = (): DiscordParticipantDto => ({
     eventId: new mongoose.Types.ObjectId('64e90a7a0eed9208a77e9b15'),
     userId: '123',
@@ -94,6 +105,7 @@ describe('VoiceStateUpdateService', () => {
     mockNewVoiceState = getMockNewVoiceState();
     mockOldVoiceState = getMockOldVoiceState();
     mockCommunityEvent = getMockCommunityEvent();
+    mockAnotherCommunityEvent = getAnotherMockCommunityEvent();
     mockUserCache = getMockUserCache();
     keys = getKeys();
   });
@@ -340,5 +352,42 @@ describe('VoiceStateUpdateService', () => {
     await expect(spy.mock.results[1].value).resolves.toEqual(null);
     await expect(spy.mock.results[2].value).resolves.toEqual(mockUserCache);
     expect(setCacheSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should track user hopping active events', async () => {
+    mockOldVoiceState.channelId = '850840267082563600';
+    mockNewVoiceState.channelId = '23423435235';
+    const spy = jest.spyOn(mockCacheManager, 'get');
+    const setCacheSpy = jest.spyOn(mockCacheManager, 'set');
+    spy.mockImplementation((key) => {
+      if (key === 'tracking:events:active:voiceChannelId:850840267082563600') {
+        return Promise.resolve(mockCommunityEvent);
+      }
+      if (key === 'tracking:events:active:voiceChannelId:23423435235') {
+        return Promise.resolve(mockAnotherCommunityEvent);
+      }
+      if (key === 'tracking:events:64e90a7a0eed9208a77e9b15:participants:123') {
+        return Promise.resolve(mockUserCache);
+      }
+      if (key === 'tracking:events:74e90a7a0eed9208a87e9b15:participants:123') {
+        return Promise.resolve(null);
+      }
+      return Promise.resolve(null);
+    });
+    await service.handleParticipantTracking(
+      mockOldVoiceState as VoiceState,
+      mockNewVoiceState as VoiceState,
+    );
+    expect(spy).toBeCalledTimes(5);
+    await expect(spy.mock.results[0].value).resolves.toEqual(
+      mockCommunityEvent,
+    );
+    await expect(spy.mock.results[1].value).resolves.toEqual(
+      mockAnotherCommunityEvent,
+    );
+    await expect(spy.mock.results[2].value).resolves.toEqual(null);
+    await expect(spy.mock.results[3].value).resolves.toEqual(null);
+    await expect(spy.mock.results[4].value).resolves.toEqual(mockUserCache);
+    expect(setCacheSpy).toHaveBeenCalledTimes(2);
   });
 });

@@ -20,7 +20,6 @@ export class EventTrackingService {
       return;
     }
 
-    // TODO: handle hopping between active events
     const communityEvents: CommunityEventDto[] = await this.getCommunityEvents(
       oldState,
       newState,
