@@ -2,17 +2,22 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { GuildMember, VoiceState } from 'discord.js';
 import {
   CommunityEventDto,
+  DiscordParticipant,
   DiscordParticipantDto,
 } from '@solidchain/badge-buddy-common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { ProcessorException } from '../../processors/_exceptions/processor.exception';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class EventTrackingService {
   constructor(
     private readonly logger: Logger,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @InjectModel(DiscordParticipant.name)
+    private discordParticipantModel: Model<DiscordParticipant>,
   ) {}
 
   async handleParticipantTracking(oldState: VoiceState, newState: VoiceState) {
@@ -140,15 +145,38 @@ export class EventTrackingService {
     this.logger.log(
       `User ${guildMember.user.username} has left a voice channel or deafened, guildId: ${guildMember.guild.id}, eventId: ${communityEvent.voiceChannelId}`,
     );
-    const userCache: DiscordParticipantDto | undefined =
+    let userCache: DiscordParticipantDto | undefined =
       await this.cacheManager.get(
         `tracking:events:${communityEvent.eventId}:participants:${guildMember.id}`,
       );
     if (!userCache) {
-      //TODO: maybe pull from db
-      throw new ProcessorException(
-        `User not found in cache, was service down? eventId: ${communityEvent.eventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
+      this.logger.warn(
+        `User not found in cache, fetching from db, eventId: ${communityEvent.eventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
       );
+      const dbUser = await this.discordParticipantModel
+        .findOne({
+          eventId: communityEvent.eventId,
+          userId: guildMember.id,
+        })
+        .exec()
+        .catch((err) => {
+          this.logger.error(err);
+          throw new ProcessorException(
+            `Failed to fetch user from db, eventId: ${communityEvent.eventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
+          );
+        });
+      if (!dbUser) {
+        throw new ProcessorException(
+          `User not found in db, eventId: ${communityEvent.eventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
+        );
+      }
+      userCache = new DiscordParticipantDto();
+      userCache.eventId = dbUser._id;
+      userCache.durationInMinutes = dbUser.durationInMinutes;
+      userCache.startDate = dbUser.startDate;
+      userCache.userTag = dbUser.userTag;
+      userCache.userId = dbUser.userId;
+      userCache.endDate = dbUser.endDate;
     }
     const endDate = new Date();
     const durationInMinutes =
