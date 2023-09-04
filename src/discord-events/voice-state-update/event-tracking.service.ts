@@ -16,50 +16,121 @@ export class EventTrackingService {
   ) {}
 
   async handleParticipantTracking(oldState: VoiceState, newState: VoiceState) {
-    const communityEvent: CommunityEventDto | null =
-      (await this.getActiveEventForVoiceChannel(newState.channelId)) ??
-      (await this.getActiveEventForVoiceChannel(oldState.channelId));
-
-    if (!communityEvent) {
+    if (this.conditionsForTrackingNotBeenMet(oldState, newState)) {
       return;
     }
 
-    if (
-      this.hasUserJoinedVoiceChannel(oldState, newState) ||
-      this.hasUserUnDeafened(oldState, newState) ||
-      this.hasUserHoppedIntoVoiceChannel(
-        oldState,
-        newState,
-        communityEvent.voiceChannelId,
-      )
-    ) {
-      const guildMember = newState.member as GuildMember;
-      const userCache: DiscordParticipantDto | undefined =
-        await this.cacheManager.get(
-          `tracking:events:${communityEvent.eventId}:participants:${guildMember.id}`,
-        );
-      if (!userCache) {
-        return this.handleUserJoinedVoiceChannel(communityEvent, guildMember);
-      }
-      return this.handleUserRejoinedVoiceChannel(
-        communityEvent,
-        guildMember,
-        userCache,
-      );
-    }
+    const communityEvents: CommunityEventDto[] = await this.getCommunityEvents(
+      oldState,
+      newState,
+    );
 
-    if (
-      this.hasUserDeafened(oldState, newState) ||
-      this.hasUserLeftVoiceChannel(oldState, newState) ||
-      this.hasUserHoppedOutOfVoiceChannel(
-        oldState,
-        newState,
-        communityEvent.voiceChannelId,
-      )
-    ) {
-      const guildMember = newState.member as GuildMember;
-      return this.handleUserLeftVoiceChannel(communityEvent, guildMember);
+    for (const communityEvent of communityEvents) {
+      if (
+        this.conditionsForTrackingNotBeenMetForCommunityEvent(
+          communityEvent,
+          oldState,
+          newState,
+        )
+      ) {
+        continue;
+      }
+
+      if (
+        this.hasUserJoinedVoiceChannel(oldState, newState) ||
+        this.hasUserUnDeafened(oldState, newState) ||
+        this.hasUserHoppedIntoVoiceChannel(
+          oldState,
+          newState,
+          communityEvent.voiceChannelId,
+        )
+      ) {
+        const guildMember = newState.member as GuildMember;
+        const userCache: DiscordParticipantDto | undefined =
+          await this.cacheManager.get(
+            `tracking:events:${communityEvent.eventId.toString()}:participants:${guildMember.id.toString()}`,
+          );
+        if (!userCache) {
+          await this.handleUserJoinedVoiceChannel(communityEvent, guildMember);
+          continue;
+        }
+        await this.handleUserRejoinedVoiceChannel(
+          communityEvent,
+          guildMember,
+          userCache,
+        );
+        continue;
+      }
+
+      if (
+        this.hasUserDeafened(oldState, newState) ||
+        this.hasUserLeftVoiceChannel(oldState, newState) ||
+        this.hasUserHoppedOutOfVoiceChannel(
+          oldState,
+          newState,
+          communityEvent.voiceChannelId,
+        )
+      ) {
+        const guildMember = newState.member as GuildMember;
+        await this.handleUserLeftVoiceChannel(communityEvent, guildMember);
+      }
     }
+  }
+
+  private getCommunityEvents = async (
+    oldState: VoiceState,
+    newState: VoiceState,
+  ): Promise<CommunityEventDto[]> => {
+    const results = [];
+    let prevEvent;
+    let newEvent;
+    if (!oldState.channelId) {
+      newEvent = await this.getActiveEventForVoiceChannel(newState.channelId);
+    } else if (!newState.channelId) {
+      prevEvent = await this.getActiveEventForVoiceChannel(oldState.channelId);
+    } else if (newState.channelId == oldState.channelId) {
+      newEvent = await this.getActiveEventForVoiceChannel(newState.channelId);
+    } else {
+      prevEvent = await this.getActiveEventForVoiceChannel(oldState.channelId);
+      newEvent = await this.getActiveEventForVoiceChannel(newState.channelId);
+    }
+    newEvent ? results.push(newEvent) : null;
+    prevEvent ? results.push(prevEvent) : null;
+    return results;
+  };
+
+  /**
+   * Conditions for tracking not been met
+   *
+   * If the user has not changed voice channels or deafened
+   * @param oldState
+   * @param newState
+   * @private
+   */
+  private conditionsForTrackingNotBeenMet(
+    oldState: VoiceState,
+    newState: VoiceState,
+  ): boolean {
+    if (
+      oldState.channelId === newState.channelId &&
+      newState.deaf === oldState.deaf
+    ) {
+      return true;
+    } else if (newState.deaf == true && oldState.deaf == true) {
+      return true;
+    }
+    return false;
+  }
+
+  private conditionsForTrackingNotBeenMetForCommunityEvent(
+    communityEvent: CommunityEventDto,
+    oldState: VoiceState,
+    newState: VoiceState,
+  ): boolean {
+    return (
+      communityEvent.voiceChannelId !== oldState.channelId &&
+      communityEvent.voiceChannelId !== newState.channelId
+    );
   }
 
   private async handleUserLeftVoiceChannel(
@@ -177,7 +248,11 @@ export class EventTrackingService {
     oldState: VoiceState,
     newState: VoiceState,
   ): boolean {
-    return newState.channelId !== oldState.channelId && !oldState.channelId;
+    return (
+      newState.channelId !== oldState.channelId &&
+      !oldState.channelId &&
+      !newState.deaf
+    );
   }
 
   private hasUserHoppedIntoVoiceChannel(
