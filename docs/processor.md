@@ -6,4 +6,7 @@ This document describes some information regarding the processor queue.
 1. events
 
 ### Events
-ID: processor_/events/:id/participants
+IDs:
+- tracking:events:{id}:participants:{id}
+- tracking:events:{id}:participants:keys
+- tracking:events:active:voiceChannelId:{id}
