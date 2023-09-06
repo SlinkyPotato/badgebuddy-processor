@@ -65,7 +65,6 @@ export class EventsProcessorService {
     );
 
     const discordParticipants: DiscordParticipant[] = [];
-    const participantsSet = new Set<string>();
     for (const member of voiceChannel.members.values()) {
       if (member.voice.deaf) {
         this.logger.warn(
@@ -91,8 +90,6 @@ export class EventsProcessorService {
       cacheUser.startDate = discordParticipant.startDate.toISOString();
       cacheUser.durationInMinutes = discordParticipant.durationInMinutes;
 
-      participantsSet.add(member.id.toString());
-
       await this.cacheManager
         .set(
           `tracking:events:${eventId}:participants:${member.id}`,
@@ -105,6 +102,11 @@ export class EventsProcessorService {
         });
 
       discordParticipants.push(discordParticipant);
+    }
+
+    if (discordParticipants.length <= 0) {
+      this.logger.warn(`No participants found for eventId: ${eventId}`);
+      return;
     }
 
     await this.discordParticipantModel

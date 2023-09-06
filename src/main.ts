@@ -13,7 +13,6 @@ async function bootstrap() {
     logger: pinoLoggerService,
   });
 
-  // TODO: add shutdown hook
   context.enableShutdownHooks();
 }
 

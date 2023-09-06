@@ -141,7 +141,7 @@ describe('VoiceStateUpdateService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should ignore non-active event', async () => {
+  it('should pull null for non-active event', async () => {
     mockNewVoiceState.channelId = '111';
     const spy = jest.spyOn(mockCacheManager, 'get');
     spy.mockReturnValue(null);
