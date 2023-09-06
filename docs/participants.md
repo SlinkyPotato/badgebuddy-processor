@@ -4,17 +4,6 @@ This document describes the logic for tracking participants in a voice channel e
 stored in cache. The cache is cleared when the event is stopped. Later the badges are distributed to eligible 
 participants.
 
-## Redis Indexes
-1. active events - GET /events/active?voiceChannelId= (endpoint)
-2. active event in cache - tracking:events:active:voiceChannelId:{id}
-    - this is used during ongoing event to check if event is active for voice channel
-    - if found, then event is active
-    - if not found, then do nothing (caching should only be used during discord events)
-    - voiceChannelId is unique for each event 
-3. participants in event - tracking:events:{id}:participants:{id} (processor only)
-4. tracking:events:{id}:participants:keys (processor only)
-    - this is used to retrieve all participants userIds for an event
-
 ### Notes
 - post start marks event as active
 - put stop marks event as inactive
@@ -98,4 +87,6 @@ A user entry in db MUST exist if they enter the voice channel during an active e
 
 # Open questions
 1. What happens if processor is down, event is marked as active, and +5 minutes has passed?
+    - there shouldn't be any change in data
+    - optimally transfer cache into db
 2. Can the app execute graceful shutdown scenario?

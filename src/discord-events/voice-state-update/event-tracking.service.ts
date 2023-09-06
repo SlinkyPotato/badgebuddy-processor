@@ -143,7 +143,7 @@ export class EventTrackingService {
     guildMember: GuildMember,
   ) {
     this.logger.log(
-      `User ${guildMember.user.username} has left a voice channel or deafened, guildId: ${guildMember.guild.id}, eventId: ${communityEvent.voiceChannelId}`,
+      `User ${guildMember.user.username} has left a voice channel or deafened, guildId: ${guildMember.guild.id}, eventId: ${communityEvent.eventId}`,
     );
     let userCache: DiscordParticipantDto | undefined =
       await this.cacheManager.get(
@@ -171,23 +171,25 @@ export class EventTrackingService {
         );
       }
       userCache = new DiscordParticipantDto();
-      userCache.eventId = dbUser._id;
+      userCache.eventId = communityEvent.eventId;
       userCache.durationInMinutes = dbUser.durationInMinutes;
-      userCache.startDate = dbUser.startDate;
+      userCache.startDate = dbUser.startDate.toISOString();
       userCache.userTag = dbUser.userTag;
       userCache.userId = dbUser.userId;
-      userCache.endDate = dbUser.endDate;
+      userCache.endDate = dbUser.endDate?.toISOString();
     }
+    const startDate = new Date(userCache.startDate);
     const endDate = new Date();
     const durationInMinutes =
-      (endDate.getTime() - userCache.startDate.getTime()) / 1000 / 60;
-    userCache.endDate = endDate;
+      (endDate.getTime() - startDate.getTime()) / 1000 / 60;
+    userCache.endDate = endDate.toISOString();
     userCache.durationInMinutes += durationInMinutes;
     await this.cacheManager.set(
       `tracking:events:${communityEvent.eventId}:participants:${guildMember.id}`,
       userCache,
+      0,
     );
-    this.logger.log(
+    this.logger.verbose(
       `User stored in cache, eventId: ${communityEvent.eventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
     );
   }
@@ -204,23 +206,14 @@ export class EventTrackingService {
     userCache.eventId = communityEvent.eventId;
     userCache.userId = guildMember.id;
     userCache.userTag = guildMember.user.tag;
-    userCache.startDate = startDate;
+    userCache.startDate = startDate.toISOString();
     userCache.durationInMinutes = 0.0;
-    userCache.startDate = startDate;
     await this.cacheManager.set(
       `tracking:events:${communityEvent.eventId}:participants:${guildMember.id}`,
       userCache,
+      0,
     );
-    const keys: string[] | null | undefined = await this.cacheManager.get(
-      `tracking:events:${communityEvent.eventId}:participants:keys`,
-    );
-    if (keys) {
-      await this.cacheManager.set(
-        `tracking:events:${communityEvent.eventId}:participants:keys`,
-        [...keys, guildMember.id],
-      );
-    }
-    this.logger.log(
+    this.logger.verbose(
       `User stored in cache, eventId: ${communityEvent.eventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
     );
   }
@@ -233,14 +226,15 @@ export class EventTrackingService {
     this.logger.log(
       `User ${guildMember.user.username} has rejoined a voice channel/un-deafened, guildId: ${guildMember.guild.id}, eventId: ${communityEvent.eventId}`,
     );
-    userCache.startDate = new Date();
+    userCache.startDate = new Date().toISOString();
     delete userCache.endDate;
     await this.cacheManager.set(
       `tracking:events:${communityEvent.eventId}:participants:${guildMember.id}`,
       userCache,
+      0,
     );
-    this.logger.log(
-      `User rejoined and stored in cache, eventId: ${communityEvent.eventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
+    this.logger.verbose(
+      `User stored in cache, eventId: ${communityEvent.eventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
     );
   }
 

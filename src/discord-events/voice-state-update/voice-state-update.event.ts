@@ -17,6 +17,8 @@ export class VoiceStateUpdateEvent {
   ): Promise<void> {
     this.eventTrackingService
       .handleParticipantTracking(oldState, newState)
-      .catch(this.logger.error);
+      .catch((err) => {
+        this.logger.error(err);
+      });
   }
 }

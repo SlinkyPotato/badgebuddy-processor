@@ -63,30 +63,30 @@ describe('VoiceStateUpdateService', () => {
   });
 
   const getMockCommunityEvent = (): CommunityEventDto => ({
-    eventId: new mongoose.Types.ObjectId('64e90a7a0eed9208a77e9b15'),
+    eventId: '64e90a7a0eed9208a77e9b15',
     eventName: 'Test event',
     organizerId: '159014522542096384',
     voiceChannelId: '850840267082563600',
     guildId: '850840267082563596',
-    startDate: new Date(),
-    endDate: new Date(new Date().getTime() + 1000 * 60 * 60),
+    startDate: new Date().toISOString(),
+    endDate: new Date(new Date().getTime() + 1000 * 60 * 60).toISOString(),
   });
 
   const getAnotherMockCommunityEvent = (): CommunityEventDto => ({
-    eventId: new mongoose.Types.ObjectId('74e90a7a0eed9208a87e9b15'),
+    eventId: '74e90a7a0eed9208a87e9b15',
     eventName: 'Another event',
     organizerId: '1592343244',
     voiceChannelId: '23423435235',
     guildId: '324244353645',
-    startDate: new Date(),
-    endDate: new Date(new Date().getTime() + 1000 * 60 * 60),
+    startDate: new Date().toISOString(),
+    endDate: new Date(new Date().getTime() + 1000 * 60 * 60).toISOString(),
   });
 
   const getMockUserCache = (): DiscordParticipantDto => ({
-    eventId: new mongoose.Types.ObjectId('64e90a7a0eed9208a77e9b15'),
+    eventId: '64e90a7a0eed9208a77e9b15',
     userId: '123',
     userTag: 'test',
-    startDate: new Date(),
+    startDate: new Date().toISOString(),
     durationInMinutes: 0,
   });
 
@@ -263,12 +263,12 @@ describe('VoiceStateUpdateService', () => {
       mockOldVoiceState as VoiceState,
       mockNewVoiceState as VoiceState,
     );
-    expect(spy).toBeCalledTimes(3);
+    expect(spy).toBeCalledTimes(2);
     await expect(spy.mock.results[0].value).resolves.toEqual(
       mockCommunityEvent,
     );
     await expect(spy.mock.results[1].value).resolves.toEqual(null);
-    expect(setCacheSpy).toHaveBeenCalledTimes(2);
+    expect(setCacheSpy).toHaveBeenCalledTimes(1);
   });
 
   it('should track user has re-joined voice channel', async () => {
@@ -500,7 +500,7 @@ describe('VoiceStateUpdateService', () => {
       mockOldVoiceState as VoiceState,
       mockNewVoiceState as VoiceState,
     );
-    expect(spy).toBeCalledTimes(5);
+    expect(spy).toBeCalledTimes(4);
     await expect(spy.mock.results[0].value).resolves.toEqual(
       mockCommunityEvent,
     );
@@ -508,8 +508,7 @@ describe('VoiceStateUpdateService', () => {
       mockAnotherCommunityEvent,
     );
     await expect(spy.mock.results[2].value).resolves.toEqual(null);
-    await expect(spy.mock.results[3].value).resolves.toEqual(null);
-    await expect(spy.mock.results[4].value).resolves.toEqual(mockUserCache);
+    await expect(spy.mock.results[3].value).resolves.toEqual(mockUserCache);
     expect(setCacheSpy).toHaveBeenCalledTimes(2);
   });
 });
