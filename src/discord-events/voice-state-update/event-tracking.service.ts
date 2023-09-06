@@ -182,7 +182,7 @@ export class EventTrackingService {
     const endDate = new Date();
     const durationInMinutes =
       (endDate.getTime() - startDate.getTime()) / 1000 / 60;
-    userCache.endDate = endDate.toString();
+    userCache.endDate = endDate.toISOString();
     userCache.durationInMinutes += durationInMinutes;
     await this.cacheManager.set(
       `tracking:events:${communityEvent.eventId}:participants:${guildMember.id}`,
