@@ -75,18 +75,18 @@ A user entry in db MUST exist if they enter the voice channel during an active e
     - capture startDate
     - duration of zero is captured
     - insert into cache
+- redis loads data from disk by default
 
 ### on redis server shutdown (graceful)
 - store all users from cache into db
   - get all active events from db
   - pull all users from cache for each active event
   - store all users from cache into db
-
-### on processor failure
-- try to store all users from cache into db
+- redis backs up data to disk by default
 
 # Open questions
 1. What happens if processor is down, event is marked as active, and +5 minutes has passed?
     - there shouldn't be any change in data
     - optimally transfer cache into db
+    - redis backs up data to disk by default
 2. Can the app execute graceful shutdown scenario?
