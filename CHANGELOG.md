@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-8](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-7...v0.0.11-8) (2023-09-06)
+
+
+### Refactor
+
+* use proper redis cache class ([155a5db](https://github.com/solidchain-tech/badge-buddy-processor/commit/155a5db6b1149506b140215b6aa98684dfa23a03))
+
 ### [0.0.11-7](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-6...v0.0.11-7) (2023-09-04)
 
 
