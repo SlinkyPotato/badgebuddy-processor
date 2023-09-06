@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-9](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-8...v0.0.11-9) (2023-09-06)
+
+
+### Tests
+
+* add full test coverage for EventsProcessorService ([1ad67df](https://github.com/solidchain-tech/badge-buddy-processor/commit/1ad67dfcf87fb5167b6a893cc128b03577b200e1))
+
 ### [0.0.11-8](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-7...v0.0.11-8) (2023-09-06)
 
 
