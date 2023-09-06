@@ -18,7 +18,7 @@ import { ProcessorException } from '../_exceptions/processor.exception';
 @Injectable()
 @Processor('events')
 export class EventsProcessorService {
-  private static CACHE_TTL = 1000 * 60 * 60 * 24 * 2;
+  private static CACHE_TTL = 0;
 
   constructor(
     private readonly logger: Logger,
@@ -85,10 +85,10 @@ export class EventsProcessorService {
       discordParticipant.durationInMinutes = 0.0;
 
       const cacheUser = new DiscordParticipantDto();
-      cacheUser.eventId = discordParticipant.communityEvent._id;
+      cacheUser.eventId = discordParticipant.communityEvent.toString();
       cacheUser.userId = discordParticipant.userId;
       cacheUser.userTag = discordParticipant.userTag;
-      cacheUser.startDate = discordParticipant.startDate;
+      cacheUser.startDate = discordParticipant.startDate.toISOString();
       cacheUser.durationInMinutes = discordParticipant.durationInMinutes;
 
       participantsSet.add(member.id.toString());
@@ -106,17 +106,6 @@ export class EventsProcessorService {
 
       discordParticipants.push(discordParticipant);
     }
-
-    await this.cacheManager
-      .set(
-        `tracking:events:${eventId}:participants:keys`,
-        Array.from(participantsSet),
-        EventsProcessorService.CACHE_TTL,
-      )
-      .catch((err) => {
-        this.logger.error(err);
-        throw new ProcessorException('Failed to cache participants keys');
-      });
 
     await this.discordParticipantModel
       .insertMany(discordParticipants, { ordered: false })
@@ -144,11 +133,11 @@ export class EventsProcessorService {
 
     const communityEvent = await this.getCommunityEvent(eventId);
 
-    const participantKeys = await this.cacheManager.get<string[]>(
-      `tracking:events:${eventId}:participants:keys`,
+    const participantKeys = await this.cacheManager.store.keys(
+      `tracking:events:${eventId}:participants:*`,
     );
 
-    if (!participantKeys) {
+    if (!participantKeys || participantKeys.length === 0) {
       throw new ProcessorException(
         `Participants keys not found for eventId: ${eventId}, guildId: ${communityEvent.guildId}, organizerId: ${communityEvent.organizerId}`,
       );
@@ -159,35 +148,35 @@ export class EventsProcessorService {
     const bulkWriteOps = [];
 
     for (const participantKey of participantKeys) {
-      const participant: DiscordParticipant | undefined =
-        await this.cacheManager.get<DiscordParticipant>(
-          `tracking:events:${eventId}:participants:${participantKey}`,
-        );
+      const participant: DiscordParticipantDto | undefined =
+        await this.cacheManager.get(participantKey);
       if (!participant) {
         throw new ProcessorException(
           `Participant not found for eventId: ${eventId}, guildId: ${communityEvent.guildId}, organizerId: ${communityEvent.organizerId}, participantKey: ${participantKey}`,
         );
       }
-      participant.communityEvent = new Types.ObjectId(
-        participant.communityEvent.toString(),
+      const startDate = new Date(participant.startDate);
+      const discordParticipant: DiscordParticipant = new DiscordParticipant();
+      discordParticipant.communityEvent = new Types.ObjectId(
+        participant.eventId,
       );
-      participant.startDate = new Date(participant.startDate);
-      participant.endDate = endDate;
-      participant.durationInMinutes =
-        (endDate.getTime() - participant.startDate.getTime()) / 1000 / 60;
+      discordParticipant.userId = participant.userId;
+      discordParticipant.userTag = participant.userTag;
+      discordParticipant.startDate = startDate;
+      discordParticipant.endDate = endDate;
+      discordParticipant.durationInMinutes =
+        (endDate.getTime() - startDate.getTime()) / 1000 / 60;
       bulkWriteOps.push({
         updateOne: {
           filter: {
-            communityEvent: participant.communityEvent,
+            communityEvent: discordParticipant.communityEvent,
             userId: participant.userId,
           },
-          update: participant,
+          update: discordParticipant,
           upsert: true,
         },
       });
-      await this.cacheManager.del(
-        `tracking:events:${eventId}:participants:${participantKey}`,
-      );
+      await this.cacheManager.del(participantKey);
     }
     await this.discordParticipantModel
       .bulkWrite(bulkWriteOps, { ordered: false })
@@ -198,7 +187,6 @@ export class EventsProcessorService {
         );
       });
 
-    await this.cacheManager.del(`tracking:events:${eventId}:participants:keys`);
     this.logger.log(
       `Processed done for eventId: ${eventId}, guildId: ${communityEvent.guildId}, organizerId: ${communityEvent.organizerId}, voiceChannelId: ${communityEvent.voiceChannelId}`,
       'EventsProcessor.end',
