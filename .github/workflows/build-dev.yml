@@ -27,7 +27,8 @@ jobs:
       - name: Retrieve package.json
         id: package
         run: echo NODE_VERSION=$(node -e "console.log(require('./package.json').engines.node)") >> "$GITHUB_OUTPUT"
-      - run: pnpm install --frozen-lockfile --prod
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:cov
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub
@@ -47,6 +48,6 @@ jobs:
       - run: git config user.name "github-action[bot]"
       - run: git config user.email "<>"
       - run: pnpm standard-version --prerelease --dry-run > changes.md | exit 0
-      - run: node -e "require('@solidchain/badge-buddy-common')['parseChangesFile']();"
+      - run: node -e "require('@solidchain/badge-buddy-common')['parseReleaseUtil']();"
       - run: gh pr edit -F release.md | exit 0
       - run: gh pr create --base release/dev --title "deploy dev -> release/dev" -F release.md | exit 0

@@ -33,8 +33,8 @@ dependencies:
     specifier: ^10.0.1
     version: 10.0.1(@nestjs/common@10.2.4)(@nestjs/core@10.2.4)(mongoose@7.5.0)(reflect-metadata@0.1.13)(rxjs@7.8.1)
   '@solidchain/badge-buddy-common':
-    specifier: 0.1.3-16
-    version: 0.1.3-16(@jest/globals@29.6.4)(@nestjs/bull@10.0.1)(@nestjs/cache-manager@2.1.0)(@nestjs/common@10.2.4)(@nestjs/config@3.0.1)(@nestjs/core@10.2.4)(@nestjs/mongoose@10.0.1)(bull@4.11.3)(cache-manager-redis-yet@4.1.2)(cache-manager@5.2.3)(class-transformer@0.5.1)(class-validator@0.14.0)(joi@17.10.1)(mongoose@7.5.0)(redis@4.6.8)(reflect-metadata@0.1.13)(rxjs@7.8.1)(standard-version@9.5.0)
+    specifier: ^1.0.1
+    version: 1.0.1(@jest/globals@29.6.4)(@nestjs/bull@10.0.1)(@nestjs/cache-manager@2.1.0)(@nestjs/common@10.2.4)(@nestjs/config@3.0.1)(@nestjs/core@10.2.4)(@nestjs/mongoose@10.0.1)(bull@4.11.3)(cache-manager-redis-yet@4.1.2)(cache-manager@5.2.3)(class-transformer@0.5.1)(class-validator@0.14.0)(joi@17.10.1)(mongoose@7.5.0)(redis@4.6.8)(reflect-metadata@0.1.13)(rxjs@7.8.1)(standard-version@9.5.0)
   axios:
     specifier: ^1.5.0
     version: 1.5.0
@@ -1602,9 +1602,9 @@ packages:
     dependencies:
       '@sinonjs/commons': 3.0.0
 
-  /@solidchain/badge-buddy-common@0.1.3-16(@jest/globals@29.6.4)(@nestjs/bull@10.0.1)(@nestjs/cache-manager@2.1.0)(@nestjs/common@10.2.4)(@nestjs/config@3.0.1)(@nestjs/core@10.2.4)(@nestjs/mongoose@10.0.1)(bull@4.11.3)(cache-manager-redis-yet@4.1.2)(cache-manager@5.2.3)(class-transformer@0.5.1)(class-validator@0.14.0)(joi@17.10.1)(mongoose@7.5.0)(redis@4.6.8)(reflect-metadata@0.1.13)(rxjs@7.8.1)(standard-version@9.5.0):
-    resolution: {integrity: sha512-zZ897QFXBDqHd0z+y47ZLUh+GBQcfzfcDYGLfCa69iC8L6ZMIfcULyaudOPO72ZSpPkkbNqYwhQ6J4Tj2a30Lw==}
-    engines: {node: 20.5.1, pnpm: 8.7.0}
+  /@solidchain/badge-buddy-common@1.0.1(@jest/globals@29.6.4)(@nestjs/bull@10.0.1)(@nestjs/cache-manager@2.1.0)(@nestjs/common@10.2.4)(@nestjs/config@3.0.1)(@nestjs/core@10.2.4)(@nestjs/mongoose@10.0.1)(bull@4.11.3)(cache-manager-redis-yet@4.1.2)(cache-manager@5.2.3)(class-transformer@0.5.1)(class-validator@0.14.0)(joi@17.10.1)(mongoose@7.5.0)(redis@4.6.8)(reflect-metadata@0.1.13)(rxjs@7.8.1)(standard-version@9.5.0):
+    resolution: {integrity: sha512-wQgislNeOcPZfidwXDkcn94RLoFP4K+xMGLAsDEYxYpJo6V5hLJqZkfISQSrddNB5dXq5MrYWU/rzClZdc3zBg==}
+    engines: {node: 20.5.1, pnpm: 8.7.4}
     peerDependencies:
       '@jest/globals': ^29.6.4
       '@nestjs/bull': ^10.0.1

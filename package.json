@@ -7,10 +7,10 @@
   "license": "MIT",
   "engines": {
     "node": "20.5.1",
-    "pnpm": "8.7.0"
+    "pnpm": "8.7.4"
   },
   "engineStrict": true,
-  "packageManager": "pnpm@8.7.0",
+  "packageManager": "pnpm@8.7.4",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -41,7 +41,7 @@
     "@nestjs/config": "^3.0.1",
     "@nestjs/core": "^10.2.4",
     "@nestjs/mongoose": "^10.0.1",
-    "@solidchain/badge-buddy-common": "0.1.3-16",
+    "@solidchain/badge-buddy-common": "^1.0.1",
     "axios": "^1.5.0",
     "bull": "^4.11.3",
     "cache-manager": "^5.2.3",
