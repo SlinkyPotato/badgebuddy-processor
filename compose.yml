@@ -1,6 +1,19 @@
 name: badge-buddy-processor
 services:
+  redis_local:
+    container_name: redis_local
+    image: redis:latest
+    restart: always
+    ports:
+      - 6379:6379
+    networks:
+      - local_server
+    profiles:
+      - local
+
   badge_buddy_processor_local:
+    depends_on:
+      - redis_local
     container_name: badge_buddy_processor_local
     build:
       context: .
@@ -8,6 +21,8 @@ services:
         NODE_VERSION: ${NODE_VERSION}
     environment:
       DOTENV_KEY: ${DOTENV_KEY}
+    env_file:
+      - .env
     networks:
       - local_server
     profiles:

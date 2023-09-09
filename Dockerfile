@@ -1,7 +1,7 @@
 ARG NODE_VERSION
 
 FROM node:${NODE_VERSION}-alpine AS base
-LABEL description="Node processor for Badge Buddy"
+LABEL description="Node processor for badge-buddy-processor"
 
 RUN corepack enable
 
