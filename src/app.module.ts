@@ -6,23 +6,21 @@ import { GatewayIntentBits, Partials } from 'discord.js';
 import { DiscordModule, DiscordModuleOption } from '@discord-nestjs/core';
 import { ProcessorsModule } from './processors/processors.module';
 import { DiscordEventsModule } from './discord-events/discord-events.module';
-import {
-  configureBull,
-  configureCache,
-  EnvConfig,
-  validationSchema,
-} from '@solidchain/badge-buddy-common';
 import { BullModule } from '@nestjs/bull';
 import { CacheModule } from '@nestjs/cache-manager';
 import { RedisClientOptions } from 'redis';
+import {
+  configureBullOptions,
+  configureCacheOptions,
+  joiValidationConfig,
+} from '@solidchain/badge-buddy-common';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       ignoreEnvFile: true,
       cache: true,
-      load: [EnvConfig],
-      validationSchema: validationSchema(),
+      validationSchema: joiValidationConfig,
       validationOptions: {},
     }),
     CacheModule.registerAsync<RedisClientOptions>({
@@ -30,13 +28,13 @@ import { RedisClientOptions } from 'redis';
       inject: [ConfigService],
       isGlobal: true,
       useFactory: (configService: ConfigService) =>
-        configureCache(configService),
+        configureCacheOptions(configService),
     }),
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) =>
-        configureBull(configService),
+        configureBullOptions(configService),
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
