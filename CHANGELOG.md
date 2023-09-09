@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-11](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-10...v0.0.11-11) (2023-09-09)
+
+
+### Tests
+
+* add test:cov to staging and production ([e1030da](https://github.com/solidchain-tech/badge-buddy-processor/commit/e1030da0a07cf1a42bfeec13df4e5a14ddb5a55e))
+
 ### [0.0.11-10](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-9...v0.0.11-10) (2023-09-09)
 
 
