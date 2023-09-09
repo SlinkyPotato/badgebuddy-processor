@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-10](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-9...v0.0.11-10) (2023-09-09)
+
+
+### Performance
+
+* upgrade common -> 1.0.1 ([54745fc](https://github.com/solidchain-tech/badge-buddy-processor/commit/54745fcfa8e10a6bd4eae5ba224c01c0bdf02f33))
+
+
+### Refactor
+
+* update workflow to use parseReleaseUtil() ([7fded73](https://github.com/solidchain-tech/badge-buddy-processor/commit/7fded7341cd890ed3faf60d0b855f9fed25edc55))
+
 ### [0.0.11-9](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-8...v0.0.11-9) (2023-09-06)
 
 
