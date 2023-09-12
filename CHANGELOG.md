@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-13](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-12...v0.0.11-13) (2023-09-12)
+
+
+### Bug Fixes
+
+* add jest.config.ts to ts exclude ([d0672f3](https://github.com/solidchain-tech/badge-buddy-processor/commit/d0672f3517bc885c9660a4efd1d4861d4b662a5f))
+
+
+### Refactor
+
+* remove unused imports ([db27147](https://github.com/solidchain-tech/badge-buddy-processor/commit/db27147a4b0f6a193090ca0618e923723617bd35))
+
 ### [0.0.11-12](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-11...v0.0.11-12) (2023-09-09)
 
 
