@@ -48,7 +48,7 @@
     "@nestjs/config": "^3.0.1",
     "@nestjs/core": "^10.2.4",
     "@nestjs/mongoose": "^10.0.1",
-    "@solidchain/badge-buddy-common": "^1.1.0-0",
+    "@solidchain/badge-buddy-common": "^1.1.0-1",
     "axios": "^1.5.0",
     "bull": "^4.11.3",
     "cache-manager": "^5.2.3",
