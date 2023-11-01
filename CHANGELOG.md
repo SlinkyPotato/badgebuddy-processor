@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-14](https://github.com/SlinkyPotato/badge-buddy-processor/compare/v0.0.11-13...v0.0.11-14) (2023-11-01)
+
+
+### Bug Fixes
+
+* remove turbo ([ac2036a](https://github.com/SlinkyPotato/badge-buddy-processor/commit/ac2036a97bde010a8a6ddea55eca9794c1fd3406))
+
+
+### Refactor
+
+* add scripts and move configs ([b810eb3](https://github.com/SlinkyPotato/badge-buddy-processor/commit/b810eb3cbe3ce0f0db6cbcd203346f3d04bb425b))
+* import typeorm common module ([63ddd6c](https://github.com/SlinkyPotato/badge-buddy-processor/commit/63ddd6c4ef63d8e022cde26cf60592f1b73860ad))
+
+
+### Performance
+
+* migrate build system to swc ([e8a74ae](https://github.com/SlinkyPotato/badge-buddy-processor/commit/e8a74ae7dc3e6034ac1e716f36e117e5f7986b6d))
+* remove sourcefiles for prod ([486fe10](https://github.com/SlinkyPotato/badge-buddy-processor/commit/486fe10cacffd0818da005b9874453333f908adb))
+
 ### [0.0.11-13](https://github.com/solidchain-tech/badge-buddy-processor/compare/v0.0.11-12...v0.0.11-13) (2023-09-12)
 
 
