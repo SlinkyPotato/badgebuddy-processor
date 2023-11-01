@@ -12,39 +12,32 @@ import { RedisClientOptions } from 'redis';
 import {
   configureBullOptions,
   configureCacheOptions,
-  joiValidationConfig,
+  CommonConfigModule,
+  CommonTypeOrmModule,
 } from '@solidchain/badge-buddy-common';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      ignoreEnvFile: true,
-      cache: true,
-      validationSchema: joiValidationConfig,
-      validationOptions: {},
-    }),
+    CommonConfigModule.forRoot(),
     CacheModule.registerAsync<RedisClientOptions>({
-      imports: [ConfigModule],
       inject: [ConfigService],
       isGlobal: true,
       useFactory: (configService: ConfigService) =>
         configureCacheOptions(configService),
     }),
     BullModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) =>
         configureBullOptions(configService),
     }),
+    CommonTypeOrmModule.forRootAsync(),
     MongooseModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>('MONGODB_URI'),
       }),
     }),
     DiscordModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (
         configService: ConfigService<{ DISCORD_BOT_TOKEN: string }, true>,
@@ -73,11 +66,11 @@ import {
         failOnLogin: true,
       }),
     }),
-    ConfigModule,
     ProcessorsModule,
     DiscordEventsModule,
   ],
   controllers: [],
   providers: [],
+  exports: [],
 })
 export class AppModule {}
