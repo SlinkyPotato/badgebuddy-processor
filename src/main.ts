@@ -7,7 +7,7 @@ import {
 } from '@solidchain/badge-buddy-common';
 
 async function bootstrap() {
-  const pinoLogger = new CommonPinoLogger('badge-buddy-processor');
+  const pinoLogger = new CommonPinoLogger('processor');
   const pinoLoggerService = new CommonPinoLoggerService(pinoLogger);
   const context = await NestFactory.createApplicationContext(AppModule, {
     logger: pinoLoggerService,
