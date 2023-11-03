@@ -36,7 +36,7 @@
     "publish-docker:production": "node publish.docker.js production latest"
   },
   "dependencies": {
-    "@badgebuddy/common": "1.1.0-9",
+    "@badgebuddy/common": "1.1.0-10",
     "@discord-nestjs/common": "^5.2.9",
     "@discord-nestjs/core": "^5.3.11",
     "@nestjs/axios": "^3.0.1",
