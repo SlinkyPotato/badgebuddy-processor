@@ -5,7 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   DiscordParticipant,
   DiscordParticipantSchema,
-} from '@solidchain/badge-buddy-common';
+} from '@badgebuddy/common';
 
 @Module({
   imports: [

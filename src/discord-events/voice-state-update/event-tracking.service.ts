@@ -4,7 +4,7 @@ import {
   CommunityEventDto,
   DiscordParticipant,
   DiscordParticipantDto,
-} from '@solidchain/badge-buddy-common';
+} from '@badgebuddy/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { ProcessorException } from '../../processors/_exceptions/processor.exception';
