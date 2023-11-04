@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-16](https://github.com/SlinkyPotato/badge-buddy-processor/compare/v0.0.11-15...v0.0.11-16) (2023-11-04)
+
 ### [0.0.11-15](https://github.com/SlinkyPotato/badge-buddy-processor/compare/v0.0.11-14...v0.0.11-15) (2023-11-04)
 
 
