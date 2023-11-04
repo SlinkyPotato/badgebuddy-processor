@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-15](https://github.com/SlinkyPotato/badge-buddy-processor/compare/v0.0.11-14...v0.0.11-15) (2023-11-04)
+
+
+### Bug Fixes
+
+* gh actions ([15494f0](https://github.com/SlinkyPotato/badge-buddy-processor/commit/15494f09585ebd2280701fc349527332511e4e85))
+
+
+### Refactor
+
+* update @badgebuddy/common ([4b8ed4f](https://github.com/SlinkyPotato/badge-buddy-processor/commit/4b8ed4fc8d56eb76192b18b5d3c51484723accd4))
+* update deps and integrate new common ([a1d08ff](https://github.com/SlinkyPotato/badge-buddy-processor/commit/a1d08ffe1e1e907b0b3e5bc5d0a84a75bf85379b))
+
 ### [0.0.11-14](https://github.com/SlinkyPotato/badge-buddy-processor/compare/v0.0.11-13...v0.0.11-14) (2023-11-01)
 
 
