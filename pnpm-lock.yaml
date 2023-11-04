@@ -50,6 +50,12 @@ dependencies:
   cache-manager-redis-yet:
     specifier: ^4.1.2
     version: 4.1.2
+  class-transformer:
+    specifier: ^0.5.1
+    version: 0.5.1
+  class-validator:
+    specifier: ^0.14.0
+    version: 0.14.0
   discord.js:
     specifier: ^14.13.0
     version: 14.13.0
@@ -115,12 +121,6 @@ devDependencies:
   '@typescript-eslint/parser':
     specifier: ^6.9.1
     version: 6.9.1(eslint@8.52.0)(typescript@5.2.2)
-  class-transformer:
-    specifier: ^0.5.1
-    version: 0.5.1
-  class-validator:
-    specifier: ^0.14.0
-    version: 0.14.0
   eslint:
     specifier: ^8.52.0
     version: 8.52.0

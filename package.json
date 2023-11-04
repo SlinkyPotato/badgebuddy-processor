@@ -61,7 +61,9 @@
     "rxjs": "^7.8.1",
     "standard-version": "^9.5.0",
     "typeorm": "^0.3.17",
-    "joi": "^17.11.0"
+    "joi": "^17.11.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
@@ -74,8 +76,6 @@
     "@types/supertest": "^2.0.15",
     "@typescript-eslint/eslint-plugin": "^6.9.1",
     "@typescript-eslint/parser": "^6.9.1",
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.0",
     "eslint": "^8.52.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
