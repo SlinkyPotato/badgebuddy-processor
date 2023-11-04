@@ -48,6 +48,6 @@ jobs:
       - run: git config user.name "github-action[bot]"
       - run: git config user.email "<>"
       - run: pnpm standard-version --prerelease --dry-run > changes.md | exit 0
-      - run: node -e "require('@solidchain/badge-buddy-common')['parseReleaseUtil']();"
+      - run: node -e "require('@badgebuddy/common')['parseReleaseUtil']();"
       - run: gh pr edit -F release.md | exit 0
       - run: gh pr create --base release/dev --title "deploy dev -> release/dev" -F release.md | exit 0
