@@ -6,7 +6,7 @@ import {
   CommunityEventDocument,
   DiscordParticipant,
   DiscordParticipantDto,
-} from '@solidchain/badge-buddy-common';
+} from '@badgebuddy/common';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';

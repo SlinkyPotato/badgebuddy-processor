@@ -7,8 +7,10 @@ import {
   DiscordParticipant,
   DiscordParticipantSchema,
   CommunityEventSchema,
-} from '@solidchain/badge-buddy-common';
+} from '@badgebuddy/common';
 import { BullModule } from '@nestjs/bull';
+import { Cache } from 'cache-manager';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [

@@ -15,7 +15,7 @@ import {
   CommunityEventDto,
   DiscordParticipant,
   DiscordParticipantDto,
-} from '@solidchain/badge-buddy-common';
+} from '@badgebuddy/common';
 import * as mongoose from 'mongoose';
 import { getModelToken } from '@nestjs/mongoose';
 import { MongooseError } from 'mongoose';
