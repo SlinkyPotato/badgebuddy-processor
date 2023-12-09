@@ -7,10 +7,10 @@
   "license": "MIT",
   "engines": {
     "node": "20.9.0",
-    "pnpm": "8.10.2"
+    "pnpm": "8.10.5"
   },
   "engineStrict": true,
-  "packageManager": "pnpm@8.10.2",
+  "packageManager": "pnpm@8.10.5",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -33,10 +33,11 @@
     "env:open": "dotenv-vault open",
     "env:pull": "dotenv-vault pull",
     "publish-docker:staging": "node publish.docker.js staging latest-beta",
-    "publish-docker:production": "node publish.docker.js production latest"
+    "publish-docker:production": "node publish.docker.js production latest",
+    "sync": "git fetch && git pull && dotenv-vault pull"
   },
   "dependencies": {
-    "@badgebuddy/common": "1.1.0-10",
+    "@badgebuddy/common": "2.0.0-12",
     "@discord-nestjs/common": "^5.2.9",
     "@discord-nestjs/core": "^5.3.11",
     "@nestjs/axios": "^3.0.1",
@@ -51,19 +52,19 @@
     "bull": "^4.11.4",
     "cache-manager": "^5.2.4",
     "cache-manager-redis-yet": "^4.1.2",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
     "discord.js": "^14.13.0",
     "dotenv": "^16.3.1",
     "dotenv-vault": "^1.25.0",
+    "joi": "^17.11.0",
     "mongoose": "^7.6.4",
     "mysql2": "^3.6.3",
     "redis": "^4.6.10",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "standard-version": "^9.5.0",
-    "typeorm": "^0.3.17",
-    "joi": "^17.11.0",
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.0"
+    "typeorm": "^0.3.17"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
