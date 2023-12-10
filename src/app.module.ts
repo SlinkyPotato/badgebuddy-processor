@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
-import { ProcessorsModule } from './processors/processors.module';
-import { DiscordEventsModule } from './discord-events/discord-events.module';
+import { DiscordGatewayModule } from './discord-gateway/discord-gateway.module';
 import {
   CommonConfigModule,
   CommonTypeOrmModule,
   RedisConfigModule,
   RedisBullConfigModule,
   DiscordConfigModule,
-  MongooseConfigModule,
 } from '@badgebuddy/common';
+import { CommunityEventsQueueModule } from './community-events-queue/community-events-queue.module';
 
 @Module({
   imports: [
@@ -16,10 +15,9 @@ import {
     RedisConfigModule.forRootAsync(),
     RedisBullConfigModule.forRootAsync(),
     CommonTypeOrmModule.forRootAsync(),
-    MongooseConfigModule.forRootAsync(),
     DiscordConfigModule.forRootAsync(),
-    ProcessorsModule,
-    DiscordEventsModule,
+    CommunityEventsQueueModule,
+    DiscordGatewayModule,
   ],
   controllers: [],
   providers: [],

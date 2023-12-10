@@ -18,10 +18,10 @@ import {
   afterEach,
 } from '@jest/globals';
 import { Collection } from 'discord.js';
-import { ProcessorException } from '../_exceptions/processor.exception';
+import { CommunityEventsProcessorService } from './community-events-queue.service';
 
-describe('EventsProcessorService', () => {
-  let service: EventsProcessorService;
+describe('CommunityEventsProcessorService', () => {
+  let service: CommunityEventsProcessorService;
   let spyCommunityEventModel: jest.Spied<any>;
   let spyDiscordParticipantModel: jest.Spied<any>;
   let spyDiscordClient: jest.Spied<any>;

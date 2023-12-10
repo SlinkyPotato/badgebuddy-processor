@@ -1,36 +1,33 @@
-import { OnQueueFailed, Process, Processor } from '@nestjs/bull';
-import { Job } from 'bull';
-import { Error, Model, Types } from 'mongoose';
-import {
-  CommunityEvent,
-  CommunityEventDocument,
-  DiscordParticipant,
-  DiscordParticipantDto,
-} from '@badgebuddy/common';
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
 import { InjectDiscordClient } from '@discord-nestjs/core';
+import { Processor, Process, OnQueueFailed } from '@nestjs/bull';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Job } from 'bull';
 import { Client, VoiceChannel } from 'discord.js';
-import { ProcessorException } from '../_exceptions/processor.exception';
+import { ProcessorException } from './exceptions/processor.exception';
+import {
+  CommunityEventDiscordEntity,
+  DISCORD_COMMUNITY_EVENTS_END_JOB,
+  DISCORD_COMMUNITY_EVENTS_QUEUE,
+  DISCORD_COMMUNITY_EVENTS_START_JOB,
+} from '@badgebuddy/common';
+import { Cache } from 'cache-manager';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
-@Processor('events')
-export class EventsProcessorService {
-  private static CACHE_TTL = 0;
+@Processor(DISCORD_COMMUNITY_EVENTS_QUEUE)
+export class CommunityEventsProcessorService {
+  private CACHE_TTL = 0 as const;
 
   constructor(
     private readonly logger: Logger,
-    @InjectModel(CommunityEvent.name)
-    private communityEventModel: Model<CommunityEvent>,
-    @InjectModel(DiscordParticipant.name)
-    private discordParticipantModel: Model<DiscordParticipant>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectDiscordClient() private readonly discordClient: Client,
+    @InjectRepository(CommunityEventDiscordEntity) private discordEventsRepo: Repository<CommunityEventDiscordEntity>,
   ) {}
 
-  @Process('start')
+  @Process(DISCORD_COMMUNITY_EVENTS_START_JOB)
   async start(job: Job<{ eventId: string }>) {
     const eventId = job.data.eventId;
     this.logger.log(
@@ -40,7 +37,7 @@ export class EventsProcessorService {
 
     const communityEvent = await this.getCommunityEvent(eventId);
 
-    this.logger.log(
+    this.logger.verbose(
       `Fetching voice channel ${communityEvent.voiceChannelId}`,
       'EventsProcessor.start',
     );
@@ -59,7 +56,7 @@ export class EventsProcessorService {
       );
     }
 
-    this.logger.log(
+    this.logger.verbose(
       `Processing members in voice channel ${voiceChannel.name}`,
       'EventsProcessor.start',
     );
@@ -94,7 +91,7 @@ export class EventsProcessorService {
         .set(
           `tracking:events:${eventId}:participants:${member.id}`,
           cacheUser,
-          EventsProcessorService.CACHE_TTL,
+          this.CACHE_TTL,
         )
         .catch((err) => {
           this.logger.error(err);
@@ -125,7 +122,7 @@ export class EventsProcessorService {
     return {};
   }
 
-  @Process('end')
+  @Process(DISCORD_COMMUNITY_EVENTS_END_JOB)
   async end(job: Job<{ eventId: string }>) {
     const eventId = job.data.eventId;
     this.logger.log(
@@ -209,9 +206,7 @@ export class EventsProcessorService {
   //   this.logger.error(error);
   // }
 
-  getCommunityEvent = async (
-    eventId: string,
-  ): Promise<CommunityEventDocument> => {
+  private async getCommunityEvent(eventId: string) {
     const communityEvent: CommunityEventDocument | null =
       await this.communityEventModel
         .findOne<CommunityEventDocument>({
@@ -227,5 +222,5 @@ export class EventsProcessorService {
       throw new ProcessorException(`Event ${eventId} not found`);
     }
     return communityEvent;
-  };
+  }
 }

@@ -4,4 +4,4 @@ import { VoiceStateUpdateModule } from './voice-state-update/voice-state-update.
 @Module({
   imports: [VoiceStateUpdateModule],
 })
-export class DiscordEventsModule {}
+export class DiscordGatewayModule {}

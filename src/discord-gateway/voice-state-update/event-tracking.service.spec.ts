@@ -19,7 +19,7 @@ import {
 import * as mongoose from 'mongoose';
 import { getModelToken } from '@nestjs/mongoose';
 import { MongooseError } from 'mongoose';
-import { ProcessorException } from '../../processors/_exceptions/processor.exception';
+import { ProcessorException } from '../../community-events-queue/exceptions/processor.exception';
 
 describe('VoiceStateUpdateService', () => {
   let service: EventTrackingService;
