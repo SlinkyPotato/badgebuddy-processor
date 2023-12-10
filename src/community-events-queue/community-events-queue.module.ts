@@ -19,7 +19,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   providers: [
     Logger,
     CommunityEventsProcessorService,
-
   ],
 })
 export class CommunityEventsQueueModule {}
