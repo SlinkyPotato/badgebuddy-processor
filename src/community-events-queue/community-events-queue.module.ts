@@ -1,4 +1,4 @@
-import { CommunityEventDiscordEntity, DISCORD_COMMUNITY_EVENTS_QUEUE } from '@badgebuddy/common';
+import { CommunityEventDiscordEntity, DISCORD_COMMUNITY_EVENTS_QUEUE, CommunityParticipantDiscordEntity } from '@badgebuddy/common';
 import { DiscordModule } from '@discord-nestjs/core';
 import { BullModule } from '@nestjs/bull';
 import { Logger, Module } from '@nestjs/common';
@@ -11,7 +11,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     BullModule.registerQueue({
       name: DISCORD_COMMUNITY_EVENTS_QUEUE,
     }),
-    TypeOrmModule.forFeature([CommunityEventDiscordEntity]),
+    TypeOrmModule.forFeature([
+      CommunityEventDiscordEntity,
+      CommunityParticipantDiscordEntity,
+    ]),
   ],
   providers: [
     Logger,
