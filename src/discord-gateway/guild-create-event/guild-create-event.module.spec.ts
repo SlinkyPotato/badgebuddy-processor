@@ -7,10 +7,9 @@ import {
   afterAll,
 } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { GuildDeleteModule } from './guild-delete.module';
+import { GuildCreateEventModule } from './guild-create-event.module';
 
-jest.mock('../../api/guilds/guilds.module');
-jest.mock('./guild-delete.event');
+jest.mock('./guild-create-event.service');
 jest.mock('@discord-nestjs/core', () => {
   const actual = jest.requireActual('@discord-nestjs/core') as object;
 
@@ -27,7 +26,7 @@ jest.mock('@discord-nestjs/core', () => {
   };
 });
 
-describe('GuildDeleteModule', () => {
+describe('GuildCreateModule', () => {
   let module: TestingModule;
   afterAll(async () => {
     await module.close();
@@ -35,7 +34,7 @@ describe('GuildDeleteModule', () => {
 
   beforeEach(async () => {
     module = await Test.createTestingModule({
-      imports: [GuildDeleteModule],
+      imports: [GuildCreateEventModule],
     }).compile();
   });
 

@@ -1,31 +1,34 @@
 import { beforeEach, describe, it, expect, jest } from '@jest/globals';
-import { GuildCreateEvent } from './guild-create.event';
+import { GuildCreateEventService } from './guild-create-event.service';
 import { Logger } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { GuildCreateService } from './guild-create.service';
 import { Guild } from 'discord.js';
+import { HttpService } from '@nestjs/axios';
 
-describe('GuildCreateEvent', () => {
-  let service: GuildCreateEvent;
+describe('GuildCreateEventService', () => {
+  let service: GuildCreateEventService;
 
   const mockLogger = {
     log: jest.fn().mockReturnThis(),
+    warn: jest.fn().mockReturnThis(),
     error: jest.fn().mockReturnThis(),
   };
 
-  const mockGuildCreateService = {
-    setupGuild: jest.fn().mockReturnThis(),
+  const mockHttpService = {
+    post: jest.fn().mockReturnThis(),
+    pipe: jest.fn().mockReturnThis(),
+    subscribe: jest.fn().mockReturnThis(),
   };
 
   beforeEach(async () => {
     const testModule = await Test.createTestingModule({
       providers: [
-        GuildCreateEvent,
+        GuildCreateEventService,
         { provide: Logger, useValue: mockLogger },
-        { provide: GuildCreateService, useValue: mockGuildCreateService },
+        { provide: HttpService, useValue: mockHttpService },
       ],
     }).compile();
-    service = testModule.get(GuildCreateEvent);
+    service = testModule.get(GuildCreateEventService);
   });
 
   it('should be defined', () => {
@@ -39,7 +42,7 @@ describe('GuildCreateEvent', () => {
       available: false,
     };
     await service.onGuildCreate(mockGuild as Guild);
-    expect(mockLogger.error).toHaveBeenCalledWith(
+    expect(mockLogger.warn).toHaveBeenCalledWith(
       `guild outage for guildId: ${mockGuild.id}, guildName: ${mockGuild.name}`,
     );
   });
@@ -51,23 +54,9 @@ describe('GuildCreateEvent', () => {
       available: true,
     };
 
-    mockGuildCreateService.setupGuild.mockReturnValue(Promise.resolve(null));
     await service.onGuildCreate(mockGuild as Guild);
     expect(mockLogger.log).toHaveBeenCalledWith(
       `guild joined, guildId: ${mockGuild.id}, name: ${mockGuild.name}`,
     );
-  });
-
-  it('should throw for guild setup error', async () => {
-    const mockGuild = {
-      id: '850840267082563596',
-      name: 'test guild',
-      available: true,
-    };
-    mockGuildCreateService.setupGuild.mockReturnValue(
-      Promise.reject(new Error('setup error')),
-    );
-    await service.onGuildCreate(mockGuild as Guild);
-    expect(mockLogger.error).toHaveBeenCalledWith(new Error('setup error'));
   });
 });

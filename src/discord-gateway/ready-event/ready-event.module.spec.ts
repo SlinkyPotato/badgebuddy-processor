@@ -7,9 +7,9 @@ import {
   afterAll,
 } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ReadyModule } from './ready.module';
+import { ReadyEventModule } from './ready.module';
 
-jest.mock('./ready.event');
+jest.mock('./ready-event.service');
 jest.mock('@discord-nestjs/core', () => {
   const actual = jest.requireActual('@discord-nestjs/core') as object;
 
@@ -26,7 +26,7 @@ jest.mock('@discord-nestjs/core', () => {
   };
 });
 
-describe('ReadyModule', () => {
+describe('ReadyEventModule', () => {
   let module: TestingModule;
   afterAll(async () => {
     await module.close();
@@ -34,7 +34,7 @@ describe('ReadyModule', () => {
 
   beforeEach(async () => {
     module = await Test.createTestingModule({
-      imports: [ReadyModule],
+      imports: [ReadyEventModule],
     }).compile();
   });
 

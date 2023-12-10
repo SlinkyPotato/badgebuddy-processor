@@ -1,11 +1,4 @@
-import { EventsProcessorService } from './events-processor.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  CommunityEvent,
-  DiscordParticipant,
-  DiscordParticipantDto,
-} from '@badgebuddy/common';
-import { getModelToken } from '@nestjs/mongoose';
 import { Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Job } from 'bull';
@@ -19,6 +12,8 @@ import {
 } from '@jest/globals';
 import { Collection } from 'discord.js';
 import { CommunityEventsProcessorService } from './community-events-queue.service';
+import { CommunityEventDiscordEntity, CommunityParticipantDiscordEntity, DiscordParticipantRedisDto } from '@badgebuddy/common';
+import { ProcessorException } from './exceptions/processor.exception';
 
 describe('CommunityEventsProcessorService', () => {
   let service: CommunityEventsProcessorService;
@@ -31,15 +26,28 @@ describe('CommunityEventsProcessorService', () => {
   const mockStartDate = new Date();
   const mockEndDate = new Date(mockStartDate.getTime() + 1000 * 60 * 60);
 
-  const getMockCommunityEvent = (): CommunityEvent => ({
-    eventName: 'test name',
-    organizerId: '123',
-    voiceChannelId: '123',
-    guildId: '123',
-    startDate: mockStartDate,
-    endDate: mockEndDate,
-    isActive: true,
-  });
+  const getMockCommunityEvent = () => ({
+    communityEvent: {
+      id: '3ba04333-622c-425d-89e0-0e6btest7d60',
+      title: 'test name',
+      startDate: mockStartDate,
+      endDate: mockEndDate,
+    },
+    organizer: {
+      userSId: '123',
+      id: '52ad6553-0801-4b86-a9cc-1a17test6cdb',
+      username: 'test-username',
+    },
+    voiceChannelSId: '123',
+    botSettings: {
+      id: '5db6156c-b889-49a4-be9c-6133testfb30',
+      guildSId: '123',
+      name: 'test name',
+      privateChannelSId: '123',
+      poapManagerRoleSId: '123',
+      ownerSid: '123',
+    }
+  } as CommunityEventDiscordEntity);
 
   const getMockVoiceChannel = () => ({
     name: 'test name',
@@ -48,13 +56,12 @@ describe('CommunityEventsProcessorService', () => {
     ]),
   });
 
-  const getMockDiscordParticipantDto = (): DiscordParticipantDto => ({
-    eventId: '64f881577e3a7efbf87b2ec2',
-    userId: '123',
-    userTag: 'test#123',
+  const getMockDiscordParticipantDto = (): DiscordParticipantRedisDto => ({
+    communityEventId: '64f881577e3a7efbf87b2ec2',
+    discordUserSId: '123',
     startDate: mockStartDate.toISOString(),
     endDate: mockEndDate.toISOString(),
-    durationInMinutes: 0,
+    durationInSeconds: 0,
   });
 
   const mockLogger = {
@@ -63,15 +70,12 @@ describe('CommunityEventsProcessorService', () => {
     warn: jest.fn().mockReturnThis(),
   };
 
-  const mockCommunityModel = {
-    findOne: jest.fn().mockReturnValue({
-      exec: jest.fn().mockReturnThis(),
-    }),
+  const mockDiscordCommunityEventsRepo = {
+    findOneOrFaile: jest.fn().mockReturnThis(),
   };
 
-  const mockDiscordParticipantModel = {
-    insertMany: jest.fn().mockReturnThis(),
-    bulkWrite: jest.fn().mockReturnThis(),
+  const mockDiscordParticipantRepo = {
+    save: jest.fn(),
   };
 
   const mockCacheManager = {
@@ -96,31 +100,21 @@ describe('CommunityEventsProcessorService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        EventsProcessorService,
-        {
-          provide: getModelToken(CommunityEvent.name),
-          useValue: mockCommunityModel,
-        },
-        {
-          provide: getModelToken(DiscordParticipant.name),
-          useValue: mockDiscordParticipantModel,
-        },
+        CommunityEventsProcessorService,
         { provide: CACHE_MANAGER, useValue: mockCacheManager },
         { provide: 'BullQueue_events', useValue: mockBullQueue },
         { provide: '__inject_discord_client__', useValue: mockClient },
         { provide: Logger, useValue: mockLogger },
+        { provide: 'CommunityEventDiscordEntityRepository', useValue: mockDiscordCommunityEventsRepo },
+        { provide: 'CommunityParticipantDiscordEntityRepository', useValue: mockDiscordParticipantRepo },
       ],
     }).compile();
 
-    service = module.get<EventsProcessorService>(EventsProcessorService);
+    service = module.get<CommunityEventsProcessorService>(CommunityEventsProcessorService);
 
-    spyCommunityEventModel = jest.spyOn(
-      mockCommunityModel.findOne() as any,
-      'exec',
-    );
-    spyCommunityEventModel.mockReturnValue(
-      Promise.resolve(getMockCommunityEvent()),
-    );
+    // spyCommunityEventModel.mockReturnValue(
+    //   Promise.resolve(getMockCommunityEvent()),
+    // );
   });
 
   afterEach(() => {
@@ -133,10 +127,10 @@ describe('CommunityEventsProcessorService', () => {
 
   describe('EventsProcessorService.start', () => {
     beforeEach(() => {
-      spyDiscordParticipantModel = jest.spyOn(
-        mockDiscordParticipantModel,
-        'insertMany',
-      );
+      // spyDiscordParticipantModel = jest.spyOn(
+      //   mockDiscordParticipantRepo,
+      //   'insertMany',
+      // );
       spyDiscordParticipantModel.mockReturnValue(Promise.resolve([]));
 
       spyDiscordClient = jest.spyOn(mockClient.channels, 'fetch');
@@ -352,10 +346,10 @@ describe('CommunityEventsProcessorService', () => {
       spyCacheManagerDel = jest.spyOn(mockCacheManager, 'del');
       spyCacheManagerDel.mockReturnValue(Promise.resolve());
 
-      spyDiscordParticipantModel = jest.spyOn(
-        mockDiscordParticipantModel,
-        'bulkWrite',
-      );
+      // spyDiscordParticipantModel = jest.spyOn(
+      //   mockDiscordParticipantRepo,
+      //   'bulkWrite',
+      // );
       spyDiscordParticipantModel.mockReturnValue(Promise.resolve([]));
     });
 
