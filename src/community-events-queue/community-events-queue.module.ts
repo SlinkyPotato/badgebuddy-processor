@@ -3,7 +3,6 @@ import { DiscordModule } from '@discord-nestjs/core';
 import { BullModule } from '@nestjs/bull';
 import { Logger, Module } from '@nestjs/common';
 import { CommunityEventsProcessorService } from './community-events-queue.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
@@ -11,10 +10,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     BullModule.registerQueue({
       name: DISCORD_COMMUNITY_EVENTS_QUEUE,
     }),
-    TypeOrmModule.forFeature([
-      CommunityEventDiscordEntity,
-      CommunityParticipantDiscordEntity,
-    ]),
   ],
   providers: [
     Logger,

@@ -147,13 +147,13 @@ describe('CommunityEventsProcessorService', () => {
     } as Job<{ eventId: string }>;
 
     it('job start should be defined', () => {
-      expect(service.start).toBeDefined();
+      expect(service.startEvent).toBeDefined();
     });
 
     it('should pull community event from db', async () => {
       const mockCommunityEvent = getMockCommunityEvent();
       try {
-        await service.start(mockJob);
+        await service.startEvent(mockJob);
       } catch (e) {}
       expect(spyCommunityEventModel).toHaveBeenCalled();
       await expect(
@@ -165,7 +165,7 @@ describe('CommunityEventsProcessorService', () => {
       spyCommunityEventModel.mockReturnValue(Promise.resolve(null));
 
       try {
-        await service.start(mockJob);
+        await service.startEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(ProcessorException);
       }
@@ -178,7 +178,7 @@ describe('CommunityEventsProcessorService', () => {
     it('should fetch voice channel from discord', async () => {
       const mockVoiceChannel = getMockVoiceChannel();
       try {
-        await service.start(mockJob);
+        await service.startEvent(mockJob);
       } catch (e) {}
       expect(spyDiscordClient).toHaveBeenCalled();
 
@@ -190,7 +190,7 @@ describe('CommunityEventsProcessorService', () => {
     it('should not find voice channel', async () => {
       spyDiscordClient.mockReturnValue(Promise.resolve(null));
       try {
-        await service.start(mockJob);
+        await service.startEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(ProcessorException);
       }
@@ -205,7 +205,7 @@ describe('CommunityEventsProcessorService', () => {
         Promise.reject(new Error('mock discordClient fetch error')),
       );
       try {
-        await service.start(mockJob);
+        await service.startEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(ProcessorException);
       }
@@ -222,7 +222,7 @@ describe('CommunityEventsProcessorService', () => {
       spyDiscordClient.mockReturnValue(Promise.resolve(mockVoiceChannel));
 
       try {
-        await service.start(mockJob);
+        await service.startEvent(mockJob);
       } catch (e) {}
       expect(spyCommunityEventModel).toHaveBeenCalled();
       await expect(
@@ -240,7 +240,7 @@ describe('CommunityEventsProcessorService', () => {
       const mockVoiceChannel = getMockVoiceChannel();
 
       try {
-        await service.start(mockJob);
+        await service.startEvent(mockJob);
       } catch (e) {}
       expect(spyCommunityEventModel).toHaveBeenCalled();
       await expect(
@@ -262,7 +262,7 @@ describe('CommunityEventsProcessorService', () => {
       );
 
       try {
-        await service.start(mockJob);
+        await service.startEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(ProcessorException);
       }
@@ -287,7 +287,7 @@ describe('CommunityEventsProcessorService', () => {
       );
 
       try {
-        await service.start(mockJob);
+        await service.startEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(ProcessorException);
       }
@@ -308,7 +308,7 @@ describe('CommunityEventsProcessorService', () => {
       spyCommunityEventModel.mockReturnValue(Promise.reject(mockError));
 
       try {
-        await service.start(mockJob);
+        await service.startEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(ProcessorException);
       }
@@ -354,13 +354,13 @@ describe('CommunityEventsProcessorService', () => {
     });
 
     it('job start should be defined', () => {
-      expect(service.end).toBeDefined();
+      expect(service.endEvent).toBeDefined();
     });
 
     it('should pull Community Event from db', async () => {
       const mockCommunityEvent = getMockCommunityEvent();
       try {
-        await service.end(mockJob);
+        await service.endEvent(mockJob);
       } catch (e) {}
       expect(spyCommunityEventModel).toHaveBeenCalled();
       await expect(
@@ -374,7 +374,7 @@ describe('CommunityEventsProcessorService', () => {
       spyCacheManagerKeys.mockReturnValue(Promise.resolve(mockCacheKeys));
 
       try {
-        await service.end(mockJob);
+        await service.endEvent(mockJob);
       } catch (e) {}
       expect(spyCommunityEventModel).toHaveBeenCalled();
       await expect(
@@ -392,7 +392,7 @@ describe('CommunityEventsProcessorService', () => {
       spyCacheManagerKeys.mockReturnValue(Promise.resolve(null));
 
       try {
-        await service.end(mockJob);
+        await service.endEvent(mockJob);
       } catch (e) {}
       expect(spyCommunityEventModel).toHaveBeenCalled();
       await expect(
@@ -410,7 +410,7 @@ describe('CommunityEventsProcessorService', () => {
       spyCacheManagerKeys.mockReturnValue(Promise.resolve([]));
 
       try {
-        await service.end(mockJob);
+        await service.endEvent(mockJob);
       } catch (e) {}
       expect(spyCommunityEventModel).toHaveBeenCalled();
       await expect(
@@ -429,7 +429,7 @@ describe('CommunityEventsProcessorService', () => {
       spyCacheManagerGet.mockReturnValue(Promise.resolve(undefined));
 
       try {
-        await service.end(mockJob);
+        await service.endEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(ProcessorException);
       }
@@ -453,7 +453,7 @@ describe('CommunityEventsProcessorService', () => {
       spyCacheManagerGet.mockReturnValue(Promise.resolve(null));
 
       try {
-        await service.end(mockJob);
+        await service.endEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(ProcessorException);
       }
@@ -475,7 +475,7 @@ describe('CommunityEventsProcessorService', () => {
       const mockCommunityEvent = getMockCommunityEvent();
 
       try {
-        await service.end(mockJob);
+        await service.endEvent(mockJob);
       } catch (e) {}
       expect(spyCommunityEventModel).toHaveBeenCalled();
       await expect(
@@ -500,7 +500,7 @@ describe('CommunityEventsProcessorService', () => {
       );
 
       try {
-        await service.end(mockJob);
+        await service.endEvent(mockJob);
       } catch (e) {}
       expect(spyCommunityEventModel).toHaveBeenCalled();
       await expect(
