@@ -4,11 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommunityParticipantDiscordEntity } from '@badgebuddy/common'
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      CommunityParticipantDiscordEntity,
-    ])
-  ],
+  imports: [],
   providers: [
     VoiceStateUpdateEventService, 
     Logger
