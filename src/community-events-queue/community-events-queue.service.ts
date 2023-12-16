@@ -12,6 +12,7 @@ import {
   DISCORD_COMMUNITY_EVENTS_START_JOB,
   CommunityParticipantDiscordEntity,
   DiscordParticipantRedisDto,
+  TRACKING_EVENTS_PARTICIPANTS,
 } from '@badgebuddy/common';
 import { Cache } from 'cache-manager';
 import { DataSource } from 'typeorm';
@@ -65,7 +66,7 @@ export class CommunityEventsProcessorService {
     for (const member of voiceChannel.members.values()) {
       if (member.voice.deaf) {
         this.logger.warn(
-          `Skipping deaf member tag: ${member.user.tag}, userId: ${member.id}, communityEventId: ${communityEventId}, guildId: ${communityEvent.botSettings.guildSId}`,
+          `Skipping deaf member tag: ${member.user.tag}, userId: ${member.id}, communityEventId: ${communityEventId}, botSettingsId: ${communityEvent.botSettingsId}`,
           CommunityEventsProcessorService.START_QUEUE_LOG,
         );
         continue;
@@ -74,7 +75,7 @@ export class CommunityEventsProcessorService {
       this.insertParticipantToCache(communityEventId, member).catch((err) => {
         this.logger.error(err);
         this.logger.warn(
-          `continuing with job process start for communityEventId: ${communityEventId}, guildId: ${communityEvent.botSettings.guildSId}`,
+          `continuing with job process start for communityEventId: ${communityEventId}, botSettingsId: ${communityEvent.botSettingsId}`,
         );
       });
 
@@ -94,12 +95,12 @@ export class CommunityEventsProcessorService {
       .catch((err) => {
         this.logger.error(err);
         this.logger.warn(
-          `continuing with job process start for communityEventId: ${communityEventId}, guildId: ${communityEvent.botSettings.guildSId}`,
+          `continuing with job process start for communityEventId: ${communityEventId}, botSettingsId: ${communityEvent.botSettingsId}`,
         );
     });
 
     this.logger.log(
-      `Processed done for communityEventId: ${communityEventId}, guildId: ${communityEvent.botSettings.guildSId}, organizerId: ${communityEvent.organizerId}, voiceChannelId: ${communityEvent.voiceChannelSId}`,
+      `Processed done for communityEventId: ${communityEventId}, botSettingsId: ${communityEvent.botSettingsId}, organizerId: ${communityEvent.organizerId}, voiceChannelId: ${communityEvent.voiceChannelSId}`,
       CommunityEventsProcessorService.START_QUEUE_LOG,
     );
     return {};
@@ -120,14 +121,12 @@ export class CommunityEventsProcessorService {
 
     const discordEvent = await this.getCommunityEvent(communityEventId);
 
-    const participantKeys = await this.cacheManager.store.keys(
-      `tracking:events:${communityEventId}:participants:*`,
-    );
+    const participantKeys = await this.cacheManager.store.keys(TRACKING_EVENTS_PARTICIPANTS(communityEventId, '*'));
 
     if (!participantKeys || participantKeys.length === 0) {
       throw new ProcessorException(
         `Participants keys not found for communityEventId: ${communityEventId}, 
-        guildId: ${discordEvent.botSettings.guildSId}, organizerId: ${discordEvent.organizerId}`,
+        botSettingsId: ${discordEvent.botSettingsId}, organizerId: ${discordEvent.organizerId}`,
       );
     }
 
@@ -145,12 +144,12 @@ export class CommunityEventsProcessorService {
         this.logger.error(err);
         this.logger.warn(
           `continuing with job process end for communityEventId: ${communityEventId}, 
-          guildId: ${discordEvent.botSettings.guildSId}`,
+          botSettingsId: ${discordEvent.botSettingsId}`,
         );
     });
 
     this.logger.log(
-      `Processed done for communityEventId: ${communityEventId}, guildId: ${discordEvent.botSettings.guildSId}, 
+      `Processed done for communityEventId: ${communityEventId}, botSettingsId: ${discordEvent.botSettingsId}, 
       organizerId: ${discordEvent.organizerId}, voiceChannelId: ${discordEvent.voiceChannelSId}`,
       CommunityEventsProcessorService.END_QUEUE_LOG,
     );
@@ -205,14 +204,17 @@ export class CommunityEventsProcessorService {
   private async getCommunityEvent(communityEventId: string): Promise<CommunityEventDiscordEntity> {
     this.logger.verbose(`Fetching community event ${communityEventId} from database`);
     try {
-      
+      console.log(communityEventId);
       const result = await this.dataSource.createQueryBuilder()
-        .select('ce')
-        .from(CommunityEventDiscordEntity, 'ce')
-        .where('ce.communityEventId = :communityEventId', { communityEventId: communityEventId })
+        .select('de')
+        .from(CommunityEventDiscordEntity, 'de')
+        .leftJoinAndSelect('de.communityEvent', 'e')
+        .where('de.communityEventId = :communityEventId', { communityEventId: communityEventId })
         .getOne();
 
-      if (!result) {
+      console.log(result);
+    
+      if (!result || !result.communityEvent || result.communityEvent.id !== communityEventId) {
         throw new ProcessorException(`Community communityEventId: ${communityEventId} not found`);
       }
 
@@ -249,7 +251,7 @@ export class CommunityEventsProcessorService {
 
   private async insertParticipantToCache(communityEventId: string, guildMember: GuildMember) {
     try {
-      await this.cacheManager.set(`tracking:events:${communityEventId}:participants:${guildMember.id}`, {
+      await this.cacheManager.set(TRACKING_EVENTS_PARTICIPANTS(communityEventId, guildMember.id), {
         communityEventId: communityEventId,
         discordUserSId: guildMember.id.toString(),
         startDate: new Date().toISOString(),

@@ -8,7 +8,7 @@ export class ReadyEventService {
 
   @Once(`ready`)
   onReady(client: Client): void {
-    this.logger.log('discord client is ready');
+    this.logger.log('Discord client is ready.');
     client.guilds.cache.forEach((guild) => {
       this.logger.log(`guildId: ${guild.id}, name: ${guild.name}`);
     });
