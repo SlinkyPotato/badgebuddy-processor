@@ -15,6 +15,7 @@ import { CommunityEventsProcessorService } from './community-events-queue.servic
 import {
   CommunityEventDiscordEntity,
   CommunityEventEntity,
+  DISCORD_COMMUNITY_EVENTS_END_JOB,
   DISCORD_COMMUNITY_EVENTS_START_JOB,
   DiscordParticipantRedisDto,
 } from '@badgebuddy/common';
@@ -381,6 +382,32 @@ describe('CommunityEventsProcessorService', () => {
         .execute();
       /* eslint-enable */
       expect(result.identifiers.length).toEqual(1);
+    });
+  });
+
+  describe(DISCORD_COMMUNITY_EVENTS_END_JOB, () => {
+    beforeEach(() => {
+      spyDiscordClient = jest.spyOn(mockClient.channels, 'fetch');
+      spyCacheManagerSet = jest.spyOn(mockCacheManager, 'set');
+      spyDataSource = jest.spyOn(mockDataSource, 'createQueryBuilder');
+
+      spyLoggerWarn = jest.spyOn(mockLogger, 'warn');
+      spyLoggerError = jest.spyOn(mockLogger, 'error');
+      spyLoggerLog = jest.spyOn(mockLogger, 'log');
+      spyLoggerVerbose = jest.spyOn(mockLogger, 'verbose');
+
+      spyDiscordClient.mockReturnValue(Promise.resolve(mockVoiceChannel));
+      spyCacheManagerSet.mockReturnValue(Promise.resolve());
+      spyDataSource.mockReturnValue(
+        getMockDataSource(
+          Promise.resolve(mockDiscordCommunityEvent),
+          Promise.resolve({
+            identifiers: [{ id: '1' }],
+            generatedMaps: [{ id: '1' }],
+            raw: { affectedRows: 1 },
+          } as InsertResult),
+        ).createQueryBuilder(),
+      );
     });
   });
 });

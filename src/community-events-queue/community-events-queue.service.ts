@@ -30,11 +30,6 @@ type DiscordCommunityEventJob = Job<{
 @Injectable()
 @Processor(DISCORD_COMMUNITY_EVENTS_QUEUE)
 export class CommunityEventsProcessorService {
-  private static START_QUEUE_LOG =
-    `Queue.${DISCORD_COMMUNITY_EVENTS_START_JOB}` as const;
-  private static END_QUEUE_LOG =
-    `Queue.${DISCORD_COMMUNITY_EVENTS_END_JOB}` as const;
-
   constructor(
     private readonly logger: Logger,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -53,7 +48,7 @@ export class CommunityEventsProcessorService {
     this.logger.log(
       `Processing queue ${DISCORD_COMMUNITY_EVENTS_START_JOB} for 
       communityEventId: ${communityEventId}`,
-      CommunityEventsProcessorService.START_QUEUE_LOG,
+      DISCORD_COMMUNITY_EVENTS_START_JOB,
     );
 
     const { voiceChannelSId, botSettingsId, organizerId } =
@@ -62,7 +57,7 @@ export class CommunityEventsProcessorService {
 
     this.logger.verbose(
       `Processing members in voice channel ${name}`,
-      CommunityEventsProcessorService.START_QUEUE_LOG,
+      DISCORD_COMMUNITY_EVENTS_START_JOB,
     );
 
     const discordParticipants: DiscordParticipant[] = [];
@@ -72,7 +67,7 @@ export class CommunityEventsProcessorService {
         this.logger.warn(
           `Skipping deaf member tag: ${member.user.tag}, userId: ${member.id}, 
           communityEventId: ${communityEventId}, botSettingsId: ${botSettingsId}`,
-          CommunityEventsProcessorService.START_QUEUE_LOG,
+          DISCORD_COMMUNITY_EVENTS_START_JOB,
         );
         continue;
       }
@@ -108,7 +103,7 @@ export class CommunityEventsProcessorService {
       `Processed start event for communityEventId: ${communityEventId}, 
       botSettingsId: ${botSettingsId}, organizerId: ${organizerId}, 
       voiceChannelId: ${voiceChannelSId}`,
-      CommunityEventsProcessorService.START_QUEUE_LOG,
+      DISCORD_COMMUNITY_EVENTS_START_JOB,
     );
     return {};
   }
@@ -123,7 +118,7 @@ export class CommunityEventsProcessorService {
     const communityEventId = job.data.eventId;
     this.logger.log(
       `Processing end of communityEventId: ${communityEventId}`,
-      CommunityEventsProcessorService.END_QUEUE_LOG,
+      DISCORD_COMMUNITY_EVENTS_END_JOB,
     );
 
     const discordEvent = await this.getDiscordCommunityEvent(communityEventId);
@@ -140,7 +135,7 @@ export class CommunityEventsProcessorService {
 
     this.logger.log(
       'Participants keys found',
-      CommunityEventsProcessorService.END_QUEUE_LOG,
+      DISCORD_COMMUNITY_EVENTS_END_JOB,
     );
 
     const discordParticipants: DiscordParticipantRedisDto[] = await Promise.all(
@@ -170,7 +165,7 @@ export class CommunityEventsProcessorService {
       `Processed done for communityEventId: ${communityEventId}, 
       botSettingsId: ${discordEvent.botSettingsId}, 
       organizerId: ${discordEvent.organizerId}, voiceChannelId: ${discordEvent.voiceChannelSId}`,
-      CommunityEventsProcessorService.END_QUEUE_LOG,
+      DISCORD_COMMUNITY_EVENTS_END_JOB,
     );
     return {};
   }
