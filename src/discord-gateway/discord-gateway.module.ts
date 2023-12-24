@@ -9,7 +9,7 @@ import { GuildDeleteModule } from './guild-delete-event/guild-delete-event.modul
     ReadyEventModule,
     GuildCreateEventModule,
     GuildDeleteModule,
-    VoiceStateUpdateEventModule
+    VoiceStateUpdateEventModule,
   ],
 })
 export class DiscordGatewayModule {}

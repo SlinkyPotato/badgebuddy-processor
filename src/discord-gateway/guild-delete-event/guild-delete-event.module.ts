@@ -14,12 +14,9 @@ import Joi from 'joi';
         validationSchema: Joi.object({
           BADGE_BUDDY_API: Joi.string().required(),
         }),
-      }
+      };
     }),
   ],
-  providers: [
-    GuildDeleteEventService, 
-    Logger
-  ],
+  providers: [GuildDeleteEventService, Logger],
 })
 export class GuildDeleteModule {}

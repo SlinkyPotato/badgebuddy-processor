@@ -11,8 +11,7 @@ import {
 import { Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { VoiceState } from 'discord.js';
-import {
-} from '@badgebuddy/common';
+import {} from '@badgebuddy/common';
 import { ProcessorException } from '@/community-events-queue/exceptions/processor.exception';
 
 describe('VoiceStateUpdateService', () => {

@@ -33,6 +33,6 @@ describe('ReadyEventService', () => {
   it('should print no guild', () => {
     mockClient.guilds.cache.forEach.mockReturnValue([]);
     service.onReady(mockClient as unknown as Client);
-    expect(mockLogger.log).toBeCalledWith('discord client is ready');
+    expect(mockLogger.log).toBeCalledWith('Discord client is ready.');
   });
 });

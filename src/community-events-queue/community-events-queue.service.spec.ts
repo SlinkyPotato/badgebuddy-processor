@@ -2,16 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Job } from 'bull';
-import {
-  describe,
-  expect,
-  jest,
-  it,
-  beforeEach,
-} from '@jest/globals';
+import { describe, expect, jest, it, beforeEach } from '@jest/globals';
 import { ChannelType, Collection } from 'discord.js';
 import { CommunityEventsProcessorService } from './community-events-queue.service';
-import { CommunityEventDiscordEntity, CommunityEventEntity, DISCORD_COMMUNITY_EVENTS_START_JOB, DiscordParticipantRedisDto } from '@badgebuddy/common';
+import {
+  CommunityEventDiscordEntity,
+  CommunityEventEntity,
+  DISCORD_COMMUNITY_EVENTS_START_JOB,
+  DiscordParticipantRedisDto,
+} from '@badgebuddy/common';
 import { ProcessorException } from './exceptions/processor.exception';
 import { DataSource } from 'typeorm';
 
@@ -65,7 +64,9 @@ describe('CommunityEventsProcessorService', () => {
 
   const mockCacheManager = {
     del: jest.fn().mockReturnThis(),
-    get: jest.fn().mockReturnValue(Promise.resolve(mockDiscordParticipantRedisDto)),
+    get: jest
+      .fn()
+      .mockReturnValue(Promise.resolve(mockDiscordParticipantRedisDto)),
     set: jest.fn().mockReturnThis(),
     store: {
       keys: jest.fn().mockReturnThis(),
@@ -88,7 +89,9 @@ describe('CommunityEventsProcessorService', () => {
         from: () => ({
           leftJoinAndSelect: () => ({
             where: () => ({
-              getOne: jest.fn().mockReturnValue(Promise.resolve(mockDiscordCommunityEvent)),
+              getOne: jest
+                .fn()
+                .mockReturnValue(Promise.resolve(mockDiscordCommunityEvent)),
             }),
           }),
         }),
@@ -114,7 +117,9 @@ describe('CommunityEventsProcessorService', () => {
       ],
     }).compile();
 
-    service = module.get<CommunityEventsProcessorService>(CommunityEventsProcessorService);
+    service = module.get<CommunityEventsProcessorService>(
+      CommunityEventsProcessorService,
+    );
   });
 
   it('should be defined', () => {
@@ -129,7 +134,19 @@ describe('CommunityEventsProcessorService', () => {
     });
 
     it('should throw finding Discord Community Event from DB', async () => {
-      spyDataSource.mockReturnValue({ select: () => ({ from: () => ({ leftJoinAndSelect: () => ({ where: () => ({ getOne: jest.fn().mockReturnValue(Promise.reject(new Error('test'))) }) }) }) })});
+      spyDataSource.mockReturnValue({
+        select: () => ({
+          from: () => ({
+            leftJoinAndSelect: () => ({
+              where: () => ({
+                getOne: jest
+                  .fn()
+                  .mockReturnValue(Promise.reject(new Error('test'))),
+              }),
+            }),
+          }),
+        }),
+      });
       try {
         await service.startEvent(mockJob);
       } catch (e) {
@@ -140,15 +157,33 @@ describe('CommunityEventsProcessorService', () => {
     });
 
     it('should not find Discord Community Event from DB', async () => {
-      spyDataSource.mockReturnValue({ select: () => ({ from: () => ({ leftJoinAndSelect: () => ({ where: () => ({ getOne: jest.fn().mockReturnValue(null) }) }) }) })});
+      spyDataSource.mockReturnValue({
+        select: () => ({
+          from: () => ({
+            leftJoinAndSelect: () => ({
+              where: () => ({ getOne: jest.fn().mockReturnValue(null) }),
+            }),
+          }),
+        }),
+      });
       try {
         await service.startEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(ProcessorException);
       }
       expect(spyDataSource).toHaveBeenCalled();
-      /* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */
-      expect(spyDataSource.mock.results[0].value.select().from().leftJoinAndSelect().where().getOne()).toEqual(null);
+
+      /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */
+      expect(
+        spyDataSource.mock.results[0].value
+          .select()
+          .from()
+          .leftJoinAndSelect()
+          .where()
+          .getOne(),
+      ).toEqual(null);
+      /* eslint-enable */
+
       spyDataSource.mockRestore();
     });
 
@@ -171,7 +206,7 @@ describe('CommunityEventsProcessorService', () => {
         expect(e).toBeInstanceOf(ProcessorException);
       }
       expect(spyDiscordClient).toHaveBeenCalled();
-      expect(spyDiscordClient.mock.results[0].value).toEqual(null);
+      expect(await spyDiscordClient.mock.results[0].value).toEqual(null);
       expect(spyCacheManagerSet).not.toHaveBeenCalled();
       spyDiscordClient.mockRestore();
     });

@@ -15,5 +15,4 @@ export class ProcessorException extends Error {
       stack: this.stack,
     };
   }
-
 }

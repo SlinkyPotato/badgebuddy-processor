@@ -11,9 +11,6 @@ import { CommunityEventsProcessorService } from './community-events-queue.servic
       name: DISCORD_COMMUNITY_EVENTS_QUEUE,
     }),
   ],
-  providers: [
-    Logger,
-    CommunityEventsProcessorService,
-  ],
+  providers: [Logger, CommunityEventsProcessorService],
 })
 export class CommunityEventsQueueModule {}

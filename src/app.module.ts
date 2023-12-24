@@ -23,7 +23,7 @@ import Joi from 'joi';
         REDIS_HOST: Joi.string().required(),
         REDIS_PORT: Joi.number().required(),
         REDIS_CACHE_MIN: Joi.number().required(),
-      }
+      },
     }),
     RedisConfigModule.forRootAsync(),
     RedisBullConfigModule.forRootAsync(),

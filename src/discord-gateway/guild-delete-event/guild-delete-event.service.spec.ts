@@ -29,5 +29,4 @@ describe('GuildDeleteEventService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-
 });

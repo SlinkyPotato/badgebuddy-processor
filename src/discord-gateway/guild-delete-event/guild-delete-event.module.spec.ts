@@ -15,7 +15,7 @@ jest.mock('@discord-nestjs/core', () => {
 
   return {
     __esModule: true,
-    ...actual as object,
+    ...(actual as object),
     DiscordModule: {
       forFeature: jest.fn().mockReturnValue(
         Test.createTestingModule({

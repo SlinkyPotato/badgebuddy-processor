@@ -5,14 +5,7 @@ import { DiscordModule } from '@discord-nestjs/core';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [
-    DiscordModule.forFeature(),
-    HttpModule,
-    ConfigModule
-  ],
-  providers: [
-    GuildCreateEventService, 
-    Logger
-  ],
+  imports: [DiscordModule.forFeature(), HttpModule, ConfigModule],
+  providers: [GuildCreateEventService, Logger],
 })
 export class GuildCreateEventModule {}

@@ -22,16 +22,27 @@ export class VoiceStateUpdateEventService {
   ) {}
 
   @On('voiceStateUpdate')
-  async onVoiceStateUpdate(oldState: VoiceState, newState: VoiceState): Promise<void> {
-
+  async onVoiceStateUpdate(
+    oldState: VoiceState,
+    newState: VoiceState,
+  ): Promise<void> {
     if (this.conditionsForTrackingNotBeenMet(oldState, newState)) {
       // participant remained defeaned or did not change voice channels, thus returning
       return;
     }
-    const communityEvents = await this.getCommunityEventsFromCache(oldState, newState);
+    const communityEvents = await this.getCommunityEventsFromCache(
+      oldState,
+      newState,
+    );
 
     for (const communityEvent of communityEvents) {
-      if (this.hasUserNotChangedVoiceChannelsRelatedToEvent(communityEvent.voiceChannelSId, oldState, newState)) {
+      if (
+        this.hasUserNotChangedVoiceChannelsRelatedToEvent(
+          communityEvent.voiceChannelSId,
+          oldState,
+          newState,
+        )
+      ) {
         continue;
       }
 
@@ -45,20 +56,40 @@ export class VoiceStateUpdateEventService {
         )
       ) {
         if (!newState.member) {
-          this.logger.error(`User has joined a voice channel or un-deafened, but member is undefined, guildId: ${newState.guild.id}`);
+          this.logger.error(
+            `User has joined a voice channel or un-deafened, but member is undefined, guildId: ${newState.guild.id}`,
+          );
           continue;
         }
-        this.logger.verbose(`User has joined a voice channel or un-deafened, guildId: ${newState.member?.guild.id}`);
+        this.logger.verbose(
+          `User has joined a voice channel or un-deafened, guildId: ${newState.member?.guild.id}`,
+        );
         const guildMember = newState.member;
-        const userCache = await this.getParticipantFromCache(communityEvent.communityEventId, guildMember.guild.id, guildMember.id);
+        const userCache = await this.getParticipantFromCache(
+          communityEvent.communityEventId,
+          guildMember.guild.id,
+          guildMember.id,
+        );
         if (!userCache) {
-          await this.insertUserToCache(communityEvent.communityEventId, guildMember);
-          this.insertUserToDb(communityEvent.communityEventId, guildMember).catch((e) => {this.logger.error(e)});
+          await this.insertUserToCache(
+            communityEvent.communityEventId,
+            guildMember,
+          );
+          this.insertUserToDb(
+            communityEvent.communityEventId,
+            guildMember,
+          ).catch((e) => {
+            this.logger.error(e);
+          });
           continue;
         }
         userCache.startDate = new Date().toISOString();
         delete userCache.endDate;
-        await this.updateUserInCache(communityEvent.communityEventId, guildMember, userCache);
+        await this.updateUserInCache(
+          communityEvent.communityEventId,
+          guildMember,
+          userCache,
+        );
         continue;
       }
 
@@ -72,19 +103,28 @@ export class VoiceStateUpdateEventService {
         )
       ) {
         if (!newState.member) {
-          this.logger.error(`User has left a voice channel or deafened, but member is undefined, guildId: ${newState.guild.id}`);
+          this.logger.error(
+            `User has left a voice channel or deafened, but member is undefined, guildId: ${newState.guild.id}`,
+          );
           continue;
         }
         const guildMember = newState.member;
         this.logger.log(
           `User ${guildMember.user.username} has left a voice channel or deafened, guildId: ${guildMember.guild.id}, eventId: ${communityEvent.communityEventId}`,
         );
-        let userCache = await this.getParticipantFromCache(communityEvent.communityEventId, guildMember.guild.id, guildMember.id);
+        let userCache = await this.getParticipantFromCache(
+          communityEvent.communityEventId,
+          guildMember.guild.id,
+          guildMember.id,
+        );
         if (!userCache) {
           this.logger.warn(
             `User not found in cache, fetching from db, communityEventId: ${communityEvent.communityEventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
           );
-          const dbUser = await this.getParticipantFromDb(communityEvent.communityEventId, guildMember);
+          const dbUser = await this.getParticipantFromDb(
+            communityEvent.communityEventId,
+            guildMember,
+          );
           userCache = {
             communityEventId: communityEvent.communityEventId,
             discordUserSId: guildMember.id,
@@ -96,8 +136,13 @@ export class VoiceStateUpdateEventService {
         const startDate = new Date(userCache.startDate);
         const endDate = new Date();
         userCache.endDate = endDate.toISOString();
-        userCache.durationInSeconds += (endDate.getTime() - startDate.getTime()) / 1000;
-        await this.updateUserInCache(communityEvent.communityEventId, guildMember, userCache);
+        userCache.durationInSeconds +=
+          (endDate.getTime() - startDate.getTime()) / 1000;
+        await this.updateUserInCache(
+          communityEvent.communityEventId,
+          guildMember,
+          userCache,
+        );
       }
     }
   }
@@ -106,7 +151,6 @@ export class VoiceStateUpdateEventService {
     oldState: VoiceState,
     newState: VoiceState,
   ): Promise<DiscordActiveCommunityEventDto[]> => {
-
     if (!oldState.channelId && !newState.channelId) {
       return [];
     }
@@ -150,9 +194,13 @@ export class VoiceStateUpdateEventService {
       `User ${guildMember.user.username} has joined a voice channel or un-deafened, guildId: ${guildMember.guild.id}, eventId: ${communityEventId}`,
     );
     try {
-      const redisKey = TRACKING_EVENTS_PARTICIPANTS(communityEventId, guildMember.id);
+      const redisKey = TRACKING_EVENTS_PARTICIPANTS(
+        communityEventId,
+        guildMember.id,
+      );
       this.logger.verbose(`attempting to store user in cache: ${redisKey}`);
-      await this.cacheManager.set(redisKey,
+      await this.cacheManager.set(
+        redisKey,
         {
           communityEventId: communityEventId,
           discordUserSId: guildMember.id,
@@ -176,7 +224,8 @@ export class VoiceStateUpdateEventService {
     guildMember: GuildMember,
   ) {
     try {
-      const result = await this.dataSource.createQueryBuilder()
+      const result = await this.dataSource
+        .createQueryBuilder()
         .insert()
         .into(CommunityParticipantDiscordEntity)
         .values({
@@ -191,7 +240,9 @@ export class VoiceStateUpdateEventService {
           `Failed to insert user to db, eventId: ${communityEventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
         );
       }
-      this.logger.verbose(`User inserted to db, eventId: ${communityEventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`);
+      this.logger.verbose(
+        `User inserted to db, eventId: ${communityEventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
+      );
     } catch (e) {
       this.logger.error(
         `Failed to insert user to db, eventId: ${communityEventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
@@ -208,7 +259,10 @@ export class VoiceStateUpdateEventService {
       `User ${guildMember.user.username} has rejoined a voice channel/un-deafened, guildId: ${guildMember.guild.id}, eventId: ${communityEventId}`,
     );
     try {
-      const redisKey = TRACKING_EVENTS_PARTICIPANTS(communityEventId, guildMember.id);
+      const redisKey = TRACKING_EVENTS_PARTICIPANTS(
+        communityEventId,
+        guildMember.id,
+      );
       this.logger.verbose(`attempting to update user in cache: ${redisKey}`);
       await this.cacheManager.set(redisKey, userCache, 0);
       this.logger.verbose(
@@ -222,12 +276,21 @@ export class VoiceStateUpdateEventService {
   }
 
   private async getParticipantFromCache(
-    communityEventId: string, guildSId: string, discordUserSId: string
+    communityEventId: string,
+    guildSId: string,
+    discordUserSId: string,
   ): Promise<DiscordParticipantRedisDto | undefined> {
     try {
-      const trackingRedisKey = TRACKING_EVENTS_PARTICIPANTS(communityEventId, discordUserSId);
-      this.logger.verbose(`attempting to get user from cache: ${trackingRedisKey}`);
-      return await this.cacheManager.get<DiscordParticipantRedisDto>(trackingRedisKey);
+      const trackingRedisKey = TRACKING_EVENTS_PARTICIPANTS(
+        communityEventId,
+        discordUserSId,
+      );
+      this.logger.verbose(
+        `attempting to get user from cache: ${trackingRedisKey}`,
+      );
+      return await this.cacheManager.get<DiscordParticipantRedisDto>(
+        trackingRedisKey,
+      );
     } catch (e) {
       this.logger.error(
         `Failed to fetch participant from cache, eventId: ${communityEventId}, userId: ${discordUserSId}, guildId: ${guildSId}`,
@@ -236,14 +299,20 @@ export class VoiceStateUpdateEventService {
   }
 
   private async getParticipantFromDb(
-    communityEventId: string, guildMember: GuildMember
-  ): Promise<CommunityParticipantDiscordEntity>  {
+    communityEventId: string,
+    guildMember: GuildMember,
+  ): Promise<CommunityParticipantDiscordEntity> {
     try {
-      const result = await this.dataSource.createQueryBuilder()
+      const result = await this.dataSource
+        .createQueryBuilder()
         .select('participant')
         .from(CommunityParticipantDiscordEntity, 'participant')
-        .where('participant.communityEventId = :communityEventId', { communityEventId })
-        .andWhere('participant.discordUserSId = :discordUserSId', { discordUserSId: guildMember.id })
+        .where('participant.communityEventId = :communityEventId', {
+          communityEventId,
+        })
+        .andWhere('participant.discordUserSId = :discordUserSId', {
+          discordUserSId: guildMember.id,
+        })
         .getOne();
       if (!result) {
         throw new ProcessorException(

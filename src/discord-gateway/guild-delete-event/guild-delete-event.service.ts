@@ -15,12 +15,16 @@ export class GuildDeleteEventService {
   @On('guildDelete')
   onGuild(guild: Guild): void {
     this.logger.log(`guild left, guildId: ${guild.id}, name: ${guild.name}`);
-    this.httpService.delete(`${this.configService.get('BADGE_BUDDY_API')}/discord/bot`, {
-      data: {
-        guildSId: guild.id,
-      }
-    }).subscribe(() => {
-      this.logger.log(`discord bot deleted from guild, guildId: ${guild.id}, name: ${guild.name}`);
-    });
+    this.httpService
+      .delete(`${this.configService.get('BADGE_BUDDY_API')}/discord/bot`, {
+        data: {
+          guildSId: guild.id,
+        },
+      })
+      .subscribe(() => {
+        this.logger.log(
+          `discord bot deleted from guild, guildId: ${guild.id}, name: ${guild.name}`,
+        );
+      });
   }
 }
