@@ -174,6 +174,8 @@ describe('CommunityEventsProcessorService', () => {
         expect(e).toBeInstanceOf(ProcessorException);
       }
       expect(spyDiscordClient).toHaveBeenCalled();
+      expect(spyDiscordClient.mock.results[0].value).toEqual(null);
+      expect(spyCacheManagerSet).not.toHaveBeenCalled();
       spyDiscordClient.mockRestore();
     });
 
@@ -193,18 +195,6 @@ describe('CommunityEventsProcessorService', () => {
     });
   });
 });
-
-//     it('should fetch voice channel from discord', async () => {
-//       const mockVoiceChannel = getMockVoiceChannel();
-//       try {
-//         await service.startEvent(mockJob);
-//       } catch (e) {}
-//       expect(spyDiscordClient).toHaveBeenCalled();
-
-//       await expect(spyDiscordClient.mock.results[0].value).resolves.toEqual(
-//         mockVoiceChannel,
-//       );
-//     });
 
 //     it('should track participant', async () => {
 //       const mockCommunityEvent = getMockCommunityEvent();
