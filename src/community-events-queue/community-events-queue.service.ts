@@ -83,13 +83,15 @@ export class CommunityEventsProcessorService {
         continue;
       }
 
-      this.insertParticipantToCache(communityEventId, member).catch((err) => {
-        this.logger.error(err);
-        this.logger.warn(
-          `continuing with job process start for 
+      this.insertParticipantToCache(communityEventId, member.user.id).catch(
+        (err) => {
+          this.logger.error(err);
+          this.logger.warn(
+            `continuing with job process start for 
           communityEventId: ${communityEventId}, botSettingsId: ${botSettingsId}`,
-        );
-      });
+          );
+        },
+      );
 
       discordParticipants.push({
         discriminator: member.user.discriminator,
@@ -301,25 +303,18 @@ export class CommunityEventsProcessorService {
 
   private async insertParticipantToCache(
     communityEventId: string,
-    guildMember: GuildMember,
+    discordUserSId: string,
   ) {
-    try {
-      await this.cacheManager.set(
-        TRACKING_EVENTS_PARTICIPANTS(communityEventId, guildMember.id),
-        {
-          communityEventId: communityEventId,
-          discordUserSId: guildMember.id.toString(),
-          startDate: new Date().toISOString(),
-          durationInSeconds: 0,
-        } as DiscordParticipantRedisDto,
-        0,
-      );
-    } catch (err) {
-      this.logger.error(err);
-      throw new ProcessorException(
-        `Failed to cache participant ${guildMember.id}`,
-      );
-    }
+    return this.cacheManager.set(
+      TRACKING_EVENTS_PARTICIPANTS(communityEventId, discordUserSId),
+      {
+        communityEventId: communityEventId,
+        discordUserSId: discordUserSId,
+        startDate: new Date().toISOString(),
+        durationInSeconds: 0,
+      } as DiscordParticipantRedisDto,
+      0,
+    );
   }
 
   private async fetchParticipantFromCache(
