@@ -1,4 +1,4 @@
-import { CommunityEventDiscordEntity, DISCORD_COMMUNITY_EVENTS_QUEUE, CommunityParticipantDiscordEntity } from '@badgebuddy/common';
+import { DISCORD_COMMUNITY_EVENTS_QUEUE } from '@badgebuddy/common';
 import { DiscordModule } from '@discord-nestjs/core';
 import { BullModule } from '@nestjs/bull';
 import { Logger, Module } from '@nestjs/common';

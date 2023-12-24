@@ -11,11 +11,11 @@ import { GuildDeleteModule } from './guild-delete-event.module';
 
 jest.mock('./guild-delete-event.service');
 jest.mock('@discord-nestjs/core', () => {
-  const actual = jest.requireActual('@discord-nestjs/core') as object;
+  const actual = jest.requireActual('@discord-nestjs/core');
 
   return {
     __esModule: true,
-    ...actual,
+    ...actual as object,
     DiscordModule: {
       forFeature: jest.fn().mockReturnValue(
         Test.createTestingModule({

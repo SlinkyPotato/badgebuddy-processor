@@ -13,4 +13,9 @@ async function bootstrap() {
   context.enableShutdownHooks();
 }
 
-bootstrap();
+bootstrap().then(() => {
+  console.log('Processor started');
+}).catch((err) => {
+  console.error('Error starting processor', err);
+  process.exit(1);
+});

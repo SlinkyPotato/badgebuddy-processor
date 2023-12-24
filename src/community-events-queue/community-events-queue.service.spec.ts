@@ -72,9 +72,9 @@ describe('CommunityEventsProcessorService', () => {
     },
   };
 
-  const mockBullQueue = {
-    add: jest.fn().mockReturnThis(),
-  };
+  // const mockBullQueue = {
+  //   add: jest.fn().mockReturnThis(),
+  // };
 
   const mockClient = {
     channels: {
@@ -128,10 +128,6 @@ describe('CommunityEventsProcessorService', () => {
       spyDataSource = jest.spyOn(mockDataSource, 'createQueryBuilder');
     });
 
-    it('job start should be defined', () => {
-      expect(service.startEvent).toBeDefined();
-    });
-
     it('should throw finding Discord Community Event from DB', async () => {
       spyDataSource.mockReturnValue({ select: () => ({ from: () => ({ leftJoinAndSelect: () => ({ where: () => ({ getOne: jest.fn().mockReturnValue(Promise.reject(new Error('test'))) }) }) }) })});
       try {
@@ -151,6 +147,7 @@ describe('CommunityEventsProcessorService', () => {
         expect(e).toBeInstanceOf(ProcessorException);
       }
       expect(spyDataSource).toHaveBeenCalled();
+      /* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */
       expect(spyDataSource.mock.results[0].value.select().from().leftJoinAndSelect().where().getOne()).toEqual(null);
       spyDataSource.mockRestore();
     });

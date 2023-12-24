@@ -12,14 +12,8 @@ import { Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { VoiceState } from 'discord.js';
 import {
-  CommunityEventDto,
-  DiscordParticipant,
-  DiscordParticipantDto,
 } from '@badgebuddy/common';
-import * as mongoose from 'mongoose';
-import { getModelToken } from '@nestjs/mongoose';
-import { MongooseError } from 'mongoose';
-import { ProcessorException } from '../../community-events-queue/exceptions/processor.exception';
+import { ProcessorException } from '@/community-events-queue/exceptions/processor.exception';
 
 describe('VoiceStateUpdateService', () => {
   let service: EventTrackingService;

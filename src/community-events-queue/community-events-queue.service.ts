@@ -224,7 +224,7 @@ export class CommunityEventsProcessorService {
       this.logger.warn('Failed to fetch community event from database');
       throw err;
     }
-    if (!result || !result.communityEvent || result.communityEvent.id !== communityEventId) {
+    if (result?.communityEvent.id !== communityEventId) {
       throw new ProcessorException(`Community communityEventId: ${communityEventId} not found`);
     }
     this.logger.verbose(`Fetched community communityEventId: ${communityEventId} from database`);

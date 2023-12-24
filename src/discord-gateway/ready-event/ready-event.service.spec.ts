@@ -2,7 +2,7 @@ import { beforeEach, describe, it, expect, jest } from '@jest/globals';
 import { ReadyEventService } from './ready-event.service';
 import { Logger } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { Client, Guild } from 'discord.js';
+import { Client } from 'discord.js';
 
 describe('ReadyEventService', () => {
   let service: ReadyEventService;

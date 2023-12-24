@@ -3,7 +3,6 @@ import { On } from '@discord-nestjs/core';
 import { GuildMember, VoiceState } from 'discord.js';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { InjectRepository } from '@nestjs/typeorm';
 import {
   CommunityParticipantDiscordEntity,
   DiscordActiveCommunityEventDto,
@@ -45,8 +44,12 @@ export class VoiceStateUpdateEventService {
           communityEvent.voiceChannelSId,
         )
       ) {
+        if (!newState.member) {
+          this.logger.error(`User has joined a voice channel or un-deafened, but member is undefined, guildId: ${newState.guild.id}`);
+          continue;
+        }
         this.logger.verbose(`User has joined a voice channel or un-deafened, guildId: ${newState.member?.guild.id}`);
-        const guildMember = newState.member as GuildMember;
+        const guildMember = newState.member;
         const userCache = await this.getParticipantFromCache(communityEvent.communityEventId, guildMember.guild.id, guildMember.id);
         if (!userCache) {
           await this.insertUserToCache(communityEvent.communityEventId, guildMember);
@@ -68,7 +71,11 @@ export class VoiceStateUpdateEventService {
           communityEvent.voiceChannelSId,
         )
       ) {
-        const guildMember = newState.member as GuildMember;
+        if (!newState.member) {
+          this.logger.error(`User has left a voice channel or deafened, but member is undefined, guildId: ${newState.guild.id}`);
+          continue;
+        }
+        const guildMember = newState.member;
         this.logger.log(
           `User ${guildMember.user.username} has left a voice channel or deafened, guildId: ${guildMember.guild.id}, eventId: ${communityEvent.communityEventId}`,
         );
@@ -99,7 +106,7 @@ export class VoiceStateUpdateEventService {
     oldState: VoiceState,
     newState: VoiceState,
   ): Promise<DiscordActiveCommunityEventDto[]> => {
-    
+
     if (!oldState.channelId && !newState.channelId) {
       return [];
     }
@@ -255,12 +262,12 @@ export class VoiceStateUpdateEventService {
   }
 
   /**
-   * Logical condition checks for tracking 
+   * Logical condition checks for tracking
    */
 
   /**
    * Conditions for tracking not been met
-   * If the user has not changed voice channels 
+   * If the user has not changed voice channels
    * or remained deafened between hops
    * @param oldState
    * @param newState
