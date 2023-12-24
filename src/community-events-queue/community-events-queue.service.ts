@@ -3,13 +3,7 @@ import { Processor, Process, OnQueueFailed } from '@nestjs/bull';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Job } from 'bull';
-import {
-  Channel,
-  ChannelType,
-  Client,
-  GuildMember,
-  VoiceChannel,
-} from 'discord.js';
+import { Channel, ChannelType, Client, VoiceChannel } from 'discord.js';
 import { ProcessorException } from './exceptions/processor.exception';
 import {
   CommunityEventDiscordEntity,
@@ -106,18 +100,12 @@ export class CommunityEventsProcessorService {
       return {};
     }
 
-    this.insertAllParticipantToDb(communityEventId, discordParticipants).catch(
-      (err) => {
-        this.logger.error(err);
-        this.logger.warn(
-          `continuing with job process start for 
-          communityEventId: ${communityEventId}, botSettingsId: ${botSettingsId}`,
-        );
-      },
-    );
+    this.logger.verbose(`found ${discordParticipants.length} participants`);
+
+    await this.insertAllParticipantToDb(communityEventId, discordParticipants);
 
     this.logger.log(
-      `Processed done for communityEventId: ${communityEventId}, 
+      `Processed start event for communityEventId: ${communityEventId}, 
       botSettingsId: ${botSettingsId}, organizerId: ${organizerId}, 
       voiceChannelId: ${voiceChannelSId}`,
       CommunityEventsProcessorService.START_QUEUE_LOG,
@@ -274,31 +262,29 @@ export class CommunityEventsProcessorService {
     communityEventId: string,
     participants: DiscordParticipant[],
   ) {
-    try {
-      const result = await this.dataSource
-        .createQueryBuilder()
-        .insert()
-        .into(CommunityParticipantDiscordEntity)
-        .values(
-          participants.map((participant) => {
-            return {
-              communityEventId: communityEventId,
-              discordUserSId: participant.userSId,
-              startDate: new Date(),
-              participationLength: 0,
-            } as CommunityParticipantDiscordEntity;
-          }),
-        )
-        .execute();
-
-      if (!result || result.identifiers.length !== participants.length) {
-        throw new ProcessorException(`Failed to insert participants 
+    this.logger.verbose(
+      `attempting to insert ${participants.length} participants into db`,
+    );
+    const result = await this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(CommunityParticipantDiscordEntity)
+      .values(
+        participants.map((participant) => {
+          return {
+            communityEventId: communityEventId,
+            discordUserSId: participant.userSId,
+            startDate: new Date(),
+            participationLength: 0,
+          } as CommunityParticipantDiscordEntity;
+        }),
+      )
+      .execute();
+    if (result.identifiers.length !== participants.length) {
+      throw new ProcessorException(`Failed to insert all participants 
         for communityEventId: ${communityEventId}`);
-      }
-    } catch (err) {
-      this.logger.warn('Failed to insert participants for community event');
-      throw err;
     }
+    this.logger.verbose(`inserted ${result.identifiers.length} participants`);
   }
 
   private async insertParticipantToCache(

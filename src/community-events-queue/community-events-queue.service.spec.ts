@@ -2,7 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Job } from 'bull';
-import { describe, expect, jest, it, beforeEach } from '@jest/globals';
+import {
+  describe,
+  expect,
+  jest,
+  it,
+  beforeEach,
+  afterEach,
+} from '@jest/globals';
 import { ChannelType, Collection } from 'discord.js';
 import { CommunityEventsProcessorService } from './community-events-queue.service';
 import {
@@ -12,7 +19,7 @@ import {
   DiscordParticipantRedisDto,
 } from '@badgebuddy/common';
 import { ProcessorException } from './exceptions/processor.exception';
-import { DataSource } from 'typeorm';
+import { DataSource, InsertResult } from 'typeorm';
 
 describe('CommunityEventsProcessorService', () => {
   let service: CommunityEventsProcessorService;
@@ -21,6 +28,8 @@ describe('CommunityEventsProcessorService', () => {
   let spyDataSource: jest.Spied<any>;
   let spyLoggerWarn: jest.Spied<any>;
   let spyLoggerError: jest.Spied<any>;
+  let spyLoggerLog: jest.Spied<any>;
+  let spyLoggerVerbose: jest.Spied<any>;
 
   const mockStartDate = new Date();
   const mockEndDate = new Date(mockStartDate.getTime() + 1000 * 60 * 60);
@@ -85,21 +94,38 @@ describe('CommunityEventsProcessorService', () => {
     },
   };
 
-  const mockDataSource = {
+  const getMockDataSource = (
+    mockDiscordCommunityEvent: Promise<CommunityEventDiscordEntity>,
+    mockInsertResult: Promise<InsertResult>,
+  ) => ({
     createQueryBuilder: () => ({
       select: () => ({
         from: () => ({
           leftJoinAndSelect: () => ({
             where: () => ({
-              getOne: jest
-                .fn()
-                .mockReturnValue(Promise.resolve(mockDiscordCommunityEvent)),
+              getOne: jest.fn().mockReturnValue(mockDiscordCommunityEvent),
             }),
           }),
         }),
       }),
+      insert: () => ({
+        into: () => ({
+          values: () => ({
+            execute: jest.fn().mockReturnValue(mockInsertResult),
+          }),
+        }),
+      }),
     }),
-  };
+  });
+
+  const mockDataSource = getMockDataSource(
+    Promise.resolve(mockDiscordCommunityEvent),
+    Promise.resolve({
+      identifiers: [{ id: '1' }],
+      generatedMaps: [{ id: '1' }],
+      raw: { affectedRows: 1 },
+    } as InsertResult),
+  );
 
   const mockJob = {
     data: {
@@ -124,6 +150,10 @@ describe('CommunityEventsProcessorService', () => {
     );
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
@@ -133,8 +163,24 @@ describe('CommunityEventsProcessorService', () => {
       spyDiscordClient = jest.spyOn(mockClient.channels, 'fetch');
       spyCacheManagerSet = jest.spyOn(mockCacheManager, 'set');
       spyDataSource = jest.spyOn(mockDataSource, 'createQueryBuilder');
+
       spyLoggerWarn = jest.spyOn(mockLogger, 'warn');
       spyLoggerError = jest.spyOn(mockLogger, 'error');
+      spyLoggerLog = jest.spyOn(mockLogger, 'log');
+      spyLoggerVerbose = jest.spyOn(mockLogger, 'verbose');
+
+      spyDiscordClient.mockReturnValue(Promise.resolve(mockVoiceChannel));
+      spyCacheManagerSet.mockReturnValue(Promise.resolve());
+      spyDataSource.mockReturnValue(
+        getMockDataSource(
+          Promise.resolve(mockDiscordCommunityEvent),
+          Promise.resolve({
+            identifiers: [{ id: '1' }],
+            generatedMaps: [{ id: '1' }],
+            raw: { affectedRows: 1 },
+          } as InsertResult),
+        ).createQueryBuilder(),
+      );
     });
 
     it('should throw finding Discord Community Event from DB', async () => {
@@ -157,7 +203,6 @@ describe('CommunityEventsProcessorService', () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(spyDataSource).toHaveBeenCalled();
-      spyDataSource.mockRestore();
     });
 
     it('should not find Discord Community Event from DB', async () => {
@@ -187,8 +232,6 @@ describe('CommunityEventsProcessorService', () => {
           .getOne(),
       ).toEqual(null);
       /* eslint-enable */
-
-      spyDataSource.mockRestore();
     });
 
     it('should throw when finding voice channel', async () => {
@@ -199,7 +242,6 @@ describe('CommunityEventsProcessorService', () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(spyDiscordClient).toHaveBeenCalled();
-      spyDiscordClient.mockRestore();
     });
 
     it('should not find voice channel', async () => {
@@ -214,7 +256,6 @@ describe('CommunityEventsProcessorService', () => {
         null,
       );
       expect(spyCacheManagerSet).not.toHaveBeenCalled();
-      spyDiscordClient.mockRestore();
     });
 
     it('should skip deaf participant and track 0 participants', async () => {
@@ -229,10 +270,9 @@ describe('CommunityEventsProcessorService', () => {
       await service.startEvent(mockJob);
       expect(spyDiscordClient).toHaveBeenCalled();
       expect(spyCacheManagerSet).not.toHaveBeenCalled();
-      spyDiscordClient.mockRestore();
     });
 
-    it('should throw on inserting participant in cache', async () => {
+    it('should proceed on error inserting participant in cache', async () => {
       const mockError = new Error('mock cacheManager set error');
       spyCacheManagerSet.mockReturnValue(Promise.reject(mockError));
 
@@ -243,73 +283,107 @@ describe('CommunityEventsProcessorService', () => {
         mockVoiceChannel,
       );
       expect(spyCacheManagerSet).toHaveBeenCalled();
-      expect;
+      expect(spyLoggerVerbose).toBeCalled();
+      expect(spyLoggerVerbose.mock.calls[5][0]).toEqual('found 1 participants');
+    });
+
+    it('should throw on inserting in db', async () => {
+      const mockError = new Error(
+        'mock discordParticipantModel bulkWrite error',
+      );
+      spyDataSource.mockReturnValue(
+        getMockDataSource(
+          Promise.resolve(mockDiscordCommunityEvent),
+          Promise.reject(mockError),
+        ).createQueryBuilder(),
+      );
+      try {
+        await service.startEvent(mockJob);
+      } catch (e) {
+        console.log(e);
+        expect(e).toBeInstanceOf(Error);
+      }
+      expect(spyDiscordClient).toHaveBeenCalled();
+      await expect(spyDiscordClient.mock.results[0].value).resolves.toEqual(
+        mockVoiceChannel,
+      );
+      expect(spyCacheManagerSet).toHaveBeenCalled();
+      expect(spyLoggerVerbose).toBeCalled();
+      expect(spyLoggerVerbose.mock.calls[5][0]).toEqual('found 1 participants');
+      expect(spyLoggerVerbose.mock.calls[6][0]).toEqual(
+        'attempting to insert 1 participants into db',
+      );
+      expect(spyDataSource).toHaveBeenCalled();
+      /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */
+      await expect(
+        spyDataSource.mock.results[1].value.insert().into().values().execute(),
+      ).rejects.toEqual(mockError);
+      /* eslint-enable */
+    });
+
+    it('should throw on inserting in db for missed insert', async () => {
+      spyDataSource.mockReturnValue(
+        getMockDataSource(
+          Promise.resolve(mockDiscordCommunityEvent),
+          Promise.resolve({
+            identifiers: [],
+            generatedMaps: [],
+            raw: { affectedRows: 0 },
+          } as InsertResult),
+        ).createQueryBuilder(),
+      );
+      try {
+        await service.startEvent(mockJob);
+      } catch (e) {
+        console.log(e);
+        expect(e).toBeInstanceOf(ProcessorException);
+      }
+      expect(spyDiscordClient).toHaveBeenCalled();
+      await expect(spyDiscordClient.mock.results[0].value).resolves.toEqual(
+        mockVoiceChannel,
+      );
+      expect(spyCacheManagerSet).toHaveBeenCalled();
+      expect(spyLoggerVerbose).toBeCalled();
+      expect(spyLoggerVerbose.mock.calls[5][0]).toEqual('found 1 participants');
+      expect(spyLoggerVerbose.mock.calls[6][0]).toEqual(
+        'attempting to insert 1 participants into db',
+      );
+      expect(spyDataSource).toHaveBeenCalled();
+      /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */
+      /* eslint-disable */
+      const result: InsertResult = await spyDataSource.mock.results[1].value
+        .insert()
+        .into()
+        .values()
+        .execute();
+      /* eslint-enable */
+      expect(result.identifiers.length).toEqual(0);
+    });
+
+    it('should track participant', async () => {
+      await service.startEvent(mockJob);
+      expect(spyDiscordClient).toHaveBeenCalled();
+      await expect(spyDiscordClient.mock.results[0].value).resolves.toEqual(
+        mockVoiceChannel,
+      );
+      expect(spyCacheManagerSet).toHaveBeenCalled();
+      expect(spyLoggerVerbose).toBeCalled();
+      expect(spyLoggerVerbose.mock.calls[5][0]).toEqual('found 1 participants');
+      expect(spyLoggerVerbose.mock.calls[6][0]).toEqual(
+        'attempting to insert 1 participants into db',
+      );
+      expect(spyDataSource).toHaveBeenCalled();
+      /* eslint-disable */
+      const result: InsertResult = await spyDataSource.mock.results[1].value
+        .insert()
+        .into()
+        .values()
+        .execute();
+      /* eslint-enable */
+      expect(result.identifiers.length).toEqual(1);
     });
   });
 });
-
-//     it('should track participant', async () => {
-//       const mockCommunityEvent = getMockCommunityEvent();
-//       const mockVoiceChannel = getMockVoiceChannel();
-
-//       try {
-//         await service.startEvent(mockJob);
-//       } catch (e) {}
-//       expect(spyCommunityEventModel).toHaveBeenCalled();
-//       await expect(
-//         spyCommunityEventModel.mock.results[0].value,
-//       ).resolves.toEqual(mockCommunityEvent);
-//       await expect(spyDiscordClient.mock.results[0].value).resolves.toEqual(
-//         mockVoiceChannel,
-//       );
-//       expect(spyCacheManagerSet).toHaveBeenCalled();
-//       expect(spyDiscordParticipantModel).toHaveBeenCalled();
-//     });
-
-//     it('should throw on inserting in db', async () => {
-//       const mockCommunityEvent = getMockCommunityEvent();
-//       const mockVoiceChannel = getMockVoiceChannel();
-
-//       spyDiscordParticipantModel.mockReturnValue(
-//         Promise.reject(
-//           new Error('mock discordParticipantModel insertMany error'),
-//         ),
-//       );
-
-//       try {
-//         await service.startEvent(mockJob);
-//       } catch (e) {
-//         expect(e).toBeInstanceOf(ProcessorException);
-//       }
-//       expect(spyCommunityEventModel).toHaveBeenCalled();
-//       await expect(
-//         spyCommunityEventModel.mock.results[0].value,
-//       ).resolves.toEqual(mockCommunityEvent);
-//       await expect(spyDiscordClient.mock.results[0].value).resolves.toEqual(
-//         mockVoiceChannel,
-//       );
-//       expect(spyCacheManagerSet).toHaveBeenCalled();
-//       expect(spyDiscordParticipantModel).toHaveBeenCalled();
-//     });
-
-//     it('should throw getting community from db', async () => {
-//       const mockError = new Error('mock communityEventModel findOne error');
-
-//       spyCommunityEventModel.mockReturnValue(Promise.reject(mockError));
-
-//       try {
-//         await service.startEvent(mockJob);
-//       } catch (e) {
-//         expect(e).toBeInstanceOf(ProcessorException);
-//       }
-//       expect(spyCommunityEventModel).toHaveBeenCalled();
-//       await expect(
-//         spyCommunityEventModel.mock.results[0].value,
-//       ).rejects.toEqual(mockError);
-//       expect(spyCacheManagerSet).not.toHaveBeenCalled();
-//       expect(spyDiscordParticipantModel).not.toHaveBeenCalled();
-//     });
-//   });
 
 //   describe('EventsProcessorService.end', () => {
 //     let spyCacheManagerGet: jest.Spied<any>;
