@@ -6,11 +6,11 @@
   "private": true,
   "license": "MIT",
   "engines": {
-    "node": "20.9.0",
-    "pnpm": "8.12.1"
+    "node": "20.10.0",
+    "pnpm": "8.13.1"
   },
   "engineStrict": true,
-  "packageManager": "pnpm@8.12.1",
+  "packageManager": "pnpm@8.13.1",
   "scripts": {
     "build": "nest build",
     "clean": "rm -rf dist && rm -rf coverage && rm -rf node_modules",
@@ -35,7 +35,7 @@
     "env:pull": "dotenv-vault pull",
     "publish-docker:staging": "node publish.docker.js staging latest-beta",
     "publish-docker:production": "node publish.docker.js production latest",
-    "sync": "git fetch && git pull && dotenv-vault pull && pnpm install"
+    "sync": "git fetch && git pull && pnpm install && dotenv-vault pull"
   },
   "dependencies": {
     "@badgebuddy/common": "2.1.0-4",
