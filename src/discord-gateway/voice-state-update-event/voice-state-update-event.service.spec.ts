@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EventTrackingService } from './event-tracking.service';
 import {
   describe,
   expect,
@@ -13,9 +12,10 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { VoiceState } from 'discord.js';
 import {} from '@badgebuddy/common';
 import { ProcessorException } from '@/community-events-queue/exceptions/processor.exception';
+import { VoiceStateUpdateEventService } from './voice-state-update-event.service';
 
 describe('VoiceStateUpdateService', () => {
-  let service: EventTrackingService;
+  let service: VoiceStateUpdateEventService;
   let mockNewVoiceState: VoiceState | any;
   let mockOldVoiceState: VoiceState | any;
   let mockCommunityEvent: CommunityEventDto;
