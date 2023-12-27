@@ -184,6 +184,12 @@ describe('CommunityEventsProcessorService', () => {
       );
     });
 
+    
+    it('should be defined for start event', () => {
+      expect(service.startEvent.name).toBeDefined();
+    });
+
+
     it('should throw finding Discord Community Event from DB', async () => {
       spyDataSource.mockReturnValue({
         select: () => ({
@@ -409,44 +415,15 @@ describe('CommunityEventsProcessorService', () => {
         ).createQueryBuilder(),
       );
     });
+
+    it('should be defined for endEvent', () => {
+      expect(service.endEvent.name).toBeDefined();
+    });
+
   });
 });
 
-//   describe('EventsProcessorService.end', () => {
-//     let spyCacheManagerGet: jest.Spied<any>;
-//     let spyCacheManagerDel: jest.Spied<any>;
-//     let spyCacheManagerKeys: jest.Spied<any>;
 
-//     const mockJob = {
-//       data: {
-//         eventId: '123',
-//       },
-//     } as Job<{ eventId: string }>;
-
-//     const mockCacheKeys = ['tracking:events:123:participants:123'];
-
-//     beforeEach(() => {
-//       spyCacheManagerKeys = jest.spyOn(mockCacheManager.store, 'keys');
-//       spyCacheManagerKeys.mockReturnValue(Promise.resolve(mockCacheKeys));
-
-//       spyCacheManagerGet = jest.spyOn(mockCacheManager, 'get');
-//       spyCacheManagerGet.mockReturnValue(
-//         Promise.resolve(getMockDiscordParticipantDto()),
-//       );
-
-//       spyCacheManagerDel = jest.spyOn(mockCacheManager, 'del');
-//       spyCacheManagerDel.mockReturnValue(Promise.resolve());
-
-//       // spyDiscordParticipantModel = jest.spyOn(
-//       //   mockDiscordParticipantRepo,
-//       //   'bulkWrite',
-//       // );
-//       spyDiscordParticipantModel.mockReturnValue(Promise.resolve([]));
-//     });
-
-//     it('job start should be defined', () => {
-//       expect(service.endEvent).toBeDefined();
-//     });
 
 //     it('should pull Community Event from db', async () => {
 //       const mockCommunityEvent = getMockCommunityEvent();
