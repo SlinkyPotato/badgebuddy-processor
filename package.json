@@ -23,7 +23,7 @@
     "start:prod": "node dist/main",
     "start:docker": "docker compose --profile local up --build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "lint": "eslint .",
+    "lint": "eslint . --fix",
     "lint:fix": "eslint . --fix",
     "test": "jest",
     "test:watch": "jest --watch",
