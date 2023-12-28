@@ -15,9 +15,9 @@ describe('GuildCreateEventService', () => {
   };
 
   const mockHttpService = {
-    post: jest.fn().mockReturnThis(),
-    pipe: jest.fn().mockReturnThis(),
-    subscribe: jest.fn().mockReturnThis(),
+    post: jest.fn().mockReturnValue({
+      status: 200,
+    }),
   };
 
   beforeEach(async () => {

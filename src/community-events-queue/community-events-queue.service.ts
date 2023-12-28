@@ -4,7 +4,6 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Job } from 'bull';
 import { Channel, ChannelType, Client, VoiceChannel } from 'discord.js';
-import { ProcessorException } from './exceptions/processor.exception';
 import {
   CommunityEventDiscordEntity,
   DISCORD_COMMUNITY_EVENTS_END_JOB,
@@ -16,6 +15,7 @@ import {
 } from '@badgebuddy/common';
 import { Cache } from 'cache-manager';
 import { DataSource } from 'typeorm';
+import { ProcessorException } from '@/exceptions/processor.exception';
 
 type DiscordParticipant = {
   userSId: string;

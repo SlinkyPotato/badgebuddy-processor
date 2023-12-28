@@ -10,8 +10,8 @@ import {
   TRACKING_EVENTS_ACTIVE,
   TRACKING_EVENTS_PARTICIPANTS,
 } from '@badgebuddy/common';
-import { ProcessorException } from '@/community-events-queue/exceptions/processor.exception';
 import { DataSource } from 'typeorm';
+import { ProcessorException } from '@/exceptions/processor.exception';
 
 @Injectable()
 export class VoiceStateUpdateEventService {
@@ -27,7 +27,7 @@ export class VoiceStateUpdateEventService {
     newState: VoiceState,
   ): Promise<void> {
     if (this.conditionsForTrackingNotBeenMet(oldState, newState)) {
-      // participant remained defeaned or did not change voice channels, thus returning
+      // participant remained deafened or did not change voice channels, thus returning
       return;
     }
     const communityEvents = await this.getCommunityEventsFromCache(
@@ -171,6 +171,11 @@ export class VoiceStateUpdateEventService {
     };
 
     try {
+      if (oldState.channelId === newState.channelId) {
+        const event = await getActiveEventFromCache(oldState.channelId);
+        return event ? [event] : [];
+      }
+
       const prevEvent = await getActiveEventFromCache(oldState.channelId);
       const newEvent = await getActiveEventFromCache(newState.channelId);
 
@@ -223,31 +228,25 @@ export class VoiceStateUpdateEventService {
     communityEventId: string,
     guildMember: GuildMember,
   ) {
-    try {
-      const result = await this.dataSource
-        .createQueryBuilder()
-        .insert()
-        .into(CommunityParticipantDiscordEntity)
-        .values({
-          communityEventId: communityEventId,
-          discordUserSId: guildMember.id.toString(),
-          startDate: new Date().toISOString(),
-          participationLength: 0,
-        })
-        .execute();
-      if (!result) {
-        throw new ProcessorException(
-          `Failed to insert user to db, eventId: ${communityEventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
-        );
-      }
-      this.logger.verbose(
-        `User inserted to db, eventId: ${communityEventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
-      );
-    } catch (e) {
-      this.logger.error(
+    const result = await this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(CommunityParticipantDiscordEntity)
+      .values({
+        communityEventId: communityEventId,
+        discordUserSId: guildMember.id.toString(),
+        startDate: new Date().toISOString(),
+        participationLength: 0,
+      })
+      .execute();
+    if (!result || result?.identifiers.length <= 0) {
+      throw new ProcessorException(
         `Failed to insert user to db, eventId: ${communityEventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
       );
     }
+    this.logger.verbose(
+      `User inserted to db, eventId: ${communityEventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
+    );
   }
 
   private async updateUserInCache(
@@ -302,32 +301,23 @@ export class VoiceStateUpdateEventService {
     communityEventId: string,
     guildMember: GuildMember,
   ): Promise<CommunityParticipantDiscordEntity> {
-    try {
-      const result = await this.dataSource
-        .createQueryBuilder()
-        .select('participant')
-        .from(CommunityParticipantDiscordEntity, 'participant')
-        .where('participant.communityEventId = :communityEventId', {
-          communityEventId,
-        })
-        .andWhere('participant.discordUserSId = :discordUserSId', {
-          discordUserSId: guildMember.id,
-        })
-        .getOne();
-      if (!result) {
-        throw new ProcessorException(
-          `User not found in db, eventId: ${communityEventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
-        );
-      }
-      return result;
-    } catch (e) {
-      this.logger.error(
-        `Failed to fetch participant from db, eventId: ${communityEventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
-      );
+    const result = await this.dataSource
+      .createQueryBuilder()
+      .select('participant')
+      .from(CommunityParticipantDiscordEntity, 'participant')
+      .where('participant.communityEventId = :communityEventId', {
+        communityEventId,
+      })
+      .andWhere('participant.discordUserSId = :discordUserSId', {
+        discordUserSId: guildMember.id,
+      })
+      .getOne();
+    if (!result) {
       throw new ProcessorException(
         `User not found in db, eventId: ${communityEventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
       );
     }
+    return result;
   }
 
   /**

@@ -9,16 +9,15 @@ import {
 } from '@jest/globals';
 import { Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Guild, GuildMember, User, VoiceState } from 'discord.js';
+import { Guild, VoiceState } from 'discord.js';
 import {
-  CommunityEventDiscordEntity,
-  CommunityEventEntity,
   CommunityParticipantDiscordEntity,
   DiscordActiveCommunityEventDto,
   DiscordParticipantRedisDto,
 } from '@badgebuddy/common';
-import { ProcessorException } from '@/community-events-queue/exceptions/processor.exception';
 import { VoiceStateUpdateEventService } from './voice-state-update-event.service';
+import { DataSource, InsertResult } from 'typeorm';
+import { ProcessorException } from '@/exceptions/processor.exception';
 
 describe('VoiceStateUpdateService', () => {
   let service: VoiceStateUpdateEventService;
@@ -32,44 +31,51 @@ describe('VoiceStateUpdateService', () => {
   let spyLoggerWarn: jest.Spied<any>;
   let spyLoggerError: jest.Spied<any>;
 
-  const mockOldVoiceState: VoiceState = {
-    channelId: '123',
-    deaf: false,
-    serverMute: false,
-    member: {
-      id: '123',
-      user: {
-        tag: 'test',
-        id: '123',
-        bot: false,
-      },
-      guild: {
-        id: '123',
-        name: 'test',
-      } as Guild,
-    },
-  } as VoiceState;
+  const mockLogger = {
+    log: jest.fn(),
+    verbose: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
 
-  const mockNewVoiceState: VoiceState = {
-    channelId: '123',
-    deaf: false,
-    serverMute: false,
-    member: {
-      id: '123',
-      user: {
-        tag: 'test',
-      },
-      guild: {
+  const getMockOldVoiceState = (): VoiceState =>
+    ({
+      channelId: '123',
+      deaf: false,
+      serverMute: false,
+      member: {
         id: '123',
+        user: {
+          tag: 'test',
+          id: '123',
+        },
+        guild: {
+          id: '123',
+        } as Guild,
       },
-    },
-  } as VoiceState;
+    }) as VoiceState;
+
+  const getMockNewVoiceState = (): VoiceState =>
+    ({
+      channelId: '123',
+      deaf: false,
+      serverMute: false,
+      member: {
+        id: '123',
+        user: {
+          tag: 'test',
+        },
+        guild: {
+          id: '123',
+        },
+      },
+    }) as VoiceState;
 
   const mockStartDate = new Date();
   const mockEndDate = new Date(mockStartDate.getTime() + 1000 * 60 * 60);
 
   const mockCommunityEvent: DiscordActiveCommunityEventDto = {
-    communityEventId: '8846c42c-477b-48f1-a959-10cd25d110ad',
+    communityEventId: 'test-event-id-1',
     voiceChannelSId: '850840267082563600',
     description: 'test',
     startDate: mockStartDate,
@@ -81,7 +87,7 @@ describe('VoiceStateUpdateService', () => {
   };
 
   const mockCommunityEvent2: DiscordActiveCommunityEventDto = {
-    communityEventId: '1146c42c-477b-48f1-a959-10cd45d310ad',
+    communityEventId: 'test-event-id-2',
     voiceChannelSId: '950840267482563600',
     description: 'Another event',
     startDate: mockStartDate,
@@ -99,50 +105,104 @@ describe('VoiceStateUpdateService', () => {
     durationInSeconds: 0,
   };
 
-  const mockDbUser: CommunityParticipantDiscordEntity = {
+  const mockDiscordParticipantEntity: CommunityParticipantDiscordEntity = {
     communityEventId: mockCommunityEvent.communityEventId,
     discordUserSId: '123',
     startDate: new Date(),
     participationLength: 0,
   };
 
-  const mockDiscordParticipantModel = {
-    exists: jest.fn().mockReturnThis(),
-    create: jest.fn().mockReturnThis(),
-    findOne: jest.fn().mockReturnThis(),
-    find: jest.fn().mockReturnThis(),
+  const mockCacheManager = {
+    del: jest.fn().mockReturnValue(Promise.resolve()),
+    get: jest.fn().mockReturnValue(Promise.resolve(mockCommunityEvent)),
+    set: jest.fn().mockReturnValue(Promise.resolve()),
   };
 
-  const mockCacheManager = {
-    del: jest.fn().mockReturnThis(),
-    get: jest.fn().mockReturnThis(),
-    set: jest.fn().mockReturnThis(),
-  };
+  const genMockDataSource = (
+    mockSelectParticipant: Promise<CommunityParticipantDiscordEntity | null>,
+    mockInsertResult: Promise<InsertResult>,
+  ) => ({
+    createQueryBuilder: () => ({
+      select: () => ({
+        from: () => ({
+          where: () => ({
+            andWhere: () => ({
+              getOne: jest.fn().mockReturnValue(mockSelectParticipant),
+            }),
+          }),
+        }),
+      }),
+      insert: () => ({
+        into: () => ({
+          values: () => ({
+            execute: jest.fn().mockReturnValue(mockInsertResult),
+          }),
+        }),
+      }),
+    }),
+  });
+
+  const mockDataSource = genMockDataSource(
+    Promise.resolve(mockDiscordParticipantEntity),
+    Promise.resolve({
+      identifiers: [{ id: '1' }],
+      generatedMaps: [{ id: '1' }],
+      raw: { affectedRows: 1 },
+    } as InsertResult),
+  );
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        EventTrackingService,
-        Logger,
+        VoiceStateUpdateEventService,
+        { provide: Logger, useValue: mockLogger },
         { provide: CACHE_MANAGER, useValue: mockCacheManager },
-        {
-          provide: getModelToken(DiscordParticipant.name),
-          useValue: mockDiscordParticipantModel,
-        },
+        { provide: DataSource, useValue: mockDataSource },
       ],
     }).compile();
 
-    service = module.get<EventTrackingService>(EventTrackingService);
-    mockNewVoiceState = getMockNewVoiceState();
-    mockOldVoiceState = getMockOldVoiceState();
-    mockCommunityEvent = getMockCommunityEvent();
-    mockAnotherCommunityEvent = getAnotherMockCommunityEvent();
-    mockUserCache = getMockUserCache();
-    keys = getKeys();
+    service = module.get<VoiceStateUpdateEventService>(
+      VoiceStateUpdateEventService,
+    );
+
+    spyLoggerLog = jest.spyOn(mockLogger, 'log');
+    spyLoggerVerbose = jest.spyOn(mockLogger, 'verbose');
+    spyLoggerWarn = jest.spyOn(mockLogger, 'warn');
+    spyLoggerError = jest.spyOn(mockLogger, 'error');
+
+    spyCacheManagerSet = jest.spyOn(mockCacheManager, 'set');
+    spyCacheManagerGet = jest.spyOn(mockCacheManager, 'get');
+    spyCacheManagerGet.mockImplementation((key) => {
+      if (key === 'tracking:events:active:voiceChannelSId:850840267082563600') {
+        return Promise.resolve(mockCommunityEvent);
+      }
+      if (key === 'tracking:events:active:voiceChannelSId:950840267482563600') {
+        return Promise.resolve(mockCommunityEvent2);
+      }
+      if (key === 'tracking:events:test-event-id-1:participants:123') {
+        return Promise.resolve(mockUserParticipantCache);
+      }
+      if (key === 'tracking:events:test-event-id-2:participants:123') {
+        return Promise.resolve(null);
+      }
+      return Promise.resolve(null);
+    });
+
+    spyDataSource = jest.spyOn(mockDataSource, 'createQueryBuilder');
+    spyDataSource.mockReturnValue(
+      genMockDataSource(
+        Promise.resolve(mockDiscordParticipantEntity),
+        Promise.resolve({
+          identifiers: [{ id: '1' }],
+          generatedMaps: [{ id: '1' }],
+          raw: { affectedRows: 1 },
+        } as InsertResult),
+      ).createQueryBuilder(),
+    );
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -150,373 +210,400 @@ describe('VoiceStateUpdateService', () => {
   });
 
   it('should pull null for non-active event', async () => {
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
     mockNewVoiceState.channelId = '111';
-    const spy = jest.spyOn(mockCacheManager, 'get');
-    spy.mockReturnValue(null);
-    await service.handleParticipantTracking(
-      mockOldVoiceState,
-      mockNewVoiceState,
+
+    await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+
+    expect(spyCacheManagerGet).toHaveBeenCalledTimes(2);
+    expect(spyDataSource).not.toBeCalled();
+    expect(spyLoggerLog).not.toBeCalled();
+    expect(spyLoggerVerbose).not.toBeCalled();
+    expect(spyLoggerWarn).not.toBeCalled();
+    expect(spyLoggerError).not.toBeCalled();
+    await expect(spyCacheManagerGet.mock.results[0].value).resolves.toEqual(
+      null,
     );
-    expect(spy).toHaveBeenCalled();
-    expect(spy.mock.results[0].value).toBe(null);
   });
 
   it('should ignore server mute user', async () => {
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
     mockNewVoiceState.serverMute = true;
-    const spy = jest.spyOn(mockCacheManager, 'get');
 
-    await service.handleParticipantTracking(
-      mockOldVoiceState as VoiceState,
-      mockNewVoiceState as VoiceState,
-    );
-    expect(spy).not.toHaveBeenCalled();
+    await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+
+    expect(spyCacheManagerGet).not.toHaveBeenCalled();
+    expect(spyDataSource).not.toHaveBeenCalled();
+    expect(spyLoggerLog).not.toHaveBeenCalled();
+    expect(spyLoggerVerbose).not.toHaveBeenCalled();
+    expect(spyLoggerWarn).not.toHaveBeenCalled();
+    expect(spyLoggerError).not.toHaveBeenCalled();
   });
 
   it('should ignore new channel and deaf', async () => {
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
     mockNewVoiceState.channelId = '111';
+    // @ts-expect-error mock testing
     mockNewVoiceState.deaf = true;
+    // @ts-expect-error mock testing
     mockOldVoiceState.deaf = true;
-    const spy = jest.spyOn(mockCacheManager, 'get');
-    await service.handleParticipantTracking(
-      mockOldVoiceState as VoiceState,
-      mockNewVoiceState as VoiceState,
-    );
-    expect(spy).not.toHaveBeenCalled();
+
+    await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+
+    expect(spyCacheManagerGet).not.toHaveBeenCalled();
+    expect(spyDataSource).not.toHaveBeenCalled();
+    expect(spyLoggerLog).not.toHaveBeenCalled();
+    expect(spyLoggerVerbose).not.toHaveBeenCalled();
+    expect(spyLoggerWarn).not.toHaveBeenCalled();
+    expect(spyLoggerError).not.toHaveBeenCalled();
   });
 
   it('should ignore for same channel and deaf', async () => {
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
+    // @ts-expect-error mock testing
     mockNewVoiceState.deaf = true;
+    // @ts-expect-error mock testing
     mockOldVoiceState.deaf = true;
-    const spy = jest.spyOn(mockCacheManager, 'get');
-    await service.handleParticipantTracking(
-      mockOldVoiceState as VoiceState,
-      mockNewVoiceState as VoiceState,
-    );
-    expect(spy).not.toHaveBeenCalled();
+
+    await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+
+    expect(spyCacheManagerGet).not.toHaveBeenCalled();
+    expect(spyDataSource).not.toHaveBeenCalled();
+    expect(spyLoggerLog).not.toHaveBeenCalled();
+    expect(spyLoggerVerbose).not.toHaveBeenCalled();
+    expect(spyLoggerWarn).not.toHaveBeenCalled();
+    expect(spyLoggerError).not.toHaveBeenCalled();
   });
 
   it('should ignore for deaf on old and new', async () => {
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
+    // @ts-expect-error mock testing
     mockNewVoiceState.deaf = true;
+    // @ts-expect-error mock testing
     mockOldVoiceState.deaf = true;
-    const spy = jest.spyOn(mockCacheManager, 'get');
-    await service.handleParticipantTracking(
-      mockOldVoiceState as VoiceState,
-      mockNewVoiceState as VoiceState,
-    );
-    expect(spy).not.toHaveBeenCalled();
+
+    await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+
+    expect(spyCacheManagerGet).not.toHaveBeenCalled();
+    expect(spyDataSource).not.toHaveBeenCalled();
+    expect(spyLoggerLog).not.toHaveBeenCalled();
+    expect(spyLoggerVerbose).not.toHaveBeenCalled();
+    expect(spyLoggerWarn).not.toHaveBeenCalled();
+    expect(spyLoggerError).not.toHaveBeenCalled();
   });
 
   it('should ignore for deaf on old and new and old and new channel', async () => {
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
+    // @ts-expect-error mock testing
     mockNewVoiceState.deaf = true;
+    // @ts-expect-error mock testing
     mockOldVoiceState.deaf = true;
     mockNewVoiceState.channelId = '111';
     mockOldVoiceState.channelId = '111';
-    const spy = jest.spyOn(mockCacheManager, 'get');
-    await service.handleParticipantTracking(
-      mockOldVoiceState as VoiceState,
-      mockNewVoiceState as VoiceState,
-    );
-    expect(spy).not.toHaveBeenCalled();
+
+    await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+
+    expect(spyCacheManagerGet).not.toHaveBeenCalled();
+    expect(spyDataSource).not.toHaveBeenCalled();
+    expect(spyLoggerLog).not.toHaveBeenCalled();
+    expect(spyLoggerVerbose).not.toHaveBeenCalled();
+    expect(spyLoggerWarn).not.toHaveBeenCalled();
+    expect(spyLoggerError).not.toHaveBeenCalled();
   });
 
   it('should ignore new user joining unrelated channel', async () => {
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
     mockNewVoiceState.channelId = '5739439857';
-    const spy = jest.spyOn(mockCacheManager, 'get');
-    spy.mockReturnValue(Promise.resolve(mockCommunityEvent));
-    await service.handleParticipantTracking(
-      mockOldVoiceState as VoiceState,
-      mockNewVoiceState as VoiceState,
+
+    await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+
+    expect(spyCacheManagerGet).toBeCalledTimes(2);
+    await expect(spyCacheManagerGet.mock.results[0].value).resolves.toEqual(
+      null,
     );
-    expect(spy).toBeCalledTimes(2);
-    await expect(spy.mock.results[0].value).resolves.toEqual(
-      mockCommunityEvent,
-    );
+    expect(spyDataSource).not.toHaveBeenCalled();
+    expect(spyLoggerLog).not.toHaveBeenCalled();
+    expect(spyLoggerVerbose).not.toHaveBeenCalled();
+    expect(spyLoggerWarn).not.toHaveBeenCalled();
+    expect(spyLoggerError).not.toHaveBeenCalled();
   });
 
   it('should ignore new user leaving unrelated channel', async () => {
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
     mockOldVoiceState.channelId = '5739439857';
-    const spy = jest.spyOn(mockCacheManager, 'get');
-    spy.mockReturnValue(Promise.resolve(mockCommunityEvent));
-    await service.handleParticipantTracking(
-      mockOldVoiceState as VoiceState,
-      mockNewVoiceState as VoiceState,
+
+    await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+
+    expect(spyCacheManagerGet).toBeCalledTimes(2);
+    await expect(spyCacheManagerGet.mock.results[0].value).resolves.toEqual(
+      null,
     );
-    expect(spy).toBeCalledTimes(2);
-    await expect(spy.mock.results[0].value).resolves.toEqual(
-      mockCommunityEvent,
-    );
+    expect(spyDataSource).not.toHaveBeenCalled();
+    expect(spyLoggerLog).not.toHaveBeenCalled();
+    expect(spyLoggerVerbose).not.toHaveBeenCalled();
+    expect(spyLoggerWarn).not.toHaveBeenCalled();
+    expect(spyLoggerError).not.toHaveBeenCalled();
   });
 
   it('should track new user has joined voice channel', async () => {
-    mockNewVoiceState.channelId = '850840267082563600';
-    delete mockOldVoiceState.channelId;
-    const spy = jest.spyOn(mockCacheManager, 'get');
-    const setCacheSpy = jest.spyOn(mockCacheManager, 'set');
-    spy.mockImplementation((key) => {
-      if (key === 'tracking:events:active:voiceChannelId:850840267082563600') {
-        return Promise.resolve(mockCommunityEvent);
-      }
-      if (key === 'tracking:events:64e90a7a0eed9208a77e9b15:participants:123') {
-        return Promise.resolve(null);
-      }
-      if (
-        key === 'tracking:events:64e90a7a0eed9208a77e9b15:participants:keys'
-      ) {
-        return Promise.resolve(keys);
-      }
-      return Promise.resolve(null);
-    });
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
+    mockNewVoiceState.channelId = mockCommunityEvent.voiceChannelSId;
+    mockOldVoiceState.channelId = null;
+    // @ts-expect-error mock testing
+    mockNewVoiceState.member!.id = 'new-id-123';
+    // @ts-expect-error mock testing
+    mockOldVoiceState.member!.id = 'new-id-123';
 
-    await service.handleParticipantTracking(
-      mockOldVoiceState as VoiceState,
-      mockNewVoiceState as VoiceState,
-    );
-    expect(spy).toBeCalledTimes(2);
-    await expect(spy.mock.results[0].value).resolves.toEqual(
+    await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+    expect(spyCacheManagerGet).toBeCalledTimes(2);
+    await expect(spyCacheManagerGet.mock.results[0].value).resolves.toEqual(
       mockCommunityEvent,
     );
-    await expect(spy.mock.results[1].value).resolves.toEqual(null);
-    expect(setCacheSpy).toHaveBeenCalledTimes(1);
+    await expect(spyCacheManagerGet.mock.results[1].value).resolves.toEqual(
+      null,
+    );
+    expect(spyCacheManagerSet).toHaveBeenCalledTimes(1);
+    expect(spyDataSource).toHaveBeenCalledTimes(1);
   });
 
   it('should track user has re-joined voice channel', async () => {
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
     mockNewVoiceState.channelId = '850840267082563600';
-    const spy = jest.spyOn(mockCacheManager, 'get');
-    const setCacheSpy = jest.spyOn(mockCacheManager, 'set');
-    spy.mockImplementation((key) => {
-      if (key === 'tracking:events:active:voiceChannelId:850840267082563600') {
-        return Promise.resolve(mockCommunityEvent);
-      }
-      if (key === 'tracking:events:64e90a7a0eed9208a77e9b15:participants:123') {
-        return Promise.resolve(mockUserCache);
-      }
-      return Promise.resolve(null);
-    });
-    await service.handleParticipantTracking(
-      mockOldVoiceState as VoiceState,
-      mockNewVoiceState as VoiceState,
+
+    await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+
+    expect(spyCacheManagerGet).toBeCalledTimes(3);
+    await expect(spyCacheManagerGet.mock.results[0].value).resolves.toEqual(
+      null,
     );
-    expect(spy).toBeCalledTimes(3);
-    await expect(spy.mock.results[0].value).resolves.toEqual(null);
-    await expect(spy.mock.results[1].value).resolves.toEqual(
+    await expect(spyCacheManagerGet.mock.results[1].value).resolves.toEqual(
       mockCommunityEvent,
     );
-    await expect(spy.mock.results[2].value).resolves.toEqual(mockUserCache);
-    expect(setCacheSpy).toHaveBeenCalledTimes(1);
+    await expect(spyCacheManagerGet.mock.results[2].value).resolves.toEqual(
+      mockUserParticipantCache,
+    );
+    expect(spyCacheManagerSet).toHaveBeenCalledTimes(1);
+    expect(spyDataSource).not.toHaveBeenCalled();
   });
 
   it('should track user deafening during event', async () => {
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
     mockOldVoiceState.channelId = '850840267082563600';
     mockNewVoiceState.channelId = '850840267082563600';
+    // @ts-expect-error mock testing
     mockNewVoiceState.deaf = true;
-    const spy = jest.spyOn(mockCacheManager, 'get');
-    const setCacheSpy = jest.spyOn(mockCacheManager, 'set');
-    spy.mockImplementation((key) => {
-      if (key === 'tracking:events:active:voiceChannelId:850840267082563600') {
-        return Promise.resolve(mockCommunityEvent);
-      }
-      if (key === 'tracking:events:64e90a7a0eed9208a77e9b15:participants:123') {
-        return Promise.resolve(mockUserCache);
-      }
-      return Promise.resolve(null);
-    });
-    await service.handleParticipantTracking(
-      mockOldVoiceState as VoiceState,
-      mockNewVoiceState as VoiceState,
-    );
-    expect(spy).toBeCalledTimes(2);
-    await expect(spy.mock.results[0].value).resolves.toEqual(
+
+    await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+
+    expect(spyCacheManagerGet).toBeCalledTimes(2);
+    await expect(spyCacheManagerGet.mock.results[0].value).resolves.toEqual(
       mockCommunityEvent,
     );
-    await expect(spy.mock.results[1].value).resolves.toEqual(mockUserCache);
-    expect(setCacheSpy).toHaveBeenCalledTimes(1);
+    await expect(spyCacheManagerGet.mock.results[1].value).resolves.toEqual(
+      mockUserParticipantCache,
+    );
+    expect(spyCacheManagerSet).toHaveBeenCalledTimes(1);
   });
 
   it('should track user leaving', async () => {
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
     mockOldVoiceState.channelId = '850840267082563600';
-    delete mockNewVoiceState.channelId;
-    const spy = jest.spyOn(mockCacheManager, 'get');
-    const setCacheSpy = jest.spyOn(mockCacheManager, 'set');
-    spy.mockImplementation((key) => {
-      if (key === 'tracking:events:active:voiceChannelId:850840267082563600') {
-        return Promise.resolve(mockCommunityEvent);
-      }
-      if (key === 'tracking:events:64e90a7a0eed9208a77e9b15:participants:123') {
-        return Promise.resolve(mockUserCache);
-      }
-      return Promise.resolve(null);
-    });
-    await service.handleParticipantTracking(
-      mockOldVoiceState as VoiceState,
-      mockNewVoiceState as VoiceState,
-    );
-    expect(spy).toBeCalledTimes(2);
-    await expect(spy.mock.results[0].value).resolves.toEqual(
+    mockNewVoiceState.channelId = null;
+
+    await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+
+    expect(spyCacheManagerGet).toBeCalledTimes(2);
+    await expect(spyCacheManagerGet.mock.results[0].value).resolves.toEqual(
       mockCommunityEvent,
     );
-    await expect(spy.mock.results[1].value).resolves.toEqual(mockUserCache);
-    expect(setCacheSpy).toHaveBeenCalledTimes(1);
+    await expect(spyCacheManagerGet.mock.results[1].value).resolves.toEqual(
+      mockUserParticipantCache,
+    );
+    expect(spyCacheManagerSet).toHaveBeenCalledTimes(1);
   });
 
-  it('should track user leaving and not found in cache and throw mongoose error', async () => {
+  it('should throw for user leaving and db error', async () => {
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
+
     mockOldVoiceState.channelId = '850840267082563600';
-    delete mockNewVoiceState.channelId;
-    const spy = jest.spyOn(mockCacheManager, 'get');
-    const dbSpy = jest.spyOn(mockDiscordParticipantModel, 'findOne');
-    dbSpy.mockReturnValue({
-      exec: () => {
-        return Promise.reject(new MongooseError('constraint error'));
-      },
-    });
-    spy.mockImplementation((key) => {
-      if (key === 'tracking:events:active:voiceChannelId:850840267082563600') {
+    mockNewVoiceState.channelId = null;
+
+    spyCacheManagerGet.mockImplementation((key) => {
+      if (key === 'tracking:events:active:voiceChannelSId:850840267082563600') {
         return Promise.resolve(mockCommunityEvent);
       }
-      if (key === 'tracking:events:64e90a7a0eed9208a77e9b15:participants:123') {
+      if (key === 'tracking:events:active:voiceChannelSId:950840267482563600') {
+        return Promise.resolve(mockCommunityEvent2);
+      }
+      if (key === 'tracking:events:test-event-id-1:participants:123') {
+        return Promise.resolve(null);
+      }
+      if (key === 'tracking:events:test-event-id-2:participants:123') {
         return Promise.resolve(null);
       }
       return Promise.resolve(null);
     });
-    await service
-      .handleParticipantTracking(
-        mockOldVoiceState as VoiceState,
-        mockNewVoiceState as VoiceState,
-      )
-      .catch((e) => {
-        expect(e).toBeInstanceOf(ProcessorException);
-      });
-    expect(spy).toBeCalledTimes(2);
-    await expect(spy.mock.results[0].value).resolves.toEqual(
-      mockCommunityEvent,
-    );
+
+    try {
+      spyDataSource.mockReturnValue(
+        genMockDataSource(
+          Promise.reject(new Error('test')),
+          Promise.resolve({
+            identifiers: [{ id: '1' }],
+            generatedMaps: [{ id: '1' }],
+            raw: { affectedRows: 1 },
+          } as InsertResult),
+        ).createQueryBuilder(),
+      );
+      await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+    } catch (e) {
+      expect(e).toBeInstanceOf(Error);
+      expect(spyCacheManagerGet).toBeCalledTimes(2);
+      await expect(spyCacheManagerGet.mock.results[0].value).resolves.toEqual(
+        mockCommunityEvent,
+      );
+      return;
+    }
+    // should be unreachable
+    expect(true).toBe(false);
   });
 
-  it('should track user leaving and not found in cache or db', async () => {
+  it('should throw for user leaving and not found in cache or db', async () => {
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
     mockOldVoiceState.channelId = '850840267082563600';
-    delete mockNewVoiceState.channelId;
-    const spy = jest.spyOn(mockCacheManager, 'get');
-    const dbSpy = jest.spyOn(mockDiscordParticipantModel, 'findOne');
-    dbSpy.mockReturnValue({
-      exec: () => {
-        return Promise.resolve(null);
-      },
-    });
-    spy.mockImplementation((key) => {
-      if (key === 'tracking:events:active:voiceChannelId:850840267082563600') {
+    mockNewVoiceState.channelId = null;
+    spyDataSource.mockReturnValue(
+      genMockDataSource(
+        Promise.resolve(null),
+        Promise.resolve({
+          identifiers: [{ id: '1' }],
+          generatedMaps: [{ id: '1' }],
+          raw: { affectedRows: 1 },
+        } as InsertResult),
+      ).createQueryBuilder(),
+    );
+
+    spyCacheManagerGet.mockImplementation((key) => {
+      if (key === 'tracking:events:active:voiceChannelSId:850840267082563600') {
         return Promise.resolve(mockCommunityEvent);
       }
-      if (key === 'tracking:events:64e90a7a0eed9208a77e9b15:participants:123') {
+      if (key === 'tracking:events:active:voiceChannelSId:950840267482563600') {
+        return Promise.resolve(mockCommunityEvent2);
+      }
+      if (key === 'tracking:events:test-event-id-1:participants:123') {
+        return Promise.resolve(null);
+      }
+      if (key === 'tracking:events:test-event-id-2:participants:123') {
         return Promise.resolve(null);
       }
       return Promise.resolve(null);
     });
-    await service
-      .handleParticipantTracking(
-        mockOldVoiceState as VoiceState,
-        mockNewVoiceState as VoiceState,
-      )
-      .catch((e) => {
-        expect(e).toBeInstanceOf(ProcessorException);
-      });
-    expect(spy).toBeCalledTimes(2);
-    await expect(spy.mock.results[0].value).resolves.toEqual(
+
+    try {
+      await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+    } catch (e) {
+      expect(e).toBeInstanceOf(ProcessorException);
+    }
+    expect(spyCacheManagerGet).toBeCalledTimes(2);
+    await expect(spyCacheManagerGet.mock.results[0].value).resolves.toEqual(
       mockCommunityEvent,
     );
-    await expect(spy.mock.results[1].value).resolves.toEqual(null);
+    await expect(spyCacheManagerGet.mock.results[1].value).resolves.toEqual(
+      null,
+    );
   });
 
   it('should track user leaving and not found in cache', async () => {
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
     mockOldVoiceState.channelId = '850840267082563600';
-    delete mockNewVoiceState.channelId;
-    const spy = jest.spyOn(mockCacheManager, 'get');
-    const setCacheSpy = jest.spyOn(mockCacheManager, 'set');
-    const dbSpy = jest.spyOn(mockDiscordParticipantModel, 'findOne');
-    dbSpy.mockReturnValue({
-      exec: () => {
-        return Promise.resolve(getMockDbUser());
-      },
-    });
-    spy.mockImplementation((key) => {
-      if (key === 'tracking:events:active:voiceChannelId:850840267082563600') {
+    mockNewVoiceState.channelId = null;
+
+    spyCacheManagerGet.mockImplementation((key) => {
+      if (key === 'tracking:events:active:voiceChannelSId:850840267082563600') {
         return Promise.resolve(mockCommunityEvent);
       }
-      if (key === 'tracking:events:64e90a7a0eed9208a77e9b15:participants:123') {
+      if (key === 'tracking:events:active:voiceChannelSId:950840267482563600') {
+        return Promise.resolve(mockCommunityEvent2);
+      }
+      if (key === 'tracking:events:test-event-id-1:participants:123') {
+        return Promise.resolve(null);
+      }
+      if (key === 'tracking:events:test-event-id-2:participants:123') {
         return Promise.resolve(null);
       }
       return Promise.resolve(null);
     });
-    await service.handleParticipantTracking(
-      mockOldVoiceState as VoiceState,
-      mockNewVoiceState as VoiceState,
-    );
-    expect(spy).toBeCalledTimes(2);
-    await expect(spy.mock.results[0].value).resolves.toEqual(
+
+    try {
+      await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+    } catch (e) {
+      expect(e).toBeInstanceOf(ProcessorException);
+    }
+    expect(spyCacheManagerGet).toBeCalledTimes(2);
+    await expect(spyCacheManagerGet.mock.results[0].value).resolves.toEqual(
       mockCommunityEvent,
     );
-    await expect(spy.mock.results[1].value).resolves.toEqual(null);
-    expect(setCacheSpy).toHaveBeenCalledTimes(1);
+    await expect(spyCacheManagerGet.mock.results[1].value).resolves.toEqual(
+      null,
+    );
+    expect(spyCacheManagerSet).toHaveBeenCalledTimes(1);
   });
 
   it('should track user hopping voice channels', async () => {
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
     mockOldVoiceState.channelId = '850840267082563600';
     mockNewVoiceState.channelId = '123';
-    const spy = jest.spyOn(mockCacheManager, 'get');
-    const setCacheSpy = jest.spyOn(mockCacheManager, 'set');
-    spy.mockImplementation((key) => {
-      if (key === 'tracking:events:active:voiceChannelId:850840267082563600') {
-        return Promise.resolve(mockCommunityEvent);
-      }
-      if (key === 'tracking:events:64e90a7a0eed9208a77e9b15:participants:123') {
-        return Promise.resolve(mockUserCache);
-      }
-      return Promise.resolve(null);
-    });
-    await service.handleParticipantTracking(
-      mockOldVoiceState as VoiceState,
-      mockNewVoiceState as VoiceState,
-    );
-    expect(spy).toBeCalledTimes(3);
-    await expect(spy.mock.results[0].value).resolves.toEqual(
+    await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+    expect(spyCacheManagerGet).toBeCalledTimes(3);
+    await expect(spyCacheManagerGet.mock.results[0].value).resolves.toEqual(
       mockCommunityEvent,
     );
-    await expect(spy.mock.results[1].value).resolves.toEqual(null);
-    await expect(spy.mock.results[2].value).resolves.toEqual(mockUserCache);
-    expect(setCacheSpy).toHaveBeenCalledTimes(1);
+    await expect(spyCacheManagerGet.mock.results[1].value).resolves.toEqual(
+      null,
+    );
+    await expect(spyCacheManagerGet.mock.results[2].value).resolves.toEqual(
+      mockUserParticipantCache,
+    );
+    expect(spyCacheManagerSet).toHaveBeenCalledTimes(1);
   });
 
   it('should track user hopping active events', async () => {
+    const mockOldVoiceState = getMockOldVoiceState();
+    const mockNewVoiceState = getMockNewVoiceState();
     mockOldVoiceState.channelId = '850840267082563600';
-    mockNewVoiceState.channelId = '23423435235';
-    const spy = jest.spyOn(mockCacheManager, 'get');
-    const setCacheSpy = jest.spyOn(mockCacheManager, 'set');
-    spy.mockImplementation((key) => {
-      if (key === 'tracking:events:active:voiceChannelId:850840267082563600') {
-        return Promise.resolve(mockCommunityEvent);
-      }
-      if (key === 'tracking:events:active:voiceChannelId:23423435235') {
-        return Promise.resolve(mockAnotherCommunityEvent);
-      }
-      if (key === 'tracking:events:64e90a7a0eed9208a77e9b15:participants:123') {
-        return Promise.resolve(mockUserCache);
-      }
-      if (key === 'tracking:events:74e90a7a0eed9208a87e9b15:participants:123') {
-        return Promise.resolve(null);
-      }
-      return Promise.resolve(null);
-    });
-    await service.handleParticipantTracking(
-      mockOldVoiceState as VoiceState,
-      mockNewVoiceState as VoiceState,
-    );
-    expect(spy).toBeCalledTimes(4);
-    await expect(spy.mock.results[0].value).resolves.toEqual(
+    mockNewVoiceState.channelId = '950840267482563600';
+
+    await service.onVoiceStateUpdate(mockOldVoiceState, mockNewVoiceState);
+
+    expect(spyCacheManagerGet).toBeCalledTimes(4);
+    await expect(spyCacheManagerGet.mock.results[0].value).resolves.toEqual(
       mockCommunityEvent,
     );
-    await expect(spy.mock.results[1].value).resolves.toEqual(
-      mockAnotherCommunityEvent,
+    await expect(spyCacheManagerGet.mock.results[1].value).resolves.toEqual(
+      mockCommunityEvent2,
     );
-    await expect(spy.mock.results[2].value).resolves.toEqual(null);
-    await expect(spy.mock.results[3].value).resolves.toEqual(mockUserCache);
-    expect(setCacheSpy).toHaveBeenCalledTimes(2);
+    await expect(spyCacheManagerGet.mock.results[2].value).resolves.toEqual(
+      mockUserParticipantCache,
+    );
+    await expect(spyCacheManagerGet.mock.results[3].value).resolves.toEqual(
+      null,
+    );
+    expect(spyCacheManagerSet).toHaveBeenCalledTimes(2);
   });
 });

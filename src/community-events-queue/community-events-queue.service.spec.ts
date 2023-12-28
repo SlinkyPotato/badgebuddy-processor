@@ -14,13 +14,12 @@ import { ChannelType, Collection } from 'discord.js';
 import { CommunityEventsProcessorService } from './community-events-queue.service';
 import {
   CommunityEventDiscordEntity,
-  CommunityEventEntity,
   DISCORD_COMMUNITY_EVENTS_END_JOB,
   DISCORD_COMMUNITY_EVENTS_START_JOB,
   DiscordParticipantRedisDto,
 } from '@badgebuddy/common';
-import { ProcessorException } from './exceptions/processor.exception';
 import { DataSource, InsertResult } from 'typeorm';
+import { ProcessorException } from '@/exceptions/processor.exception';
 
 describe('CommunityEventsProcessorService', () => {
   let service: CommunityEventsProcessorService;
@@ -84,10 +83,6 @@ describe('CommunityEventsProcessorService', () => {
       keys: jest.fn().mockReturnThis(),
     },
   };
-
-  // const mockBullQueue = {
-  //   add: jest.fn().mockReturnThis(),
-  // };
 
   const mockClient = {
     channels: {
