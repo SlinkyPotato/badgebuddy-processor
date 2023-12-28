@@ -24,9 +24,11 @@ import { DataSource, InsertResult } from 'typeorm';
 
 describe('CommunityEventsProcessorService', () => {
   let service: CommunityEventsProcessorService;
+
   let spyDiscordClient: jest.Spied<any>;
   let spyCacheManagerSet: jest.Spied<any>;
   let spyDataSource: jest.Spied<any>;
+
   let spyLoggerLog: jest.Spied<any>;
   let spyLoggerVerbose: jest.Spied<any>;
   let spyLoggerWarn: jest.Spied<any>;
@@ -35,20 +37,18 @@ describe('CommunityEventsProcessorService', () => {
   const mockStartDate = new Date();
   const mockEndDate = new Date(mockStartDate.getTime() + 1000 * 60 * 60);
 
-  const mockCommunityEvent = {
-    id: '8846c42c-477b-48f1-a959-10cd25d110ad',
-    title: 'test title',
-    description: 'test description',
-    startDate: mockStartDate,
-    endDate: mockEndDate,
-  } as CommunityEventEntity;
-
   const mockDiscordCommunityEvent = {
     communityEventId: '8846c42c-477b-48f1-a959-10cd25d110ad',
     organizerId: 'ea088187-6e92-4811-95d6-24b5268efee5',
     botSettingsId: 'a11fc19f-2937-4789-ac51-a93ac4df5487',
     voiceChannelSId: '850840267082563600',
-    communityEvent: mockCommunityEvent,
+    communityEvent: {
+      id: '8846c42c-477b-48f1-a959-10cd25d110ad',
+      title: 'test title',
+      description: 'test description',
+      startDate: mockStartDate,
+      endDate: mockEndDate,
+    },
   } as CommunityEventDiscordEntity;
 
   const mockVoiceChannel = {
@@ -130,7 +130,7 @@ describe('CommunityEventsProcessorService', () => {
 
   const mockJob = {
     data: {
-      eventId: mockCommunityEvent.id,
+      eventId: mockDiscordCommunityEvent.communityEventId,
     },
   } as Job<{ eventId: string }>;
 

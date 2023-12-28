@@ -9,23 +9,48 @@ import {
 } from '@jest/globals';
 import { Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { VoiceState } from 'discord.js';
-import {} from '@badgebuddy/common';
+import { Guild, GuildMember, User, VoiceState } from 'discord.js';
+import {
+  CommunityEventDiscordEntity,
+  CommunityEventEntity,
+  CommunityParticipantDiscordEntity,
+  DiscordActiveCommunityEventDto,
+  DiscordParticipantRedisDto,
+} from '@badgebuddy/common';
 import { ProcessorException } from '@/community-events-queue/exceptions/processor.exception';
 import { VoiceStateUpdateEventService } from './voice-state-update-event.service';
 
 describe('VoiceStateUpdateService', () => {
   let service: VoiceStateUpdateEventService;
-  let mockNewVoiceState: VoiceState | any;
-  let mockOldVoiceState: VoiceState | any;
-  let mockCommunityEvent: CommunityEventDto;
-  let mockAnotherCommunityEvent: CommunityEventDto;
-  let mockUserCache: DiscordParticipantDto;
-  let keys: string[];
 
-  const getKeys = (): string[] => ['123'];
+  let spyCacheManagerSet: jest.Spied<any>;
+  let spyCacheManagerGet: jest.Spied<any>;
+  let spyDataSource: jest.Spied<any>;
 
-  const getMockOldVoiceState = (): VoiceState | any => ({
+  let spyLoggerLog: jest.Spied<any>;
+  let spyLoggerVerbose: jest.Spied<any>;
+  let spyLoggerWarn: jest.Spied<any>;
+  let spyLoggerError: jest.Spied<any>;
+
+  const mockOldVoiceState: VoiceState = {
+    channelId: '123',
+    deaf: false,
+    serverMute: false,
+    member: {
+      id: '123',
+      user: {
+        tag: 'test',
+        id: '123',
+        bot: false,
+      },
+      guild: {
+        id: '123',
+        name: 'test',
+      } as Guild,
+    },
+  } as VoiceState;
+
+  const mockNewVoiceState: VoiceState = {
     channelId: '123',
     deaf: false,
     serverMute: false,
@@ -38,58 +63,48 @@ describe('VoiceStateUpdateService', () => {
         id: '123',
       },
     },
-  });
+  } as VoiceState;
 
-  const getMockNewVoiceState = (): VoiceState | any => ({
-    channelId: '123',
-    deaf: false,
-    serverMute: false,
-    member: {
-      id: '123',
-      user: {
-        tag: 'test',
-      },
-      guild: {
-        id: '123',
-      },
-    },
-  });
+  const mockStartDate = new Date();
+  const mockEndDate = new Date(mockStartDate.getTime() + 1000 * 60 * 60);
 
-  const getMockCommunityEvent = (): CommunityEventDto => ({
-    eventId: '64e90a7a0eed9208a77e9b15',
-    eventName: 'Test event',
-    organizerId: '159014522542096384',
-    voiceChannelId: '850840267082563600',
-    guildId: '850840267082563596',
+  const mockCommunityEvent: DiscordActiveCommunityEventDto = {
+    communityEventId: '8846c42c-477b-48f1-a959-10cd25d110ad',
+    voiceChannelSId: '850840267082563600',
+    description: 'test',
+    startDate: mockStartDate,
+    endDate: mockEndDate,
+    guildSId: 'test-guildSId-1',
+    organizerSId: 'test-organizerSId-1',
+    title: 'test title',
+    availablePOAPs: 0,
+  };
+
+  const mockCommunityEvent2: DiscordActiveCommunityEventDto = {
+    communityEventId: '1146c42c-477b-48f1-a959-10cd45d310ad',
+    voiceChannelSId: '950840267482563600',
+    description: 'Another event',
+    startDate: mockStartDate,
+    endDate: mockEndDate,
+    guildSId: 'test-guildSId-2',
+    organizerSId: 'test-organizerSId-2',
+    title: 'test title 2',
+    availablePOAPs: 0,
+  };
+
+  const mockUserParticipantCache: DiscordParticipantRedisDto = {
+    communityEventId: mockCommunityEvent.communityEventId,
+    discordUserSId: '123',
     startDate: new Date().toISOString(),
-    endDate: new Date(new Date().getTime() + 1000 * 60 * 60).toISOString(),
-  });
+    durationInSeconds: 0,
+  };
 
-  const getAnotherMockCommunityEvent = (): CommunityEventDto => ({
-    eventId: '74e90a7a0eed9208a87e9b15',
-    eventName: 'Another event',
-    organizerId: '1592343244',
-    voiceChannelId: '23423435235',
-    guildId: '324244353645',
-    startDate: new Date().toISOString(),
-    endDate: new Date(new Date().getTime() + 1000 * 60 * 60).toISOString(),
-  });
-
-  const getMockUserCache = (): DiscordParticipantDto => ({
-    eventId: '64e90a7a0eed9208a77e9b15',
-    userId: '123',
-    userTag: 'test',
-    startDate: new Date().toISOString(),
-    durationInMinutes: 0,
-  });
-
-  const getMockDbUser = (): DiscordParticipant => ({
-    communityEvent: new mongoose.Types.ObjectId('64e90a7a0eed9208a77e9b15'),
-    userId: '123',
-    userTag: 'testTag',
+  const mockDbUser: CommunityParticipantDiscordEntity = {
+    communityEventId: mockCommunityEvent.communityEventId,
+    discordUserSId: '123',
     startDate: new Date(),
-    durationInMinutes: 0,
-  });
+    participationLength: 0,
+  };
 
   const mockDiscordParticipantModel = {
     exists: jest.fn().mockReturnThis(),
