@@ -38,7 +38,7 @@
     "sync": "git fetch && git pull && pnpm install && dotenv-vault pull"
   },
   "dependencies": {
-    "@badgebuddy/common": "2.1.0-6",
+    "@badgebuddy/common": "2.1.0-7",
     "@discord-nestjs/common": "^5.2.10",
     "@discord-nestjs/core": "^5.3.12",
     "@nestjs/axios": "^3.0.1",
