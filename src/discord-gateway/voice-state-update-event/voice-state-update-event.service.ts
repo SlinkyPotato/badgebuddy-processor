@@ -4,7 +4,7 @@ import { GuildMember, VoiceState } from 'discord.js';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import {
-  CommunityParticipantDiscordEntity,
+  CommunityEventParticipantDiscordEntity,
   DiscordActiveCommunityEventDto,
   DiscordParticipantRedisDto,
   TRACKING_EVENTS_ACTIVE,
@@ -231,7 +231,7 @@ export class VoiceStateUpdateEventService {
     const result = await this.dataSource
       .createQueryBuilder()
       .insert()
-      .into(CommunityParticipantDiscordEntity)
+      .into(CommunityEventParticipantDiscordEntity)
       .values({
         communityEventId: communityEventId,
         discordUserSId: guildMember.id.toString(),
@@ -300,11 +300,11 @@ export class VoiceStateUpdateEventService {
   private async getParticipantFromDb(
     communityEventId: string,
     guildMember: GuildMember,
-  ): Promise<CommunityParticipantDiscordEntity> {
+  ): Promise<CommunityEventParticipantDiscordEntity> {
     const result = await this.dataSource
       .createQueryBuilder()
       .select('participant')
-      .from(CommunityParticipantDiscordEntity, 'participant')
+      .from(CommunityEventParticipantDiscordEntity, 'participant')
       .where('participant.communityEventId = :communityEventId', {
         communityEventId,
       })

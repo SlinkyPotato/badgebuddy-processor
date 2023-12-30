@@ -6,10 +6,10 @@ import { Job } from 'bull';
 import { Channel, ChannelType, Client, VoiceChannel } from 'discord.js';
 import {
   CommunityEventDiscordEntity,
+  CommunityEventParticipantDiscordEntity,
   DISCORD_COMMUNITY_EVENTS_END_JOB,
   DISCORD_COMMUNITY_EVENTS_QUEUE,
   DISCORD_COMMUNITY_EVENTS_START_JOB,
-  CommunityParticipantDiscordEntity,
   DiscordParticipantRedisDto,
   TRACKING_EVENTS_PARTICIPANTS,
 } from '@badgebuddy/common';
@@ -295,7 +295,7 @@ export class CommunityEventsProcessorService {
     const result = await this.dataSource
       .createQueryBuilder()
       .insert()
-      .into(CommunityParticipantDiscordEntity)
+      .into(CommunityEventParticipantDiscordEntity)
       .values(
         participants.map((participant) => {
           return {
@@ -303,7 +303,7 @@ export class CommunityEventsProcessorService {
             discordUserSId: participant.userSId,
             startDate: new Date(),
             participationLength: 0,
-          } as CommunityParticipantDiscordEntity;
+          } as CommunityEventParticipantDiscordEntity;
         }),
       )
       .execute();
@@ -354,7 +354,7 @@ export class CommunityEventsProcessorService {
     const result = await this.dataSource
       .createQueryBuilder()
       .insert()
-      .into(CommunityParticipantDiscordEntity)
+      .into(CommunityEventParticipantDiscordEntity)
       .values(
         participants.map((participant) => {
           return {
@@ -364,7 +364,7 @@ export class CommunityEventsProcessorService {
             endDate,
             participationLength:
               (endDate.getTime() - startDate.getTime()) / 1000,
-          } as CommunityParticipantDiscordEntity;
+          } as CommunityEventParticipantDiscordEntity;
         }),
       )
       .execute();

@@ -11,7 +11,7 @@ import { Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Guild, VoiceState } from 'discord.js';
 import {
-  CommunityParticipantDiscordEntity,
+  CommunityEventParticipantDiscordEntity,
   DiscordActiveCommunityEventDto,
   DiscordParticipantRedisDto,
 } from '@badgebuddy/common';
@@ -105,7 +105,7 @@ describe('VoiceStateUpdateService', () => {
     durationInSeconds: 0,
   };
 
-  const mockDiscordParticipantEntity: CommunityParticipantDiscordEntity = {
+  const mockDiscordParticipantEntity: CommunityEventParticipantDiscordEntity = {
     communityEventId: mockCommunityEvent.communityEventId,
     discordUserSId: '123',
     startDate: new Date(),
@@ -119,7 +119,7 @@ describe('VoiceStateUpdateService', () => {
   };
 
   const genMockDataSource = (
-    mockSelectParticipant: Promise<CommunityParticipantDiscordEntity | null>,
+    mockSelectParticipant: Promise<CommunityEventParticipantDiscordEntity | null>,
     mockInsertResult: Promise<InsertResult>,
   ) => ({
     createQueryBuilder: () => ({
