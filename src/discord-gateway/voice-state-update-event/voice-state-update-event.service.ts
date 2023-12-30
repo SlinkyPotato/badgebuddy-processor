@@ -229,17 +229,14 @@ export class VoiceStateUpdateEventService {
     guildMember: GuildMember,
   ) {
     const result = await this.dataSource
-      .createQueryBuilder()
-      .insert()
-      .into(CommunityEventParticipantDiscordEntity)
-      .values({
+      .getRepository(CommunityEventParticipantDiscordEntity)
+      .save({
         communityEventId: communityEventId,
         discordUserSId: guildMember.id.toString(),
-        startDate: new Date().toISOString(),
+        startDate: new Date(),
         participationLength: 0,
-      })
-      .execute();
-    if (!result || result?.identifiers.length <= 0) {
+      } as CommunityEventParticipantDiscordEntity);
+    if (!result) {
       throw new ProcessorException(
         `Failed to insert user to db, eventId: ${communityEventId}, userId: ${guildMember.id}, guildId: ${guildMember.guild.id}`,
       );
