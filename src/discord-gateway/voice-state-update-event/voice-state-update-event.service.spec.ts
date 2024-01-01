@@ -122,6 +122,9 @@ describe('VoiceStateUpdateService', () => {
     mockSelectParticipant: Promise<CommunityEventParticipantDiscordEntity | null>,
     mockInsertResult: Promise<InsertResult>,
   ) => ({
+    getRepository: () => ({
+      save: () => jest.fn().mockReturnValue(mockInsertResult),
+    }),
     createQueryBuilder: () => ({
       select: () => ({
         from: () => ({
@@ -356,6 +359,10 @@ describe('VoiceStateUpdateService', () => {
   it('should track new user has joined voice channel', async () => {
     const mockOldVoiceState = getMockOldVoiceState();
     const mockNewVoiceState = getMockNewVoiceState();
+    const spyDataSourceForRepository = jest.spyOn(
+      mockDataSource,
+      'getRepository',
+    );
     mockNewVoiceState.channelId = mockCommunityEvent.voiceChannelSId;
     mockOldVoiceState.channelId = null;
     // @ts-expect-error mock testing
@@ -372,7 +379,7 @@ describe('VoiceStateUpdateService', () => {
       null,
     );
     expect(spyCacheManagerSet).toHaveBeenCalledTimes(1);
-    expect(spyDataSource).toHaveBeenCalledTimes(1);
+    expect(spyDataSourceForRepository).toHaveBeenCalledTimes(1);
   });
 
   it('should track user has re-joined voice channel', async () => {

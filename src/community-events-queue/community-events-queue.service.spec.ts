@@ -407,7 +407,7 @@ describe('CommunityEventsProcessorService', () => {
     });
 
     it('should be defined for endEvent', () => {
-      expect(service.endEvent.name).toBeDefined();
+      expect(service.disbandEvent.name).toBeDefined();
     });
 
     it('should throw finding Discord Community Event from DB', async () => {
@@ -425,7 +425,7 @@ describe('CommunityEventsProcessorService', () => {
         }),
       });
       try {
-        await service.endEvent(mockJob);
+        await service.disbandEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(Error);
       }
@@ -444,7 +444,7 @@ describe('CommunityEventsProcessorService', () => {
         }),
       });
       try {
-        await service.endEvent(mockJob);
+        await service.disbandEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(ProcessorException);
       }
@@ -467,7 +467,7 @@ describe('CommunityEventsProcessorService', () => {
       spyCacheManagerKeys.mockReturnValue(Promise.reject(new Error('test')));
 
       try {
-        await service.endEvent(mockJob);
+        await service.disbandEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(Error);
       }
@@ -480,7 +480,7 @@ describe('CommunityEventsProcessorService', () => {
       spyCacheManagerKeys.mockReturnValue(Promise.resolve(null));
 
       try {
-        await service.endEvent(mockJob);
+        await service.disbandEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(ProcessorException);
       }
@@ -497,7 +497,7 @@ describe('CommunityEventsProcessorService', () => {
       spyCacheManagerKeys.mockReturnValue(Promise.resolve([]));
 
       try {
-        await service.endEvent(mockJob);
+        await service.disbandEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(ProcessorException);
       }
@@ -513,7 +513,7 @@ describe('CommunityEventsProcessorService', () => {
     it('should throw for fetching participant from cache', async () => {
       const mockError = new Error('mock cacheManager get error');
       spyCacheManagerGet.mockReturnValue(Promise.reject(mockError));
-      await service.endEvent(mockJob);
+      await service.disbandEvent(mockJob);
       expect(spyCacheManagerKeys).toHaveBeenCalled();
       await expect(spyCacheManagerGet.mock.results[0].value).rejects.toEqual(
         mockError,
@@ -526,7 +526,7 @@ describe('CommunityEventsProcessorService', () => {
 
     it('should throw getting undefined participant from cache', async () => {
       spyCacheManagerGet.mockReturnValue(Promise.resolve(undefined));
-      await service.endEvent(mockJob);
+      await service.disbandEvent(mockJob);
 
       expect(spyCacheManagerKeys).toHaveBeenCalled();
       await expect(spyCacheManagerGet.mock.results[0].value).resolves.toEqual(
@@ -547,7 +547,7 @@ describe('CommunityEventsProcessorService', () => {
         ).createQueryBuilder(),
       );
 
-      await service.endEvent(mockJob);
+      await service.disbandEvent(mockJob);
 
       expect(spyCacheManagerKeys).toHaveBeenCalled();
       expect(spyDataSource).toBeCalledTimes(2);
@@ -572,7 +572,7 @@ describe('CommunityEventsProcessorService', () => {
         ).createQueryBuilder(),
       );
 
-      await service.endEvent(mockJob);
+      await service.disbandEvent(mockJob);
 
       expect(spyCacheManagerKeys).toHaveBeenCalled();
       expect(spyDataSource).toBeCalledTimes(2);
@@ -585,7 +585,7 @@ describe('CommunityEventsProcessorService', () => {
     });
 
     it('should end tracking for participant in cache', async () => {
-      await service.endEvent(mockJob);
+      await service.disbandEvent(mockJob);
 
       expect(spyCacheManagerKeys).toHaveBeenCalled();
       await expect(spyCacheManagerGet.mock.results[0].value).resolves.toEqual(
