@@ -4,8 +4,8 @@ import { GuildMember, VoiceState } from 'discord.js';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import {
+  CommunityEventActiveDiscordDto,
   CommunityEventParticipantDiscordEntity,
-  DiscordActiveCommunityEventDto,
   DiscordParticipantRedisDto,
   TRACKING_EVENTS_ACTIVE,
   TRACKING_EVENTS_PARTICIPANTS,
@@ -150,7 +150,7 @@ export class VoiceStateUpdateEventService {
   private getCommunityEventsFromCache = async (
     oldState: VoiceState,
     newState: VoiceState,
-  ): Promise<DiscordActiveCommunityEventDto[]> => {
+  ): Promise<CommunityEventActiveDiscordDto[]> => {
     if (!oldState.channelId && !newState.channelId) {
       return [];
     }
@@ -160,7 +160,7 @@ export class VoiceStateUpdateEventService {
         return undefined;
       }
       try {
-        return await this.cacheManager.get<DiscordActiveCommunityEventDto>(
+        return await this.cacheManager.get<CommunityEventActiveDiscordDto>(
           TRACKING_EVENTS_ACTIVE(voiceChannelSId),
         );
       } catch (e) {
