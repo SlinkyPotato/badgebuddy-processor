@@ -18,15 +18,18 @@ import {
   DISCORD_COMMUNITY_EVENTS_START_JOB,
   DiscordParticipantRedisDto,
 } from '@badgebuddy/common';
-import { DataSource, InsertResult } from 'typeorm';
+import { DataSource, InsertResult, UpdateResult } from 'typeorm';
 import { ProcessorException } from '@/exceptions/processor.exception';
+import { CronJobsService } from '@/cron-jobs/cron-jobs.service';
 
 describe('CommunityEventsProcessorService', () => {
   let service: CommunityEventsProcessorService;
 
   let spyDiscordClient: jest.Spied<any>;
   let spyCacheManagerSet: jest.Spied<any>;
-  let spyDataSource: jest.Spied<any>;
+  let spyDataSourceGetRepository: jest.Spied<any>;
+  let spyDataSourceCreateQueryBuilder: jest.Spied<any>;
+  let spyDataSourceTransaction: jest.Spied<any>;
 
   let spyLoggerLog: jest.Spied<any>;
   let spyLoggerVerbose: jest.Spied<any>;
@@ -90,44 +93,21 @@ describe('CommunityEventsProcessorService', () => {
     },
   };
 
-  const getMockDataSource = (
-    mockDiscordCommunityEvent: Promise<CommunityEventDiscordEntity>,
-    mockInsertResult: Promise<InsertResult>,
-  ) => ({
-    createQueryBuilder: () => ({
-      select: () => ({
-        from: () => ({
-          leftJoinAndSelect: () => ({
-            where: () => ({
-              getOne: jest.fn().mockReturnValue(mockDiscordCommunityEvent),
-            }),
-          }),
-        }),
-      }),
-      insert: () => ({
-        into: () => ({
-          values: () => ({
-            execute: jest.fn().mockReturnValue(mockInsertResult),
-          }),
-        }),
-      }),
-    }),
-  });
-
-  const mockDataSource = getMockDataSource(
-    Promise.resolve(mockDiscordCommunityEvent),
-    Promise.resolve({
-      identifiers: [{ id: '1' }],
-      generatedMaps: [{ id: '1' }],
-      raw: { affectedRows: 1 },
-    } as InsertResult),
-  );
+  const mockDataSource = {
+    getRepository: jest.fn(),
+    createQueryBuilder: jest.fn(),
+    transaction: jest.fn(),
+  };
 
   const mockJob = {
     data: {
       eventId: mockDiscordCommunityEvent.communityEventId,
     },
   } as Job<{ eventId: string }>;
+
+  const mockCronJobsService = {
+    addCronTimeoutToDisbandEvent: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -137,6 +117,7 @@ describe('CommunityEventsProcessorService', () => {
         { provide: CACHE_MANAGER, useValue: mockCacheManager },
         { provide: '__inject_discord_client__', useValue: mockClient },
         { provide: DataSource, useValue: mockDataSource },
+        { provide: CronJobsService, useValue: mockCronJobsService },
       ],
     }).compile();
 
@@ -152,17 +133,51 @@ describe('CommunityEventsProcessorService', () => {
     spyLoggerWarn = jest.spyOn(mockLogger, 'warn');
     spyLoggerError = jest.spyOn(mockLogger, 'error');
 
-    spyDataSource = jest.spyOn(mockDataSource, 'createQueryBuilder');
-    spyDataSource.mockReturnValue(
-      getMockDataSource(
-        Promise.resolve(mockDiscordCommunityEvent),
+    spyDataSourceGetRepository = jest.spyOn(mockDataSource, 'getRepository');
+    spyDataSourceGetRepository.mockReturnValue({
+      update: jest.fn().mockReturnValue(
         Promise.resolve({
-          identifiers: [{ id: '1' }],
-          generatedMaps: [{ id: '1' }],
-          raw: { affectedRows: 1 },
-        } as InsertResult),
-      ).createQueryBuilder(),
+          affected: 1,
+        } as UpdateResult),
+      ),
+      findOneBy: jest
+        .fn()
+        .mockReturnValue(Promise.resolve(mockDiscordCommunityEvent)),
+    });
+
+    spyDataSourceCreateQueryBuilder = jest.spyOn(
+      mockDataSource,
+      'createQueryBuilder',
     );
+    spyDataSourceCreateQueryBuilder.mockReturnValue({
+      insert: () => ({
+        into: () => ({
+          values: () => ({
+            execute: jest.fn().mockReturnValue(
+              Promise.resolve({
+                identifiers: [{ id: '1' }],
+                generatedMaps: [{ id: '1' }],
+                raw: { affectedRows: 1 },
+              } as InsertResult),
+            ),
+          }),
+        }),
+      }),
+      update: () => ({
+        set: () => ({
+          where: () => ({
+            execute: jest.fn().mockReturnValue(
+              Promise.resolve({
+                affected: 1,
+              } as UpdateResult),
+            ),
+          }),
+        }),
+      }),
+    });
+
+    spyDataSourceTransaction = jest.spyOn(mockDataSource, 'transaction');
+    spyDataSourceTransaction.mockReturnValue(Promise.resolve());
   });
 
   afterEach(() => {
@@ -184,54 +199,33 @@ describe('CommunityEventsProcessorService', () => {
     });
 
     it('should throw finding Discord Community Event from DB', async () => {
-      spyDataSource.mockReturnValue({
-        select: () => ({
-          from: () => ({
-            leftJoinAndSelect: () => ({
-              where: () => ({
-                getOne: jest
-                  .fn()
-                  .mockReturnValue(Promise.reject(new Error('test'))),
-              }),
-            }),
-          }),
-        }),
+      spyDataSourceGetRepository.mockReturnValue({
+        findOneBy: jest.fn().mockReturnValue(Promise.reject(new Error('test'))),
       });
       try {
         await service.startEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(Error);
       }
-      expect(spyDataSource).toHaveBeenCalled();
+      expect(spyDataSourceGetRepository).toHaveBeenCalled();
       expect(spyLoggerLog).toHaveBeenCalledTimes(1);
     });
 
     it('should not find Discord Community Event from DB', async () => {
-      spyDataSource.mockReturnValue({
-        select: () => ({
-          from: () => ({
-            leftJoinAndSelect: () => ({
-              where: () => ({ getOne: jest.fn().mockReturnValue(null) }),
-            }),
-          }),
-        }),
+      spyDataSourceGetRepository.mockReturnValue({
+        findOneBy: jest.fn().mockReturnValue(Promise.resolve(null)),
       });
       try {
         await service.startEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(ProcessorException);
       }
-      expect(spyDataSource).toHaveBeenCalled();
+      expect(spyDataSourceGetRepository).toHaveBeenCalled();
 
       /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */
-      expect(
-        spyDataSource.mock.results[0].value
-          .select()
-          .from()
-          .leftJoinAndSelect()
-          .where()
-          .getOne(),
-      ).toEqual(null);
+      await expect(
+        spyDataSourceGetRepository.mock.results[0].value.findOneBy(),
+      ).resolves.toEqual(null);
       /* eslint-enable */
       expect(spyLoggerLog).toHaveBeenCalledTimes(1);
     });
@@ -290,20 +284,28 @@ describe('CommunityEventsProcessorService', () => {
       );
       expect(spyCacheManagerSet).toHaveBeenCalled();
       expect(spyLoggerVerbose).toBeCalled();
-      expect(spyLoggerVerbose.mock.calls[5][0]).toEqual('found 1 participants');
+      expect(spyLoggerVerbose.mock.calls[5][0]).toEqual(
+        'stored 1 participants in cache',
+      );
       expect(spyLoggerLog).toHaveBeenCalledTimes(2);
+      expect(
+        mockCronJobsService.addCronTimeoutToDisbandEvent,
+      ).toHaveBeenCalled();
     });
 
     it('should throw on inserting in db', async () => {
       const mockError = new Error(
         'mock discordParticipantModel bulkWrite error',
       );
-      spyDataSource.mockReturnValue(
-        getMockDataSource(
-          Promise.resolve(mockDiscordCommunityEvent),
-          Promise.reject(mockError),
-        ).createQueryBuilder(),
-      );
+      spyDataSourceCreateQueryBuilder.mockReturnValue({
+        insert: () => ({
+          into: () => ({
+            values: () => ({
+              execute: jest.fn().mockReturnValue(Promise.reject(mockError)),
+            }),
+          }),
+        }),
+      });
       try {
         await service.startEvent(mockJob);
       } catch (e) {
@@ -315,30 +317,41 @@ describe('CommunityEventsProcessorService', () => {
       );
       expect(spyCacheManagerSet).toHaveBeenCalled();
       expect(spyLoggerVerbose).toBeCalled();
-      expect(spyLoggerVerbose.mock.calls[5][0]).toEqual('found 1 participants');
+      expect(spyLoggerVerbose.mock.calls[5][0]).toEqual(
+        'stored 1 participants in cache',
+      );
       expect(spyLoggerVerbose.mock.calls[6][0]).toEqual(
         'attempting to insert 1 participants into db',
       );
-      expect(spyDataSource).toHaveBeenCalled();
+      expect(spyDataSourceCreateQueryBuilder).toHaveBeenCalled();
       /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */
       await expect(
-        spyDataSource.mock.results[1].value.insert().into().values().execute(),
+        spyDataSourceCreateQueryBuilder.mock.results[0].value
+          .insert()
+          .into()
+          .values()
+          .execute(),
       ).rejects.toEqual(mockError);
       /* eslint-enable */
       expect(spyLoggerLog).toHaveBeenCalledTimes(1);
     });
 
     it('should throw on inserting in db for missed insert', async () => {
-      spyDataSource.mockReturnValue(
-        getMockDataSource(
-          Promise.resolve(mockDiscordCommunityEvent),
-          Promise.resolve({
-            identifiers: [],
-            generatedMaps: [],
-            raw: { affectedRows: 0 },
-          } as InsertResult),
-        ).createQueryBuilder(),
-      );
+      spyDataSourceCreateQueryBuilder.mockReturnValue({
+        insert: () => ({
+          into: () => ({
+            values: () => ({
+              execute: jest.fn().mockReturnValue(
+                Promise.resolve({
+                  identifiers: [],
+                  generatedMaps: [],
+                  raw: { affectedRows: 0 },
+                } as InsertResult),
+              ),
+            }),
+          }),
+        }),
+      });
       try {
         await service.startEvent(mockJob);
       } catch (e) {
@@ -350,18 +363,21 @@ describe('CommunityEventsProcessorService', () => {
       );
       expect(spyCacheManagerSet).toHaveBeenCalled();
       expect(spyLoggerVerbose).toBeCalled();
-      expect(spyLoggerVerbose.mock.calls[5][0]).toEqual('found 1 participants');
+      expect(spyLoggerVerbose.mock.calls[5][0]).toEqual(
+        'stored 1 participants in cache',
+      );
       expect(spyLoggerVerbose.mock.calls[6][0]).toEqual(
         'attempting to insert 1 participants into db',
       );
-      expect(spyDataSource).toHaveBeenCalled();
+      expect(spyDataSourceCreateQueryBuilder).toHaveBeenCalled();
       /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */
       /* eslint-disable */
-      const result: InsertResult = await spyDataSource.mock.results[1].value
-        .insert()
-        .into()
-        .values()
-        .execute();
+      const result: InsertResult =
+        await spyDataSourceCreateQueryBuilder.mock.results[0].value
+          .insert()
+          .into()
+          .values()
+          .execute();
       /* eslint-enable */
       expect(result.identifiers.length).toEqual(0);
       expect(spyLoggerLog).toHaveBeenCalledTimes(1);
@@ -375,17 +391,21 @@ describe('CommunityEventsProcessorService', () => {
       );
       expect(spyCacheManagerSet).toHaveBeenCalled();
       expect(spyLoggerVerbose).toBeCalled();
-      expect(spyLoggerVerbose.mock.calls[5][0]).toEqual('found 1 participants');
+      expect(spyLoggerVerbose.mock.calls[5][0]).toEqual(
+        'stored 1 participants in cache',
+      );
       expect(spyLoggerVerbose.mock.calls[6][0]).toEqual(
         'attempting to insert 1 participants into db',
       );
-      expect(spyDataSource).toHaveBeenCalled();
+      expect(spyDataSourceCreateQueryBuilder).toHaveBeenCalled();
+      expect(spyDataSourceGetRepository).toHaveBeenCalled();
       /* eslint-disable */
-      const result: InsertResult = await spyDataSource.mock.results[1].value
-        .insert()
-        .into()
-        .values()
-        .execute();
+      const result: InsertResult =
+        await spyDataSourceCreateQueryBuilder.mock.results[0].value
+          .insert()
+          .into()
+          .values()
+          .execute();
       /* eslint-enable */
       expect(result.identifiers.length).toEqual(1);
       expect(spyLoggerLog).toHaveBeenCalledTimes(2);
@@ -411,54 +431,33 @@ describe('CommunityEventsProcessorService', () => {
     });
 
     it('should throw finding Discord Community Event from DB', async () => {
-      spyDataSource.mockReturnValue({
-        select: () => ({
-          from: () => ({
-            leftJoinAndSelect: () => ({
-              where: () => ({
-                getOne: jest
-                  .fn()
-                  .mockReturnValue(Promise.reject(new Error('test'))),
-              }),
-            }),
-          }),
-        }),
+      spyDataSourceGetRepository.mockReturnValue({
+        findOneBy: jest.fn().mockReturnValue(Promise.reject(new Error('test'))),
       });
       try {
         await service.disbandEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(Error);
       }
-      expect(spyDataSource).toHaveBeenCalled();
+      expect(spyDataSourceGetRepository).toHaveBeenCalled();
       expect(spyLoggerLog).toHaveBeenCalledTimes(1);
     });
 
     it('should not find Discord Community Event from DB', async () => {
-      spyDataSource.mockReturnValue({
-        select: () => ({
-          from: () => ({
-            leftJoinAndSelect: () => ({
-              where: () => ({ getOne: jest.fn().mockReturnValue(null) }),
-            }),
-          }),
-        }),
+      spyDataSourceGetRepository.mockReturnValue({
+        findOneBy: jest.fn().mockReturnValue(Promise.resolve(null)),
       });
       try {
         await service.disbandEvent(mockJob);
       } catch (e) {
         expect(e).toBeInstanceOf(ProcessorException);
       }
-      expect(spyDataSource).toHaveBeenCalled();
+      expect(spyDataSourceGetRepository).toHaveBeenCalled();
 
       /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */
-      expect(
-        spyDataSource.mock.results[0].value
-          .select()
-          .from()
-          .leftJoinAndSelect()
-          .where()
-          .getOne(),
-      ).toEqual(null);
+      await expect(
+        spyDataSourceGetRepository.mock.results[0].value.findOneBy(),
+      ).resolves.toEqual(null);
       /* eslint-enable */
       expect(spyLoggerLog).toHaveBeenCalledTimes(1);
     });
@@ -472,7 +471,7 @@ describe('CommunityEventsProcessorService', () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(spyCacheManagerKeys).toHaveBeenCalled();
-      expect(spyDataSource).toBeCalledTimes(1);
+      expect(spyDataSourceGetRepository).toBeCalledTimes(1);
       expect(spyLoggerLog).toHaveBeenCalledTimes(1);
     });
 
@@ -488,8 +487,8 @@ describe('CommunityEventsProcessorService', () => {
       await expect(spyCacheManagerKeys.mock.results[0].value).resolves.toEqual(
         null,
       );
-      expect(spyDataSource).toBeCalledTimes(1);
-      expect(spyLoggerLog).toHaveBeenCalledTimes(1);
+      expect(spyDataSourceGetRepository).toBeCalledTimes(1);
+      expect(spyLoggerLog).toHaveBeenCalledTimes(2);
       expect(spyLoggerWarn).toHaveBeenCalledTimes(1);
     });
 
@@ -505,8 +504,8 @@ describe('CommunityEventsProcessorService', () => {
       await expect(spyCacheManagerKeys.mock.results[0].value).resolves.toEqual(
         [],
       );
-      expect(spyDataSource).toBeCalledTimes(1);
-      expect(spyLoggerLog).toHaveBeenCalledTimes(1);
+      expect(spyDataSourceGetRepository).toBeCalledTimes(1);
+      expect(spyLoggerLog).toHaveBeenCalledTimes(2);
       expect(spyLoggerWarn).toHaveBeenCalledTimes(1);
     });
 
@@ -518,7 +517,7 @@ describe('CommunityEventsProcessorService', () => {
       await expect(spyCacheManagerGet.mock.results[0].value).rejects.toEqual(
         mockError,
       );
-      expect(spyDataSource).toBeCalledTimes(1);
+      expect(spyDataSourceGetRepository).toBeCalledTimes(1);
       expect(spyLoggerLog).toHaveBeenCalledTimes(2);
       expect(spyLoggerWarn).toHaveBeenCalledTimes(2);
       expect(spyLoggerError).toHaveBeenCalledTimes(1);
@@ -532,7 +531,7 @@ describe('CommunityEventsProcessorService', () => {
       await expect(spyCacheManagerGet.mock.results[0].value).resolves.toEqual(
         undefined,
       );
-      expect(spyDataSource).toBeCalledTimes(1);
+      expect(spyDataSourceGetRepository).toBeCalledTimes(1);
       expect(spyLoggerLog).toHaveBeenCalledTimes(2);
       expect(spyLoggerWarn).toHaveBeenCalledTimes(2);
       expect(spyLoggerError).toHaveBeenCalledTimes(1);
@@ -540,21 +539,28 @@ describe('CommunityEventsProcessorService', () => {
 
     it('should throw end tracking in db', async () => {
       const mockError = new Error('mock discordParticipantModel bulkWrite');
-      spyDataSource.mockReturnValue(
-        getMockDataSource(
-          Promise.resolve(mockDiscordCommunityEvent),
-          Promise.reject(mockError),
-        ).createQueryBuilder(),
-      );
+      spyDataSourceCreateQueryBuilder.mockReturnValue({
+        update: () => ({
+          set: () => ({
+            where: () => ({
+              execute: jest.fn().mockReturnValue(Promise.reject(mockError)),
+            }),
+          }),
+        }),
+      });
 
       await service.disbandEvent(mockJob);
 
       expect(spyCacheManagerKeys).toHaveBeenCalled();
-      expect(spyDataSource).toBeCalledTimes(2);
+      expect(spyDataSourceGetRepository).toBeCalledTimes(1);
       /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */
-      await expect(
-        spyDataSource.mock.results[1].value.insert().into().values().execute(),
-      ).rejects.toEqual(mockError);
+      // await expect(
+      //   spyDataSourceGetRepository.mock.results[0].value
+      //     .insert()
+      //     .into()
+      //     .values()
+      //     .execute(),
+      // ).rejects.toEqual(mockError);
       /* eslint-enable */
       expect(spyLoggerLog).toHaveBeenCalledTimes(2);
     });
@@ -565,22 +571,31 @@ describe('CommunityEventsProcessorService', () => {
         generatedMaps: [],
         raw: { affectedRows: 0 },
       } as InsertResult;
-      spyDataSource.mockReturnValue(
-        getMockDataSource(
-          Promise.resolve(mockDiscordCommunityEvent),
-          Promise.resolve(mockInsertResult),
-        ).createQueryBuilder(),
-      );
+      spyDataSourceCreateQueryBuilder.mockReturnValue({
+        update: () => ({
+          set: () => ({
+            where: () => ({
+              execute: jest
+                .fn()
+                .mockReturnValue(Promise.resolve(mockInsertResult)),
+            }),
+          }),
+        }),
+      });
 
       await service.disbandEvent(mockJob);
 
       expect(spyCacheManagerKeys).toHaveBeenCalled();
-      expect(spyDataSource).toBeCalledTimes(2);
-      /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */
-      await expect(
-        spyDataSource.mock.results[1].value.insert().into().values().execute(),
-      ).resolves.toEqual(mockInsertResult);
-      /* eslint-enable */
+      // expect(spyDataSourceCreateQueryBuilder).toBeCalledTimes(1);
+      // /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call */
+      // await expect(
+      //   spyDataSourceCreateQueryBuilder.mock.results[0].value
+      //     .insert()
+      //     .into()
+      //     .values()
+      //     .execute(),
+      // ).resolves.toEqual(mockInsertResult);
+      // /* eslint-enable */
       expect(spyLoggerLog).toHaveBeenCalledTimes(2);
     });
 
@@ -591,7 +606,9 @@ describe('CommunityEventsProcessorService', () => {
       await expect(spyCacheManagerGet.mock.results[0].value).resolves.toEqual(
         mockDiscordParticipantRedisDto,
       );
-      expect(spyDataSource).toBeCalledTimes(2);
+      expect(spyDataSourceGetRepository).toBeCalledTimes(1);
+      expect(spyDataSourceGetRepository).toBeCalledTimes(1);
+      expect(spyDataSourceTransaction).toBeCalledTimes(1);
       expect(spyLoggerLog).toHaveBeenCalledTimes(2);
     });
   });

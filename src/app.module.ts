@@ -9,6 +9,8 @@ import {
 } from '@badgebuddy/common';
 import { CommunityEventsQueueModule } from './community-events-queue/community-events-queue.module';
 import Joi from 'joi';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronJobsModule } from './cron-jobs/cron-jobs.module';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import Joi from 'joi';
     DiscordConfigModule.forRootAsync(),
     CommunityEventsQueueModule,
     DiscordGatewayModule,
+    ScheduleModule.forRoot(),
+    CronJobsModule,
   ],
   controllers: [],
   providers: [],

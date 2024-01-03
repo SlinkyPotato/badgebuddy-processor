@@ -1,5 +1,5 @@
 import { InjectDiscordClient } from '@discord-nestjs/core';
-import { Processor, Process, OnQueueFailed } from '@nestjs/bull';
+import { OnQueueFailed, Process, Processor } from '@nestjs/bull';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Job } from 'bull';
@@ -15,8 +15,9 @@ import {
   TRACKING_EVENTS_PARTICIPANTS,
 } from '@badgebuddy/common';
 import { Cache } from 'cache-manager';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager, In } from 'typeorm';
 import { ProcessorException } from '@/exceptions/processor.exception';
+import { CronJobsService } from '@/cron-jobs/cron-jobs.service';
 
 type DiscordParticipant = {
   userSId: string;
@@ -36,6 +37,7 @@ export class CommunityEventsProcessorService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectDiscordClient() private readonly discordClient: Client,
     private readonly dataSource: DataSource,
+    private readonly cronJobService: CronJobsService,
   ) {}
 
   /**
@@ -47,18 +49,16 @@ export class CommunityEventsProcessorService {
   async startEvent(job: DiscordCommunityEventJob): Promise<any> {
     const communityEventId = job.data.eventId;
     this.logger.log(
-      `processing queue ${DISCORD_COMMUNITY_EVENTS_START_JOB} for 
-      communityEventId: ${communityEventId}, job: ${job.id}`,
-      DISCORD_COMMUNITY_EVENTS_START_JOB,
+      `starting jobId: ${job.id}, to start communityEventId: ${communityEventId}, in queue: ${DISCORD_COMMUNITY_EVENTS_START_JOB}`,
     );
 
-    const { voiceChannelSId, botSettingsId, organizerId } =
+    const { voiceChannelSId, communityEvent } =
       await this.fetchDiscordEvent(communityEventId);
+
     const { name, members } = await this.fetchVoiceChannel(voiceChannelSId);
 
     this.logger.verbose(
-      `processing members in voice channel ${name}`,
-      DISCORD_COMMUNITY_EVENTS_START_JOB,
+      `processing members in voice channel ${name}, with ${members.size} members`,
     );
 
     const discordParticipants: DiscordParticipant[] = [];
@@ -66,8 +66,7 @@ export class CommunityEventsProcessorService {
     for (const member of members.values()) {
       if (member.voice.deaf) {
         this.logger.warn(
-          `skipping deaf member tag: ${member.user.tag}, userId: ${member.id}, 
-          communityEventId: ${communityEventId}, botSettingsId: ${botSettingsId}`,
+          `skipping deaf member tag: ${member.user.tag}, userId: ${member.id}, communityEventId: ${communityEventId}`,
           DISCORD_COMMUNITY_EVENTS_START_JOB,
         );
         continue;
@@ -77,8 +76,7 @@ export class CommunityEventsProcessorService {
         (err) => {
           this.logger.error(err);
           this.logger.warn(
-            `continuing with job process start for 
-          communityEventId: ${communityEventId}, botSettingsId: ${botSettingsId}`,
+            `continuing with job process start for communityEventId: ${communityEventId}`,
           );
         },
       );
@@ -94,23 +92,24 @@ export class CommunityEventsProcessorService {
       this.logger.warn(`no participants found for 
       communityEventId: ${communityEventId}`);
       this.logger.log(
-        `start event for communityEventId: ${communityEventId}, 
-      botSettingsId: ${botSettingsId}, organizerId: ${organizerId}, 
-      voiceChannelId: ${voiceChannelSId}, job: ${job.id}`,
-        DISCORD_COMMUNITY_EVENTS_START_JOB,
+        `finished jobId: ${job.id}, to start communityEventId: ${communityEventId} in queue, ${DISCORD_COMMUNITY_EVENTS_START_JOB}`,
       );
       return {};
     }
 
-    this.logger.verbose(`found ${discordParticipants.length} participants`);
+    this.logger.verbose(
+      `stored ${discordParticipants.length} participants in cache`,
+    );
 
     await this.insertAllParticipantToDb(communityEventId, discordParticipants);
 
+    this.cronJobService.addCronTimeoutToDisbandEvent(
+      communityEventId,
+      communityEvent.endDate,
+    );
+
     this.logger.log(
-      `start event for communityEventId: ${communityEventId}, 
-      botSettingsId: ${botSettingsId}, organizerId: ${organizerId}, 
-      voiceChannelId: ${voiceChannelSId}, job: ${job.id}`,
-      DISCORD_COMMUNITY_EVENTS_START_JOB,
+      `finished jobId: ${job.id}, to start communityEventId: ${communityEventId} in queue, ${DISCORD_COMMUNITY_EVENTS_START_JOB}`,
     );
     return {};
   }
@@ -124,19 +123,24 @@ export class CommunityEventsProcessorService {
   async disbandEvent(job: DiscordCommunityEventJob) {
     const communityEventId = job.data.eventId;
     this.logger.log(
-      `end event of communityEventId: ${communityEventId} for job: ${job.id}`,
+      `starting jobId: ${job.id}, to end communityEventId: ${communityEventId}, in queue: ${DISCORD_COMMUNITY_EVENTS_END_JOB}`,
       DISCORD_COMMUNITY_EVENTS_END_JOB,
     );
 
-    const discordEvent = await this.fetchDiscordEvent(communityEventId);
+    const endDate = (await this.fetchDiscordEvent(communityEventId))
+      .communityEvent.endDate;
     const participantKeys = await this.cacheManager.store.keys(
       TRACKING_EVENTS_PARTICIPANTS(communityEventId, '*'),
     );
 
     if (!participantKeys || participantKeys.length === 0) {
-      this.logger
-        .warn(`participants keys not found for communityEventId: ${communityEventId}, 
-        botSettingsId: ${discordEvent.botSettingsId}, organizerId: ${discordEvent.organizerId}`);
+      this.logger.warn(
+        `participants keys not found for communityEventId: ${communityEventId}`,
+      );
+      await this.disbandEventInDb(communityEventId);
+      this.logger.log(
+        `finished jobId: ${job.id}, to end communityEventId: ${communityEventId} in queue, ${DISCORD_COMMUNITY_EVENTS_END_JOB}`,
+      );
       return {};
     }
 
@@ -159,8 +163,7 @@ export class CommunityEventsProcessorService {
           } catch (err) {
             this.logger.error(err);
             this.logger.warn(
-              `continuing to end next participant for communityEventId: ${communityEventId}, 
-            botSettingsId: ${discordEvent.botSettingsId}`,
+              `continuing to end next participant for communityEventId: ${communityEventId}`,
             );
             return null;
           }
@@ -174,31 +177,23 @@ export class CommunityEventsProcessorService {
       this.logger.warn(`no participants found for 
       communityEventId: ${communityEventId}`);
       this.logger.log(
-        `end event done for communityEventId: ${communityEventId}, 
-      botSettingsId: ${discordEvent.botSettingsId}, 
-      organizerId: ${discordEvent.organizerId}, voiceChannelId: ${discordEvent.voiceChannelSId}, job: ${job.id}`,
-        DISCORD_COMMUNITY_EVENTS_END_JOB,
+        `finished jobId: ${job.id}, to end communityEventId: ${communityEventId} in queue, ${DISCORD_COMMUNITY_EVENTS_END_JOB}`,
       );
       return {};
     }
 
-    this.disbandParticipantsIntoDb(
-      communityEventId,
-      discordEvent.communityEvent.endDate,
-      discordParticipants,
-    ).catch((err) => {
-      this.logger.error(err);
-      this.logger.warn(
-        `continuing with job process end for communityEventId: ${communityEventId}, 
-          botSettingsId: ${discordEvent.botSettingsId}`,
+    await this.dataSource.transaction(async (manager) => {
+      await this.setParticipationLengthInDb(
+        communityEventId,
+        endDate,
+        discordParticipants,
+        manager,
       );
+      await this.disbandEventInDb(communityEventId, manager);
     });
 
     this.logger.log(
-      `end event done for communityEventId: ${communityEventId}, 
-      botSettingsId: ${discordEvent.botSettingsId}, 
-      organizerId: ${discordEvent.organizerId}, voiceChannelId: ${discordEvent.voiceChannelSId}, job: ${job.id}`,
-      DISCORD_COMMUNITY_EVENTS_END_JOB,
+      `finished jobId: ${job.id}, to end communityEventId: ${communityEventId} in queue, ${DISCORD_COMMUNITY_EVENTS_END_JOB}`,
     );
     return {};
   }
@@ -229,7 +224,7 @@ export class CommunityEventsProcessorService {
     voiceChannelSId: string,
   ): Promise<VoiceChannel> {
     this.logger.verbose(
-      `Fetching voice channel ${voiceChannelSId} from discord`,
+      `fetching voice channel ${voiceChannelSId} from discord`,
     );
     let voiceChannel: Channel | null;
     try {
@@ -244,7 +239,7 @@ export class CommunityEventsProcessorService {
       );
     }
     this.logger.verbose(
-      `Fetched voice channel ${voiceChannelSId} from discord`,
+      `fetched voice channel ${voiceChannelSId} and found ${voiceChannel.members.size} members`,
     );
     return voiceChannel;
   }
@@ -258,19 +253,15 @@ export class CommunityEventsProcessorService {
     communityEventId: string,
   ): Promise<CommunityEventDiscordEntity> {
     this.logger.verbose(
-      `Fetching community event ${communityEventId} from database`,
+      `fetching community event ${communityEventId} from database`,
     );
     let result: CommunityEventDiscordEntity | null;
     try {
       result = await this.dataSource
-        .createQueryBuilder()
-        .select('de')
-        .from(CommunityEventDiscordEntity, 'de')
-        .leftJoinAndSelect('de.communityEvent', 'e')
-        .where('de.communityEventId = :communityEventId', {
+        .getRepository(CommunityEventDiscordEntity)
+        .findOneBy({
           communityEventId: communityEventId,
-        })
-        .getOne();
+        });
     } catch (err) {
       this.logger.warn('Failed to fetch community event from database');
       throw err;
@@ -281,7 +272,7 @@ export class CommunityEventsProcessorService {
       );
     }
     this.logger.verbose(
-      `Fetched community communityEventId: ${communityEventId} from database`,
+      `fetched community communityEventId: ${communityEventId} from database`,
     );
     return result;
   }
@@ -346,54 +337,58 @@ export class CommunityEventsProcessorService {
     return participant;
   }
 
-  private async disbandParticipantsIntoDb(
+  private async setParticipationLengthInDb(
     communityEventId: string,
     startDate: Date,
     participants: DiscordParticipantRedisDto[],
+    manager: DataSource | EntityManager = this.dataSource,
   ) {
     const endDate = new Date();
-    await this.dataSource.transaction(async (manager) => {
-      const insertParticipantResult = await this.dataSource
-        .createQueryBuilder()
-        .insert()
-        .into(CommunityEventParticipantDiscordEntity)
-        .values(
-          participants.map((participant) => {
-            return {
-              communityEventId: communityEventId,
-              discordUserSId: participant.discordUserSId,
-              startDate,
-              endDate,
-              participationLength:
-                (endDate.getTime() - startDate.getTime()) / 1000,
-            } as CommunityEventParticipantDiscordEntity;
-          }),
-        )
-        .execute();
-
-      if (insertParticipantResult?.identifiers.length !== participants.length) {
-        throw new ProcessorException(`Failed to update participants 
-        for communityEventId: ${communityEventId}`);
-      }
-
-      this.logger.verbose(
-        `updated ${insertParticipantResult.identifiers.length} participants`,
+    const insertParticipantResult = await manager
+      .getRepository(CommunityEventParticipantDiscordEntity)
+      .update(
+        {
+          communityEventId: communityEventId,
+          discordUserSId: In(participants.map((p) => p.discordUserSId)),
+        },
+        {
+          endDate: endDate,
+          participationLength: Math.round(
+            (endDate.getTime() - startDate.getTime()) / 1000,
+          ),
+        },
       );
 
-      // disband the community event
-      const disbandResult = await manager
-        .createQueryBuilder()
-        .update(CommunityEventEntity)
-        .set({
-          disbandedDate: endDate,
-        } as CommunityEventEntity)
-        .where('id = :id', { id: communityEventId })
-        .execute();
+    if (insertParticipantResult.affected !== participants.length) {
+      throw new ProcessorException(
+        `Failed to update participants for communityEventId: ${communityEventId}`,
+      );
+    }
 
-      if (disbandResult?.affected !== 1) {
-        throw new ProcessorException(`Failed to disband community event 
+    this.logger.verbose(
+      `updated ${insertParticipantResult.affected} participants`,
+    );
+  }
+
+  private async disbandEventInDb(
+    communityEventId: string,
+    manager: DataSource | EntityManager = this.dataSource,
+  ) {
+    this.logger.verbose(`disbanding community event ${communityEventId}`);
+    const disbandResult = await manager
+      .createQueryBuilder()
+      .update(CommunityEventEntity)
+      .set({
+        disbandedDate: new Date(),
+      } as CommunityEventEntity)
+      .where('id = :id', { id: communityEventId })
+      .execute();
+
+    if (disbandResult?.affected !== 1) {
+      throw new ProcessorException(`Failed to disband community event 
         for communityEventId: ${communityEventId}`);
-      }
-    });
+    }
+    this.logger.verbose(`disbanded community event ${communityEventId}`);
+    return disbandResult;
   }
 }
