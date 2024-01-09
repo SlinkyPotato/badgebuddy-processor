@@ -1,7 +1,7 @@
-name: staging_badge-buddy-processor
+name: stage_badgebuddy
 services:
   processor-1:
-    container_name: staging_badge-buddy-processor-1
+    container_name: processor-1_stage-badgebuddy
     image: solidchain/badge-buddy-processor:next
     restart: always
     networks:

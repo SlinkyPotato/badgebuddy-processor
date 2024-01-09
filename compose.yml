@@ -1,5 +1,23 @@
-name: local_badge-buddy
+name: local_badgebuddy
 services:
+  processor-1:
+    container_name: local_badgebuddy-processor-1
+    depends_on:
+      - redis
+      - mariadb
+    build:
+      context: .
+    env_file:
+      - .env
+    environment:
+      MARIADB_HOST: local_badgebuddy-mariadb-1
+      MARIADB_PASSWORD: local-pass
+      REDIS_HOST: local_badgebuddy-redis-1
+    networks:
+      - local_server
+    volumes:
+      - ./logs:/app/logs
+
   redis:
     image: redis:latest
     restart: always
@@ -8,18 +26,16 @@ services:
     networks:
       - local_server
 
-  processor-1:
-    container_name: local_badge-buddy-processor-1
-    depends_on:
-      - redis
-    build:
-      context: .
-    environment:
-      DOTENV_KEY: ${DOTENV_KEY}
+  mariadb:
+    image: mariadb:latest
     networks:
       - local_server
+    environment:
+      MARIADB_ROOT_USER: root
+      MARIADB_ROOT_PASSWORD: local-pass
+      MARIADB_DATABASE: badgebuddy
     volumes:
-      - ./logs:/app/logs
+      - ../../packages/common/src/common-typeorm/scripts/mysql.setup.sql:/docker-entrypoint-initdb.d/init.sql
 
 networks:
   local_server:
