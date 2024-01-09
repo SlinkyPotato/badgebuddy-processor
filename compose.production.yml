@@ -1,0 +1,18 @@
+name: production_badge-buddy-processor
+services:
+  processor:
+    image: solidchain/badge-buddy-processor:latest
+    restart: always
+    networks:
+      - prod_server
+    environment:
+      DOTENV_KEY: ${DOTENV_KEY}
+    volumes:
+      - ./logs:/app/logs
+      - type: bind
+        source: /run/redis-badge-buddy/redis-server-badge-buddy.sock
+        target: /app/redis/redis.sock
+
+networks:
+  prod_server:
+    external: true
