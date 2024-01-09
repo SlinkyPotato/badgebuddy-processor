@@ -56,12 +56,12 @@ jobs:
           context: .
           load: true
           tags: |
-            solidchain/badge-buddy-processor:latest
-            solidchain/badge-buddy-processor:${{ steps.package.outputs.PACKAGE_VERSION }}
+            ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:latest
+            ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:${{ steps.package.outputs.PACKAGE_VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - run: docker push solidchain/badge-buddy-processor -a
-      - run: docker cp $(docker run -d --rm solidchain/badge-buddy-processor:latest):/app/dist ./dist
+      - run: docker push ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor -a
+      - run: docker cp $(docker run -d --rm ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:latest):/app/dist ./dist
       - uses: vimtor/action-zip@v1
         with:
           files: dist/ CHANGELOG.md LICENSE.md README.md package.json
