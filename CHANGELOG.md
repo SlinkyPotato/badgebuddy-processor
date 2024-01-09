@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-19](https://github.com/SlinkyPotato/badge-buddy-processor/compare/v0.0.11-18...v0.0.11-19) (2024-01-09)
+
+
+### Bug Fixes
+
+* set redis host as optional ([38447e8](https://github.com/SlinkyPotato/badge-buddy-processor/commit/38447e84e38411396b0c69b1ab3fe309084f6172))
+
 ### [0.0.11-18](https://github.com/SlinkyPotato/badge-buddy-processor/compare/v0.0.11-17...v0.0.11-18) (2024-01-09)
 
 
