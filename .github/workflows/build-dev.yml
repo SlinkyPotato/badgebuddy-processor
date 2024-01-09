@@ -41,7 +41,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/badge-buddy-processor:dev
+          tags: ${{ secrets.DOCKER_USERNAME }}/processor:dev
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
