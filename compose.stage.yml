@@ -1,0 +1,19 @@
+name: stage_badgebuddy
+services:
+  processor-1:
+    container_name: processor-1_stage-badgebuddy
+    image: badgebuddy/processor:next
+    restart: always
+    networks:
+      - staging_server
+    environment:
+      DOTENV_KEY: ${DOTENV_KEY}
+    volumes:
+      - ./logs:/app/logs
+      - type: bind
+        source: /run/redis-badge-buddy/redis-server-badge-buddy.sock
+        target: /app/redis/redis.sock
+
+networks:
+  staging_server:
+    external: true

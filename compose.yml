@@ -1,71 +1,42 @@
-name: badge-buddy-processor
+name: local_badgebuddy
 services:
-  redis_local:
-    container_name: redis_local
+  processor-1:
+    container_name: local_badgebuddy-processor-1
+    depends_on:
+      - redis
+      - mariadb
+    build:
+      context: .
+    env_file:
+      - .env
+    environment:
+      MARIADB_HOST: local_badgebuddy-mariadb-1
+      MARIADB_PASSWORD: local-pass
+      REDIS_HOST: local_badgebuddy-redis-1
+    networks:
+      - local_server
+    volumes:
+      - ./logs:/app/logs
+
+  redis:
     image: redis:latest
     restart: always
     ports:
       - 6379:6379
     networks:
       - local_server
-    profiles:
-      - local
 
-  badge_buddy_processor_local:
-    depends_on:
-      - redis_local
-    container_name: badge_buddy_processor_local
-    build:
-      context: .
-      args:
-        NODE_VERSION: ${NODE_VERSION}
-    environment:
-      DOTENV_KEY: ${DOTENV_KEY}
-    env_file:
-      - .env
+  mariadb:
+    image: mariadb:latest
     networks:
       - local_server
-    profiles:
-      - local
-    volumes:
-      - ./logs:/app/logs
-
-  badge_buddy_processor_qa:
-    container_name: badge_buddy_processor_qa
-    image: solidchain/badge-buddy-processor:next
-    restart: always
-    networks:
-      - qa_server
-    profiles:
-      - staging
     environment:
-      DOTENV_KEY: ${DOTENV_KEY}
+      MARIADB_ROOT_USER: root
+      MARIADB_ROOT_PASSWORD: local-pass
+      MARIADB_DATABASE: badgebuddy
     volumes:
-      - ./logs:/app/logs
-      - type: bind
-        source: /run/redis-badge-buddy/redis-server-badge-buddy.sock
-        target: /app/redis/redis.sock
-
-  badge_buddy_processor_prod:
-    container_name: badge_buddy_processor_prod
-    image: solidchain/badge-buddy-processor:latest
-    restart: always
-    networks:
-      - prod_server
-    profiles:
-      - production
-    environment:
-      DOTENV_KEY: ${DOTENV_KEY}
-    volumes:
-      - ./logs:/app/logs
-      - type: bind
-        source: /run/redis-badge-buddy/redis-server-badge-buddy.sock
-        target: /app/redis/redis.sock
+      - ../../packages/common/src/common-typeorm/scripts/mysql.setup.sql:/docker-entrypoint-initdb.d/init.sql
 
 networks:
   local_server:
-    external: true
-  qa_server:
-    external: true
-  prod_server:
     external: true
