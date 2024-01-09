@@ -25,6 +25,7 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: './pnpm-lock.yaml'
       - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
       - run: pnpm test:cov
       - run: git config user.name "github-action[bot]"
       - run: git config user.email "<>"
@@ -32,7 +33,6 @@ jobs:
       - name: Retrieve package.json
         id: package
         run: |
-          echo NODE_VERSION=$(node -e "console.log(require('./package.json').engines.node)") >> "$GITHUB_OUTPUT"
           echo PACKAGE_VERSION=$(node -e "console.log(require('./package.json').version)") >> "$GITHUB_OUTPUT"
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -51,9 +51,7 @@ jobs:
             solidchain/badge-buddy-processor:${{ steps.package.outputs.PACKAGE_VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: |
-            NODE_VERSION=${{ steps.package.outputs.NODE_VERSION }}
-      - name: Transfer compose.yml
+      - name: Transfer compose.staging.yml
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -61,7 +59,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: ${{ secrets.SSH_PORT }}
-          source: "compose.yml"
+          source: "compose.staging.yml"
           target: "${{ secrets.APP_PATH_STAGING }}"
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.0
@@ -76,9 +74,9 @@ jobs:
           envs: DOTENV_KEY
           script: |
             cd ${{ secrets.APP_PATH_STAGING }}
-            docker compose --profile staging pull
-            docker compose --profile staging stop
-            DOTENV_KEY=$DOTENV_KEY docker compose --profile staging up -d
+            docker compose -f compose.staging.yml pull
+            docker compose -f compose.staging.yml stop
+            DOTENV_KEY=$DOTENV_KEY docker compose -f compose.staging.yml up -d
       - run: git push --follow-tags
       - name: Remove prerelease tags
         run: git tag -d $(git tag -l "v$(node -e "console.log('${{ steps.package.outputs.PACKAGE_VERSION }}'.split('-')[0]);")-*")

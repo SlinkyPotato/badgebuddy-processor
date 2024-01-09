@@ -1,6 +1,4 @@
-ARG NODE_VERSION
-
-FROM node:${NODE_VERSION}-alpine AS base
+FROM node:20.10.0-alpine AS base
 LABEL description="Node processor for badge-buddy-processor"
 
 RUN corepack enable

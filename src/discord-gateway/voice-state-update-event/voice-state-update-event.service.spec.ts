@@ -12,7 +12,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Guild, VoiceState } from 'discord.js';
 import {
   CommunityEventParticipantDiscordEntity,
-  DiscordActiveCommunityEventDto,
+  CommunityEventActiveDiscordDto,
   DiscordParticipantRedisDto,
 } from '@badgebuddy/common';
 import { VoiceStateUpdateEventService } from './voice-state-update-event.service';
@@ -74,7 +74,7 @@ describe('VoiceStateUpdateService', () => {
   const mockStartDate = new Date();
   const mockEndDate = new Date(mockStartDate.getTime() + 1000 * 60 * 60);
 
-  const mockCommunityEvent: DiscordActiveCommunityEventDto = {
+  const mockCommunityEvent: CommunityEventActiveDiscordDto = {
     communityEventId: 'test-event-id-1',
     voiceChannelSId: '850840267082563600',
     description: 'test',
@@ -86,7 +86,7 @@ describe('VoiceStateUpdateService', () => {
     availablePOAPs: 0,
   };
 
-  const mockCommunityEvent2: DiscordActiveCommunityEventDto = {
+  const mockCommunityEvent2: CommunityEventActiveDiscordDto = {
     communityEventId: 'test-event-id-2',
     voiceChannelSId: '950840267482563600',
     description: 'Another event',

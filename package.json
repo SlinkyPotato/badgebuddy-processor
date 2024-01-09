@@ -23,7 +23,7 @@
     "start:prod": "node dist/main",
     "start:docker": "docker compose --profile local up --build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "lint": "eslint . --fix",
+    "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -38,7 +38,7 @@
     "sync": "git fetch && git pull && pnpm install && dotenv-vault pull"
   },
   "dependencies": {
-    "@badgebuddy/common": "2.2.0-5",
+    "@badgebuddy/common": "2.2.0",
     "@discord-nestjs/common": "^5.2.10",
     "@discord-nestjs/core": "^5.3.12",
     "@nestjs/axios": "^3.0.1",
