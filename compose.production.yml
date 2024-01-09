@@ -2,7 +2,7 @@ name: prod_badgebuddy
 services:
   processor-1:
     container_name: processor-1_prod-badgebuddy
-    image: solidchain/badge-buddy-processor:latest
+    image: badgebuddy/processor:latest
     restart: always
     networks:
       - prod_server
