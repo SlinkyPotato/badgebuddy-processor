@@ -2,6 +2,45 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-18](https://github.com/SlinkyPotato/badge-buddy-processor/compare/v0.0.11-17...v0.0.11-18) (2024-01-09)
+
+
+### Features
+
+* add cron-job service ([fbd0cee](https://github.com/SlinkyPotato/badge-buddy-processor/commit/fbd0ceef81a45c2becc3db7fb5f5150b752acf69))
+
+
+### Bug Fixes
+
+* insert participant in db ([ddaedbf](https://github.com/SlinkyPotato/badge-buddy-processor/commit/ddaedbf4604ce61df55cc6b19d94f3414f9375ef))
+
+
+### Performance
+
+* update deps ([b7f8329](https://github.com/SlinkyPotato/badge-buddy-processor/commit/b7f8329db302b1299653eb1b7a748ee116d88d75))
+
+
+### Tests
+
+* add coverage for community-events-queue.service.ts ([3950971](https://github.com/SlinkyPotato/badge-buddy-processor/commit/39509717140e94b6bf158606ac32593f411c6a62))
+* finish start event tests ([caa1a43](https://github.com/SlinkyPotato/badge-buddy-processor/commit/caa1a43ab7f7a424ce8d76e7d84a08b79f479231))
+* finish voice-state-update spec units ([e08c286](https://github.com/SlinkyPotato/badge-buddy-processor/commit/e08c286d33f6d30a1cf7c17ebb45837e2cf02e09))
+* fix start job tests ([3ab43fd](https://github.com/SlinkyPotato/badge-buddy-processor/commit/3ab43fd53579c5fa1534495773afac7218b65ac5))
+
+
+### Refactor
+
+* add prettier and adjust eslint ([8b83289](https://github.com/SlinkyPotato/badge-buddy-processor/commit/8b83289da03c3ead22e4d9ad0b27abc6b69fa4be))
+* migrate from mongo to mysql with typeorm ([afdb335](https://github.com/SlinkyPotato/badge-buddy-processor/commit/afdb335f0384a844a6089891dceed3c7333098ff))
+* production pipeline ([90fe310](https://github.com/SlinkyPotato/badge-buddy-processor/commit/90fe310ea0559084283b99f970fb238d828085c3))
+* remove repository usage in queue in favor of dataSource ([c701165](https://github.com/SlinkyPotato/badge-buddy-processor/commit/c701165376412d363a0b41e37c1e8a373d400622))
+* rename actions and pipeline ([57c87c4](https://github.com/SlinkyPotato/badge-buddy-processor/commit/57c87c48f903442fce62876e33847829be41ed77))
+* specify env requirement ([9b99e61](https://github.com/SlinkyPotato/badge-buddy-processor/commit/9b99e618b27b7a021a6eb563636ee0afd8401f01))
+* specify redis configs ([f6c69d4](https://github.com/SlinkyPotato/badge-buddy-processor/commit/f6c69d43582e70416e212d4220e28b972d56a933))
+* staging pipeline ([c7ae0d1](https://github.com/SlinkyPotato/badge-buddy-processor/commit/c7ae0d12823ff66d029dc23fba8c1e67b40d243e))
+* update docker compose namespace ([8c88fd2](https://github.com/SlinkyPotato/badge-buddy-processor/commit/8c88fd228bf69ba577faf311cd45f16a5e7408da))
+* use vars for github actions ([56a5424](https://github.com/SlinkyPotato/badge-buddy-processor/commit/56a5424f94047dccfdcc4d527e1c54bb0d9b3e69))
+
 ### [0.0.11-17](https://github.com/SlinkyPotato/badge-buddy-processor/compare/v0.0.11-16...v0.0.11-17) (2023-11-04)
 
 
