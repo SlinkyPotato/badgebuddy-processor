@@ -6,11 +6,11 @@
   "private": true,
   "license": "MIT",
   "engines": {
-    "node": "20.10.0",
-    "pnpm": "8.13.1"
+    "node": "20.11.0",
+    "pnpm": "8.14.1"
   },
   "engineStrict": true,
-  "packageManager": "pnpm@8.13.1",
+  "packageManager": "pnpm@8.14.1",
   "scripts": {
     "build": "nest build",
     "clean": "rm -rf dist && rm -rf coverage && rm -rf node_modules",
