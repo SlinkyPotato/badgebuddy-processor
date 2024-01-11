@@ -23,8 +23,8 @@
     "dev:bot": "cd ../discord-bot && pnpm dev",
     "start:prod": "node dist/main",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -35,7 +35,8 @@
     "env:pull": "dotenv-vault pull",
     "publish-docker:staging": "node publish.docker.js staging latest-beta",
     "publish-docker:production": "node publish.docker.js production latest",
-    "sync": "git fetch && git pull && pnpm install && dotenv-vault pull"
+    "sync": "git fetch && git pull && pnpm install",
+    "sync:env": "git fetch && git pull && pnpm install && dotenv-vault pull"
   },
   "dependencies": {
     "@badgebuddy/common": "2.3.0-1",
@@ -87,6 +88,7 @@
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "husky": "^8.0.0"
   }
 }
