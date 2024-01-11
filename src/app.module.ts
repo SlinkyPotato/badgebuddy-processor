@@ -11,6 +11,7 @@ import { CommunityEventsQueueModule } from './community-events-queue/community-e
 import Joi from 'joi';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronJobsModule } from './cron-jobs/cron-jobs.module';
+import { ApiBadgebuddyModule } from './api-badgebuddy/api-badgebuddy.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { CronJobsModule } from './cron-jobs/cron-jobs.module';
     DiscordGatewayModule,
     ScheduleModule.forRoot(),
     CronJobsModule,
+    ApiBadgebuddyModule,
   ],
   controllers: [],
   providers: [],
