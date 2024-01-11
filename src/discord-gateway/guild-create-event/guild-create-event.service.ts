@@ -3,12 +3,15 @@ import { On } from '@discord-nestjs/core';
 import { Guild } from 'discord.js';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { ConfigService } from '@nestjs/config';
+import { ENV_BADGE_BUDDY_API_HOST } from '@/app.constants';
 
 @Injectable()
 export class GuildCreateEventService {
   constructor(
     private readonly logger: Logger,
     private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
   ) {}
 
   @On('guildCreate')
@@ -22,9 +25,12 @@ export class GuildCreateEventService {
     this.logger.log(`guild joined, guildId: ${guild.id}, name: ${guild.name}`);
     try {
       const response = await firstValueFrom(
-        this.httpService.post(`${process.env.BADGE_BUDDY_API}/discord/bot`, {
-          guildSId: guild.id,
-        }),
+        this.httpService.post(
+          `${this.configService.get(ENV_BADGE_BUDDY_API_HOST)}/discord/bot`,
+          {
+            guildSId: guild.id,
+          },
+        ),
       );
       if (response.status !== 200) {
         this.logger.error(

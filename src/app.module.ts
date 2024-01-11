@@ -25,6 +25,7 @@ import { CronJobsModule } from './cron-jobs/cron-jobs.module';
         REDIS_HOST: Joi.string().optional(),
         REDIS_PORT: Joi.number().optional(),
         REDIS_CACHE_MIN: Joi.number().required(),
+        BADGE_BUDDY_API_HOST: Joi.string().required(),
       },
     }),
     RedisConfigModule.forRootAsync(),

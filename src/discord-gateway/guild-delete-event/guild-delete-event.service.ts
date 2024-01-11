@@ -3,6 +3,7 @@ import { On } from '@discord-nestjs/core';
 import { Guild } from 'discord.js';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { ENV_BADGE_BUDDY_API_HOST } from '@/app.constants';
 
 @Injectable()
 export class GuildDeleteEventService {
@@ -16,11 +17,14 @@ export class GuildDeleteEventService {
   onGuild(guild: Guild): void {
     this.logger.log(`guild left, guildId: ${guild.id}, name: ${guild.name}`);
     this.httpService
-      .delete(`${this.configService.get('BADGE_BUDDY_API')}/discord/bot`, {
-        data: {
-          guildSId: guild.id,
+      .delete(
+        `${this.configService.get(ENV_BADGE_BUDDY_API_HOST)}/discord/bot`,
+        {
+          data: {
+            guildSId: guild.id,
+          },
         },
-      })
+      )
       .subscribe(() => {
         this.logger.log(
           `discord bot deleted from guild, guildId: ${guild.id}, name: ${guild.name}`,
