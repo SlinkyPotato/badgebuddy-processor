@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { ProcessorTokenDto } from '@badgebuddy/common';
+import { InternalAxiosRequestConfig } from 'axios';
+import { AuthRequestInterceptor } from '@/api-badgebuddy/auth-api/interceptors/auth-request/auth-request.interceptor';
 
 @Injectable()
 export class AuthApiService {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly authRequestInterceptor: AuthRequestInterceptor,
+  ) {}
 
-  generateToken(discordUserSId: string): string {
-    return this.jwtService.sign({
-      sessionId: crypto.randomUUID().toString(),
-      discordUserSId,
-    } as ProcessorTokenDto);
+  commonAuthRequestInterceptor() {
+    return {
+      intercept: (config: InternalAxiosRequestConfig<any>) => {
+        return this.authRequestInterceptor.intercept(config);
+      },
+    };
   }
 }
