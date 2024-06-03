@@ -1,6 +1,6 @@
 ARG DOTENV_KEY
 
-FROM node:20.11.0-alpine AS base
+FROM node:20.11.1-alpine AS base
 LABEL description="Node processor for BadgeBuddy"
 
 RUN corepack enable
