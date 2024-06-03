@@ -5,6 +5,7 @@ import { Test } from '@nestjs/testing';
 import { Guild } from 'discord.js';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { DiscordBotApiService } from '@/api-badgebuddy/discord-bot-api/discord-bot-api.service';
 
 describe('GuildCreateEventService', () => {
   let service: GuildCreateEventService;
@@ -32,6 +33,7 @@ describe('GuildCreateEventService', () => {
         { provide: Logger, useValue: mockLogger },
         { provide: HttpService, useValue: mockHttpService },
         { provide: ConfigService, useValue: mockConfigService },
+        { provide: DiscordBotApiService, useValue: jest.fn().mockReturnThis() },
       ],
     }).compile();
     service = testModule.get(GuildCreateEventService);
