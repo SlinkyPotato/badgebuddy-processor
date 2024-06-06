@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-21](https://github.com/SlinkyPotato/badgebuddy-processor/compare/v0.0.11-20...v0.0.11-21) (2024-06-06)
+
+
+### Features
+
+* add auth-api interceptors ([8a377a0](https://github.com/SlinkyPotato/badgebuddy-processor/commit/8a377a0a54552afd9159c519979b4df9bc2f22ab))
+* integrate auth request interceptor ([761fb3b](https://github.com/SlinkyPotato/badgebuddy-processor/commit/761fb3b0eaced4d03adf244ea0d73d71618fa3ae))
+
+
+### Bug Fixes
+
+* env name for badge_buddy_host ([c20b4c0](https://github.com/SlinkyPotato/badgebuddy-processor/commit/c20b4c092a31a25154400d5646b58826debf955e))
+
+
+### Performance
+
+* upgrade node ([ee668bb](https://github.com/SlinkyPotato/badgebuddy-processor/commit/ee668bba655d52593b3b521948747225305f5e8e))
+
+
+### Refactor
+
+* add husky ([a2afdf0](https://github.com/SlinkyPotato/badgebuddy-processor/commit/a2afdf0828411a8c3f476c5fd39b1876e9449e29))
+* bump node version to 20.11.1 ([f12fe3a](https://github.com/SlinkyPotato/badgebuddy-processor/commit/f12fe3a39d43829a50dc921abcbfddd5dbacfb6e))
+* rename staging_server -> stage_server ([e3671f0](https://github.com/SlinkyPotato/badgebuddy-processor/commit/e3671f01196b6e77e3b8a0c5d219f4b2ec85540d))
+* rename start:docker dev:docker ([47e53d3](https://github.com/SlinkyPotato/badgebuddy-processor/commit/47e53d361e61bf6858685ebfb8ea41580bddf030))
+* update local env ([a8c8528](https://github.com/SlinkyPotato/badgebuddy-processor/commit/a8c8528290a8851af28ede975a63728ffd77d8ce))
+* upgrade common ([fd53ca3](https://github.com/SlinkyPotato/badgebuddy-processor/commit/fd53ca3a6f78ab7eaaa527082d7edac143de7ab2))
+
 ### [0.0.11-20](https://github.com/SlinkyPotato/badge-buddy-processor/compare/v0.0.11-19...v0.0.11-20) (2024-01-09)
 
 
