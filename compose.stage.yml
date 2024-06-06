@@ -5,7 +5,7 @@ services:
     image: badgebuddy/processor:next
     restart: always
     networks:
-      - staging_server
+      - stage_server
     environment:
       DOTENV_KEY: ${DOTENV_KEY}
     volumes:
@@ -15,5 +15,5 @@ services:
         target: /app/redis/redis.sock
 
 networks:
-  staging_server:
+  stage_server:
     external: true

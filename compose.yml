@@ -10,9 +10,9 @@ services:
     env_file:
       - .env
     environment:
-      MARIADB_HOST: local_badgebuddy-mariadb-1
-      MARIADB_PASSWORD: local-pass
-      REDIS_HOST: local_badgebuddy-redis-1
+      MARIADB_HOST: "local_badgebuddy-mariadb-1"
+      MARIADB_PASSWORD: "local-pass"
+      REDIS_HOST: "local_badgebuddy-redis-1"
     networks:
       - local_server
     volumes:
@@ -31,9 +31,9 @@ services:
     networks:
       - local_server
     environment:
-      MARIADB_ROOT_USER: root
-      MARIADB_ROOT_PASSWORD: local-pass
-      MARIADB_DATABASE: badgebuddy
+      MARIADB_ROOT_USER: "root"
+      MARIADB_ROOT_PASSWORD: "local-pass"
+      MARIADB_DATABASE: "badgebuddy"
     volumes:
       - ../../packages/common/src/common-typeorm/scripts/mysql.setup.sql:/docker-entrypoint-initdb.d/init.sql
 

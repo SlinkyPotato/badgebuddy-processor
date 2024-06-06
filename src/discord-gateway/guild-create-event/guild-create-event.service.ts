@@ -1,14 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { On } from '@discord-nestjs/core';
 import { Guild } from 'discord.js';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
+import { DiscordBotApiService } from '@/api-badgebuddy/discord-bot-api/discord-bot-api.service';
+import { DiscordBotPostResponseDto } from '@badgebuddy/common';
 
 @Injectable()
 export class GuildCreateEventService {
   constructor(
     private readonly logger: Logger,
-    private readonly httpService: HttpService,
+    private readonly discordBotApiService: DiscordBotApiService,
   ) {}
 
   @On('guildCreate')
@@ -20,25 +20,19 @@ export class GuildCreateEventService {
       return;
     }
     this.logger.log(`guild joined, guildId: ${guild.id}, name: ${guild.name}`);
+    let response: DiscordBotPostResponseDto;
     try {
-      const response = await firstValueFrom(
-        this.httpService.post(`${process.env.BADGE_BUDDY_API}/discord/bot`, {
-          guildSId: guild.id,
-        }),
-      );
-      if (response.status !== 200) {
-        this.logger.error(
-          `error adding discord bot to guild, guildId: ${guild.id}, name: ${guild.name}, status: ${response.status}`,
-        );
-        return;
-      }
-      this.logger.log(
-        `discord bot added to guild, guildId: ${guild.id}, name: ${guild.name}`,
-      );
+      response = await this.discordBotApiService.addDiscordBotToGuild({
+        guildSId: guild.id,
+      });
     } catch (err) {
       this.logger.error(
         `error adding discord bot to guild, guildId: ${guild.id}, name: ${guild.name}, error: ${err}`,
       );
+      return;
     }
+    this.logger.log(
+      `successfully added discord bot to guild, guildSId: ${guild.id}, name: ${guild.name}, botId: ${response.discordBotSettingsId}`,
+    );
   }
 }
