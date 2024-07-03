@@ -171,7 +171,7 @@ export class CommunityEventsProcessorService {
       )
     ).filter(
       (participant) => participant !== null,
-    ) as DiscordParticipantRedisDto[];
+    );
 
     if (discordParticipants.length <= 0) {
       this.logger.warn(`no participants found for 
