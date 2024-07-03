@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11-22](https://github.com/SlinkyPotato/badgebuddy-processor/compare/v0.0.11-21...v0.0.11-22) (2024-07-03)
+
+
+### Refactor
+
+* pnpm lint ([ad7c23a](https://github.com/SlinkyPotato/badgebuddy-processor/commit/ad7c23addcf013475651f5fa0f643ee19a29b41a))
+* pnpm up ([ca7e707](https://github.com/SlinkyPotato/badgebuddy-processor/commit/ca7e707a77dd2a48a97f670e86353c6d191d3834))
+* pnpm up ([b3f109b](https://github.com/SlinkyPotato/badgebuddy-processor/commit/b3f109b967c30b660a9c969aa5a748a43e4f3a0a))
+* set to stable typescript 5.3.3 ([327c4ea](https://github.com/SlinkyPotato/badgebuddy-processor/commit/327c4ea4ce099ba7f01833165e4aeae0087ddf27))
+
 ### [0.0.11-21](https://github.com/SlinkyPotato/badgebuddy-processor/compare/v0.0.11-20...v0.0.11-21) (2024-06-06)
 
 
