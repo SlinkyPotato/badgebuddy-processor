@@ -1,4 +1,3 @@
-#file: noinspection YAMLSchemaValidation
 name: deploy prod
 on:
   push:
@@ -29,14 +28,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm test:cov
-#      - name: Retrieve pre-release package.json
-#        id: pre-release
-#        run: |
-#          echo PRERELEASE_VERSION=$(node -e "console.log(require('./package.json').version)") >> "$GITHUB_OUTPUT"
-#      - name: Remove prerelease tags
-#        run: git tag -d $(git tag -l "v$(node -e "console.log('${{ steps.pre-release.outputs.PRERELEASE_VERSION }}'.split('-')[0]);")-*")
-#      - run: pnpm standard-version --dry-run > changes.md | exit 0
-#      - run: pnpm standard-version
       - name: Retrieve package.json
         id: package
         run: |
@@ -60,7 +51,6 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/processor:${{ steps.package.outputs.PACKAGE_VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-#      - run: docker push ${{ secrets.DOCKER_USERNAME }}/processor -a
       - run: docker cp $(docker run -d --rm ${{ secrets.DOCKER_USERNAME }}/processor:latest):/app/dist ./dist
       - uses: vimtor/action-zip@v1
         with:
