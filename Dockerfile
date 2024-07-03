@@ -1,7 +1,7 @@
-ARG NODE_VERSION
+ARG DOTENV_KEY
 
-FROM node:${NODE_VERSION}-alpine
-LABEL description="Node processor for Badge Buddy"
+FROM node:20.11.1-alpine AS base
+LABEL description="Node processor for BadgeBuddy"
 
 RUN corepack enable
 
@@ -13,7 +13,6 @@ COPY . /app/
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --offline --frozen-lockfile
 
 RUN pnpm build
-RUN pnpm test
 
 COPY CHANGELOG.md /app/dist/
 COPY LICENSE.md /app/dist/

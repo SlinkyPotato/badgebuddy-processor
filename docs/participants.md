@@ -4,14 +4,6 @@ This document describes the logic for tracking participants in a voice channel e
 stored in cache. The cache is cleared when the event is stopped. Later the badges are distributed to eligible 
 participants.
 
-## Redis Indexes
-1. active events - GET /events/active?guildId= (endpoint)
-2. active events in cache - /events/active?guildId=&voiceChannelId= (manual cache)
-    - this is used during ongoing event to check if event is active for voice channel
-    - if found, then event is active
-    - if not found, then do nothing (caching should only be used during discord events)
-3. participants in event - tracking:events:{id}:participants:{id} (processor only)
-
 ### Notes
 - post start marks event as active
 - put stop marks event as inactive
@@ -37,6 +29,9 @@ A user entry in db MUST exist if they enter the voice channel during an active e
 - capture startDate
 - duration of zero is captured
 - insert into cache
+  - add user key to keys
+  - store startDate for user
+  - store duration for user
 
 ### user leaves (or is deafened)
 - check event is active for voice channel
@@ -58,7 +53,15 @@ A user entry in db MUST exist if they enter the voice channel during an active e
   - store new startDate for user
   - remove endDate for user
 
-### on processor startup recovery
+### end of event
+- endDate captured
+- retrieve all users from cache (check size of object and revisit this)
+    - store new endDate for all users missing endDate
+- duration is calculated
+- all participants updated in db (should be single db call, replace if exists)
+- clear cache
+
+### on redis startup recovery
 - all present users are checked from channel
 - audio checked
 - store users from channel and db into cache
@@ -72,22 +75,18 @@ A user entry in db MUST exist if they enter the voice channel during an active e
     - capture startDate
     - duration of zero is captured
     - insert into cache
+- redis loads data from disk by default
 
-
-### on processor shutdown (graceful)
+### on redis server shutdown (graceful)
 - store all users from cache into db
-
-### on processor failure
-- try to store all users from cache into db
-
-### end of event
-- endDate captured
-- retrieve all users from cache (check size of object and revisit this)
-  - store new endDate for all users missing endDate
-- duration is calculated
-- all participants updated in db (should be single db call, replace if exists)
-- clear cache
+  - get all active events from db
+  - pull all users from cache for each active event
+  - store all users from cache into db
+- redis backs up data to disk by default
 
 # Open questions
 1. What happens if processor is down, event is marked as active, and +5 minutes has passed?
+    - there shouldn't be any change in data
+    - optimally transfer cache into db
+    - redis backs up data to disk by default
 2. Can the app execute graceful shutdown scenario?

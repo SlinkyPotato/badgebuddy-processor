@@ -1,87 +1,48 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import { GatewayIntentBits, Partials } from 'discord.js';
-
-import { DiscordModule, DiscordModuleOption } from '@discord-nestjs/core';
-import { ProcessorsModule } from './processors/processors.module';
-import { DiscordEventsModule } from './discord-events/discord-events.module';
+import { DiscordGatewayModule } from './discord-gateway/discord-gateway.module';
 import {
-  configureBull,
-  configureCache,
-  EnvConfig,
-  validationSchema,
-} from '@solidchain/badge-buddy-common';
-import { BullModule } from '@nestjs/bull';
-import { CacheModule } from '@nestjs/cache-manager';
-import { RedisClientOptions } from 'redis';
+  CommonConfigModule,
+  CommonTypeOrmModule,
+  RedisConfigModule,
+  RedisBullConfigModule,
+  DiscordConfigModule,
+} from '@badgebuddy/common';
+import { CommunityEventsQueueModule } from './community-events-queue/community-events-queue.module';
+import Joi from 'joi';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronJobsModule } from './cron-jobs/cron-jobs.module';
+import { ApiBadgebuddyModule } from './api-badgebuddy/api-badgebuddy.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      ignoreEnvFile: true,
-      cache: true,
-      load: [EnvConfig],
-      validationSchema: validationSchema(),
-      validationOptions: {},
+    CommonConfigModule.forRoot({
+      validationSchema: {
+        MARIADB_HOST: Joi.string().required(),
+        MARIADB_PORT: Joi.number().required(),
+        MARIADB_USERNAME: Joi.string().required(),
+        MARIADB_PASSWORD: Joi.string().required(),
+        MARIADB_DATABASE: Joi.string().required(),
+        MARIADB_LOGGING: Joi.required(),
+        REDIS_HOST: Joi.string().optional(),
+        REDIS_PORT: Joi.number().optional(),
+        REDIS_CACHE_MIN: Joi.number().required(),
+        BADGEBUDDY_API_HOST: Joi.string().required(),
+        BADGEBUDDY_API_CLIENT_ID: Joi.string().required(),
+        BADGEBUDDY_API_CLIENT_SECRET: Joi.string().required(),
+      },
     }),
-    CacheModule.registerAsync<RedisClientOptions>({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      isGlobal: true,
-      useFactory: (configService: ConfigService) =>
-        configureCache(configService),
-    }),
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) =>
-        configureBull(configService),
-    }),
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI'),
-      }),
-    }),
-    DiscordModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (
-        configService: ConfigService<{ DISCORD_BOT_TOKEN: string }, true>,
-      ): Promise<DiscordModuleOption> | DiscordModuleOption => ({
-        token: configService.get('DISCORD_BOT_TOKEN', { infer: true }),
-        discordClientOptions: {
-          // TODO: Reduce and compact the intents
-          intents: [
-            GatewayIntentBits.Guilds,
-            GatewayIntentBits.GuildEmojisAndStickers,
-            GatewayIntentBits.GuildVoiceStates,
-            GatewayIntentBits.GuildMessages,
-            GatewayIntentBits.GuildMessageReactions,
-            GatewayIntentBits.DirectMessages,
-            GatewayIntentBits.DirectMessageReactions,
-            GatewayIntentBits.GuildMembers,
-            GatewayIntentBits.MessageContent,
-          ],
-          partials: [
-            Partials.Message,
-            Partials.Channel,
-            Partials.Reaction,
-            Partials.User,
-          ],
-        },
-        failOnLogin: true,
-      }),
-    }),
-    ConfigModule,
-    ProcessorsModule,
-    DiscordEventsModule,
+    RedisConfigModule.forRootAsync(),
+    RedisBullConfigModule.forRootAsync(),
+    CommonTypeOrmModule.forRootAsync(),
+    DiscordConfigModule.forRootAsync(),
+    CommunityEventsQueueModule,
+    DiscordGatewayModule,
+    ScheduleModule.forRoot(),
+    CronJobsModule,
+    ApiBadgebuddyModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
+  exports: [],
 })
 export class AppModule {}

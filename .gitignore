@@ -45,3 +45,6 @@ badge-buddy-processor.iml
 # Certs
 /certs/*
 !/certs/.gitkeep
+
+# Turborepo
+.turbo

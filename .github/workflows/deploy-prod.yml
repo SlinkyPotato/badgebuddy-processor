@@ -1,0 +1,98 @@
+#file: noinspection YAMLSchemaValidation
+name: deploy prod
+on:
+  push:
+    branches:
+      - main
+env:
+  GH_TOKEN: ${{ github.token }}
+jobs:
+  deploy-prod:
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: read
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: 'package.json'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+      - run: git config user.name "github-action[bot]"
+      - run: git config user.email "<>"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm test:cov
+      - name: Retrieve pre-release package.json
+        id: pre-release
+        run: |
+          echo PRERELEASE_VERSION=$(node -e "console.log(require('./package.json').version)") >> "$GITHUB_OUTPUT"
+      - name: Remove prerelease tags
+        run: git tag -d $(git tag -l "v$(node -e "console.log('${{ steps.pre-release.outputs.PRERELEASE_VERSION }}'.split('-')[0]);")-*")
+      - run: pnpm standard-version --dry-run -f > changes.md | exit 0
+      - run: pnpm standard-version
+      - name: Retrieve package.json
+        id: package
+        run: |
+          echo PACKAGE_VERSION=$(node -e "console.log(require('./package.json').version)") >> "$GITHUB_OUTPUT"
+      - run: git push --follow-tags
+      - run: node -e "require('@badgebuddy/common')['parseReleaseUtil']();"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Build Docker
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          load: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/processor:latest
+            ${{ secrets.DOCKER_USERNAME }}/processor:${{ steps.package.outputs.PACKAGE_VERSION }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+#      - run: docker push ${{ secrets.DOCKER_USERNAME }}/processor -a
+      - run: docker cp $(docker run -d --rm ${{ secrets.DOCKER_USERNAME }}/processor:latest):/app/dist ./dist
+      - uses: vimtor/action-zip@v1
+        with:
+          files: dist/ CHANGELOG.md LICENSE.md README.md package.json
+          dest: dist.zip
+      - name: Transfer compose.prod.yml
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "compose.prod.yml"
+          target: "${{ secrets.APP_PATH_PRODUCTION }}"
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.0
+        env:
+          DOTENV_KEY: ${{ secrets.DOTENV_KEY_PRODUCTION }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: ${{ secrets.SSH_PORT }}
+          envs: DOTENV_KEY
+          script: |
+            cd ${{ secrets.APP_PATH_PRODUCTION }}
+            docker compose -f compose.prod.yml pull
+            docker compose -f compose.prod.yml stop
+            DOTENV_KEY=$DOTENV_KEY docker compose -f compose.prod.yml up -d
+      - run: gh release create -F release.md --verify-tag v${{ steps.package.outputs.PACKAGE_VERSION }} dist.zip | exit 0
+      - run: git checkout dev
+      - run: git merge --no-ff main -m "sync branch main v${{ steps.package.outputs.PACKAGE_VERSION }} into dev" | exit 0
+      - run: git push

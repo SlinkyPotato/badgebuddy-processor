@@ -1,0 +1,89 @@
+#file: noinspection YAMLSchemaValidation
+name: deploy stage
+on:
+  push:
+    branches:
+      - release/dev
+env:
+  GH_TOKEN: ${{ github.token }}
+jobs:
+  deploy-stage:
+    runs-on: ubuntu-latest
+    environment: stage
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: read
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: 'package.json'
+          cache: 'pnpm'
+          cache-dependency-path: './pnpm-lock.yaml'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm test:cov
+      - run: git config user.name "github-action[bot]"
+      - run: git config user.email "<>"
+      - run: pnpm standard-version --prerelease
+      - name: Retrieve package.json
+        id: package
+        run: |
+          echo PACKAGE_VERSION=$(node -e "console.log(require('./package.json').version)") >> "$GITHUB_OUTPUT"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Build Docker
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/processor:next
+            ${{ secrets.DOCKER_USERNAME }}/processor:${{ steps.package.outputs.PACKAGE_VERSION }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Transfer compose.stage.yml
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "compose.stage.yml"
+          target: "${{ secrets.APP_PATH_STAGING }}"
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.0
+        env:
+          DOTENV_KEY: ${{ secrets.DOTENV_KEY_STAGING }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: ${{ secrets.SSH_PORT }}
+          envs: DOTENV_KEY
+          script: |
+            cd ${{ secrets.APP_PATH_STAGING }}
+            docker compose -f compose.stage.yml pull
+            docker compose -f compose.stage.yml stop
+            DOTENV_KEY=$DOTENV_KEY docker compose -f compose.stage.yml up -d
+      - run: git push --follow-tags
+      - name: Remove prerelease tags
+        run: git tag -d $(git tag -l "v$(node -e "console.log('${{ steps.package.outputs.PACKAGE_VERSION }}'.split('-')[0]);")-*")
+      - run: pnpm standard-version --dry-run > changes.md | exit 0
+      - run: node -e "require('@badgebuddy/common')['parseReleaseUtil']();"
+      - run: gh pr edit -F release.md | exit 0
+      - run: gh pr create --base main -F release.md --title "deploy release/dev to production" | exit 0
+      - run: git checkout dev
+      - run: git merge --no-ff release/dev -m "sync branch release/dev into dev" | exit 0
+      - run: git push
