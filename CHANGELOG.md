@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.1-0](https://github.com/SlinkyPotato/badgebuddy-processor/compare/v1.0.0...v1.0.1-0) (2024-07-23)
+
+
+### Refactor
+
+* enable standard ga flow ([8f2f50a](https://github.com/SlinkyPotato/badgebuddy-processor/commit/8f2f50a39662921da2bcdbbdeb2a31afeeece8cc))
+
 ## [1.0.0](https://github.com/SlinkyPotato/badge-buddy/compare/v0.0.10...v1.0.0) (2024-07-03)
 
 
