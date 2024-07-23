@@ -2,7 +2,7 @@ name: stage_badgebuddy
 services:
   processor-1:
     container_name: processor-1_stage-badgebuddy
-    image: badgebuddy/processor:next
+    image: amaredeus/badgebuddy-processor:next
     restart: always
     networks:
       - stage_server
