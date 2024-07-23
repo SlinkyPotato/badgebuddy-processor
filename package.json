@@ -1,6 +1,6 @@
 {
   "name": "@badgebuddy/processor",
-  "version": "1.0.1",
+  "version": "1.0.2-1",
   "description": "Processing app for badge buddy operations.",
   "author": "SlinkyPotato <patinobrian@gmail.com>",
   "private": true,
