@@ -2,7 +2,7 @@ name: prod_badgebuddy
 services:
   processor-1:
     container_name: processor-1_prod-badgebuddy
-    image: badgebuddy/processor:latest
+    image: amaredeus/badgebuddy-processor:latest
     restart: always
     networks:
       - prod_server
