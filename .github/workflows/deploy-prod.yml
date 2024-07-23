@@ -50,10 +50,10 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Build Docker
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           context: .
-          load: true
+          push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/badgebuddy-processor:latest
             ${{ secrets.DOCKER_USERNAME }}/badgebuddy-processor:${{ steps.package.outputs.PACKAGE_VERSION }}
