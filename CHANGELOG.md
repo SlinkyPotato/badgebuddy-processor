@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.1-2](https://github.com/SlinkyPotato/badgebuddy-processor/compare/v1.0.1-1...v1.0.1-2) (2024-07-23)
+
+
+### Refactor
+
+* add logtail active ([46fe209](https://github.com/SlinkyPotato/badgebuddy-processor/commit/46fe209c0949f8bdd6cfc7a59b3cc42311e99e42))
+
 ### [1.0.1-1](https://github.com/SlinkyPotato/badgebuddy-processor/compare/v1.0.1-0...v1.0.1-1) (2024-07-23)
 
 
