@@ -55,11 +55,11 @@ jobs:
           context: .
           load: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/processor:latest
-            ${{ secrets.DOCKER_USERNAME }}/processor:${{ steps.package.outputs.PACKAGE_VERSION }}
+            ${{ secrets.DOCKER_USERNAME }}/badgebuddy-processor:latest
+            ${{ secrets.DOCKER_USERNAME }}/badgebuddy-processor:${{ steps.package.outputs.PACKAGE_VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - run: docker cp $(docker run -d --rm ${{ secrets.DOCKER_USERNAME }}/processor:latest):/app/dist ./dist
+      - run: docker cp $(docker run -d --rm ${{ secrets.DOCKER_USERNAME }}/badgebuddy-processor:latest):/app/dist ./dist
       - uses: vimtor/action-zip@v1
         with:
           files: dist/ CHANGELOG.md LICENSE.md README.md package.json

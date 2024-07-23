@@ -47,8 +47,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/processor:next
-            ${{ secrets.DOCKER_USERNAME }}/processor:${{ steps.package.outputs.PACKAGE_VERSION }}
+            ${{ secrets.DOCKER_USERNAME }}/badgebuddy-processor:next
+            ${{ secrets.DOCKER_USERNAME }}/badgebuddy-processor:${{ steps.package.outputs.PACKAGE_VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Transfer compose.stage.yml

@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file. See [standa
 * complete processing for start and end event ([1fd1080](https://github.com/SlinkyPotato/badge-buddy/commit/1fd1080d00d3ed317082d6d9493fb6dc4412a9da))
 * handle event tracking impl ([cbbc8ce](https://github.com/SlinkyPotato/badge-buddy/commit/cbbc8ce06722442af1a1a5b7de199f4509d8cad2))
 * integrate auth request interceptor ([761fb3b](https://github.com/SlinkyPotato/badge-buddy/commit/761fb3b0eaced4d03adf244ea0d73d71618fa3ae))
+* switch to amaredeus docker
 
 
 ### Bug Fixes
