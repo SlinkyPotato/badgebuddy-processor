@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.1-1](https://github.com/SlinkyPotato/badgebuddy-processor/compare/v1.0.1-0...v1.0.1-1) (2024-07-23)
+
+
+### Refactor
+
+* print to prod cli ([81ae937](https://github.com/SlinkyPotato/badgebuddy-processor/commit/81ae9370a05a62c33235fb8f1e5d46ef7355248f))
+* update env vault ([b0f951f](https://github.com/SlinkyPotato/badgebuddy-processor/commit/b0f951fafcd4d0599a2ffc6353bd0ffe2dc9634e))
+
 ### [1.0.1-0](https://github.com/SlinkyPotato/badgebuddy-processor/compare/v1.0.0...v1.0.1-0) (2024-07-23)
 
 
