@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.3-0](https://github.com/SlinkyPotato/badgebuddy-processor/compare/v1.0.2...v1.0.3-0) (2024-08-09)
+
+
+### Refactor
+
+* upgrade gh action deps and docker build-dev name ([afc25e2](https://github.com/SlinkyPotato/badgebuddy-processor/commit/afc25e2a5451d6aff1efc982b28527d79939f70b))
+
 ### [1.0.2](https://github.com/SlinkyPotato/badgebuddy-processor/compare/v1.0.1-3...v1.0.2) (2024-07-23)
 
 
