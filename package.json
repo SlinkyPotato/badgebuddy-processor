@@ -11,6 +11,10 @@
   },
   "engineStrict": true,
   "packageManager": "pnpm@8.15.5",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SlinkyPotato/badgebuddy-processor.git"
+  },
   "scripts": {
     "build": "nest build",
     "clean": "rm -rf dist && rm -rf coverage && rm -rf node_modules",
