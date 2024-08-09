@@ -15,11 +15,11 @@ jobs:
       pull-requests: write
       repository-projects: read
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v2
-      - uses: actions/setup-node@v3
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: 'package.json'
           cache: 'pnpm'
@@ -31,17 +31,17 @@ jobs:
       - run: pnpm lint
       - run: pnpm test:cov
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Build and push to Docker Hub
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/processor:dev
+          tags: ${{ secrets.DOCKER_USERNAME }}/badgebuddy-processor:dev
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
